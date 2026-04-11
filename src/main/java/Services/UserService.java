@@ -3,13 +3,13 @@ package Services;
 import Models.User;
 import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.nio.ByteBuffer;
-import java.util.Properties;
 import java.util.Random;
 
 public class UserService implements Iservice<User> {
@@ -20,8 +20,13 @@ public class UserService implements Iservice<User> {
         connection = Utils.Database.getInstance().getConnection();
     }
 
-    // ─── Hashage simple SHA-256 (substitut de BCrypt sans dépendance externe) ───
+    // ─── Hachage BCrypt (pour les nouveaux utilisateurs Java) ───
     private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    // ─── Hachage SHA-256 (compatibilité anciens comptes Java) ───
+    private String hashPasswordSHA256(String password) {
         try {
             java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -35,6 +40,32 @@ public class UserService implements Iservice<User> {
         } catch (java.security.NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 non disponible", e);
         }
+    }
+
+    // ─── Détecte le type de hash et compare ───
+    private boolean verifyPassword(String plainPassword, String storedHash) {
+        if (storedHash == null) return false;
+
+        if (storedHash.startsWith("$2y$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2a$")) {
+            // Hash BCrypt (Symfony ou nouveaux comptes Java)
+            String hash = storedHash;
+            if (hash.startsWith("$2y$") || hash.startsWith("$2b$")) {
+                hash = "$2a$" + hash.substring(4);
+            }
+            try {
+                return BCrypt.checkpw(plainPassword, hash);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Erreur BCrypt : " + e.getMessage());
+                return false;
+            }
+        } else if (storedHash.length() == 64) {
+            // Hash SHA-256 (anciens comptes Java)
+            System.out.println("⚠️ Hash SHA-256 détecté, utilisation du mode de compatibilité.");
+            return hashPasswordSHA256(plainPassword).equals(storedHash);
+        }
+
+        System.out.println("⚠️ Format de hash inconnu !");
+        return false;
     }
 
     // ─── Génère un code à 6 chiffres ───
@@ -162,21 +193,31 @@ public class UserService implements Iservice<User> {
 
     // ─── Connexion ───
     public User login(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ? AND is_verified = true";
+        String sql = "SELECT * FROM users WHERE email = ? AND is_verified = true";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
-            ps.setString(2, hashPassword(password));
             ResultSet rs = ps.executeQuery();
+
             if (rs.next()) {
-                User user = new User();
-                user.setEmail(rs.getString("email"));
-                user.setUsername(rs.getString("username"));
-                user.setRole(rs.getString("role"));
-                user.setStatus(rs.getString("status"));
-                return user;
+                String storedHash = rs.getString("password");
+                System.out.println("Hash trouvé en base : " + storedHash);
+
+                if (verifyPassword(password, storedHash)) {
+                    User user = new User();
+                    user.setEmail(rs.getString("email"));
+                    user.setUsername(rs.getString("username"));
+                    user.setRole(rs.getString("role"));
+                    user.setStatus(rs.getString("status"));
+                    System.out.println("Connexion réussie pour : " + user.getUsername());
+                    return user;
+                } else {
+                    System.out.println("Mot de passe incorrect pour : " + email);
+                }
+            } else {
+                System.out.println("Aucun compte vérifié trouvé pour : " + email);
             }
         } catch (SQLException e) {
-            System.out.println("Erreur login : " + e.getMessage());
+            System.out.println("Erreur login SQL : " + e.getMessage());
         }
         return null;
     }
