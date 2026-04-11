@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1000" prefHeight="700">
+<AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.auth.LoginController" prefWidth="1000" prefHeight="700">
     <children>
         <HBox alignment="CENTER" spacing="60" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-padding: 50px;">
             
@@ -59,13 +59,7 @@
                     <Label text="Content de vous revoir parmi nous." styleClass="card-subtitle"/>
                 </VBox>
 
-                <!-- Mocked Flash Messages (Can be toggled via Java Code) -->
-                <!-- Success Message Example
-                <HBox styleClass="alert-success" alignment="CENTER_LEFT" spacing="10">
-                    <Label text="✓" styleClass="alert-success-text"/>
-                    <Label text="Message de succès" styleClass="alert-success-text"/>
-                </HBox> 
-                -->
+                <Label fx:id="errorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;" wrapText="true" visible="false"/>
 
                 <!-- Google Auth Button -->
                 <Button text="Continuer avec Google" styleClass="btn-google" maxWidth="Infinity">
@@ -85,7 +79,7 @@
                 <!-- Form Fields -->
                 <VBox spacing="6">
                     <Label text="VOTRE EMAIL" styleClass="form-label"/>
-                    <TextField promptText="user@email.com" styleClass="form-input"/>
+                    <TextField fx:id="emailField" promptText="user@email.com" styleClass="form-input"/>
                 </VBox>
 
                 <VBox spacing="6">
@@ -94,7 +88,7 @@
                         <Region HBox.hgrow="ALWAYS" />
                         <Hyperlink text="Oublié ?" style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 0;"/>
                     </HBox>
-                    <PasswordField promptText="8 caractères minimum" styleClass="form-input"/>
+                    <PasswordField fx:id="passwordField" promptText="8 caractères minimum" styleClass="form-input"/>
                 </VBox>
 
                 <!-- Checkbox -->
@@ -103,7 +97,7 @@
                     <Label text="Rester connecté" styleClass="checkbox"/>
                 </HBox>
 
-                <Button text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
+                <Button fx:id="loginBtn" onAction="#handleLogin" text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
                     <VBox.margin>
                         <Insets top="5"/>
                     </VBox.margin>
@@ -112,7 +106,7 @@
                 <VBox alignment="CENTER" style="-fx-padding: 20 0 0 0; -fx-border-color: rgba(255,255,255,0.05); -fx-border-width: 1 0 0 0;">
                     <HBox alignment="CENTER" spacing="5">
                         <Label text="Pas encore de compte ?" styleClass="footer-text"/>
-                        <Hyperlink text="Créer un profil" styleClass="link"/>
+                        <Hyperlink fx:id="signupLink" onAction="#handleShowSignup" text="Créer un profil" styleClass="link"/>
                     </HBox>
                 </VBox>
             </VBox>
