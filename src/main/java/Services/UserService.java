@@ -5,53 +5,208 @@ import Models.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class UserService implements Iservice <User>{
+public class UserService implements Iservice<User> {
+
     private Connection connection;
+
     public UserService() {
         connection = Utils.Database.getInstance().getConnection();
     }
 
+    // ─── Hashage simple SHA-256 (substitut de BCrypt sans dépendance externe) ───
+    private String hashPassword(String password) {
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 non disponible", e);
+        }
+    }
+
+    // ─── Génère un code à 6 chiffres ───
+    public String generateVerificationCode() {
+        return String.format("%06d", new Random().nextInt(999999));
+    }
+
+    // ─── Vérifie si un email existe déjà ───
+    public boolean emailExists(String email) {
+        String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            System.out.println("Erreur emailExists : " + e.getMessage());
+        }
+        return false;
+    }
+
+    // ─── Envoi de l'email de vérification via JavaMail ───
+    public boolean sendVerificationEmail(String toEmail, String username, String code) {
+        String host = "smtp.gmail.com";
+        // skill path email
+        String from = "skillPathdonotreply@gmail.com";
+        //password : xckmtvtgnmxutbfm
+        String appPassword = "xckmtvtgnmxutbfm"; 
+
+        java.util.Properties props = new java.util.Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", "587");
+
+        try {
+            jakarta.mail.Session session = jakarta.mail.Session.getInstance(props,
+                new jakarta.mail.Authenticator() {
+                    protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                        return new jakarta.mail.PasswordAuthentication(from, appPassword);
+                    }
+                });
+
+            jakarta.mail.Message message = new jakarta.mail.internet.MimeMessage(session);
+            message.setFrom(new jakarta.mail.internet.InternetAddress(from));
+            message.setRecipients(jakarta.mail.Message.RecipientType.TO,
+                    jakarta.mail.internet.InternetAddress.parse(toEmail));
+            message.setSubject("Vérification de votre compte SkillPath");
+
+            String htmlContent =
+                "<h1 style='color:#8b5cf6;'>Bienvenue sur SkillPath!</h1>" +
+                "<p>Bonjour <strong>" + username + "</strong>,</p>" +
+                "<p>Votre code de vérification est :</p>" +
+                "<h2 style='font-size:32px; color:#1e88e5; letter-spacing:8px;'>" + code + "</h2>" +
+                "<p>Veuillez entrer ce code pour activer votre compte.</p>" +
+                "<p style='color:#64748b; font-size:12px;'>Ce code expire dans 15 minutes.</p>";
+
+            message.setContent(htmlContent, "text/html; charset=UTF-8");
+            jakarta.mail.Transport.send(message);
+            System.out.println("Email envoyé à " + toEmail);
+            return true;
+        } catch (jakarta.mail.MessagingException e) {
+            System.out.println("Erreur envoi email : " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
+        String sql = "INSERT INTO user (email, username, password, status, role, is_verified, verification_code, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            String hashedPassword = hashPassword(user.getPassword());
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, hashedPassword);
+            ps.setString(4, "pending");
+            ps.setString(5, "student");
+            ps.setBoolean(6, false);
+            ps.setString(7, user.getVerificationCode());
+            ps.setTimestamp(8, Timestamp.valueOf(user.getCreatedAt()));
+            ps.executeUpdate();
+            System.out.println("Utilisateur enregistré : " + user.getEmail());
+        } catch (SQLException e) {
+            System.out.println("Erreur ajouter : " + e.getMessage());
+            throw new SQLDataException(e.getMessage());
+        }
+    }
 
+    // ─── Vérification du code ───
+    public boolean verifyCode(String email, String code) {
+        String sql = "SELECT verification_code FROM user WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String storedCode = rs.getString("verification_code");
+                if (code.equals(storedCode)) {
+                    // Activer le compte
+                    String updateSql = "UPDATE user SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
+                    try (PreparedStatement ps2 = connection.prepareStatement(updateSql)) {
+                        ps2.setString(1, email);
+                        ps2.executeUpdate();
+                    }
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur verifyCode : " + e.getMessage());
+        }
+        return false;
+    }
+
+    // ─── Connexion ───
+    public User login(String email, String password) {
+        String sql = "SELECT * FROM user WHERE email = ? AND password = ? AND is_verified = true";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setString(2, hashPassword(password));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setEmail(rs.getString("email"));
+                user.setUsername(rs.getString("username"));
+                user.setRole(rs.getString("role"));
+                user.setStatus(rs.getString("status"));
+                return user;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur login : " + e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public void supprimer(User user) throws SQLDataException {
-
+        String sql = "DELETE FROM user WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getEmail());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
     }
 
     @Override
     public void modifier(User user) throws SQLDataException {
-
+        String sql = "UPDATE user SET username = ?, status = ?, role = ? WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getStatus());
+            ps.setString(3, user.getRole());
+            ps.setString(4, user.getEmail());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
     }
 
     @Override
     public List<User> recuperer() throws SQLDataException {
-        String sql = "SELECT * FROM users";
-        List<User> personneList = new ArrayList<>();
-        
-        if (this.connection == null) {
-            System.out.println("Impossible de récupérer les données : la connexion est nulle.");
-            return personneList;
-        }
-
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(sql);
-            personneList = new ArrayList<>();
+        String sql = "SELECT * FROM user";
+        List<User> list = new ArrayList<>();
+        if (connection == null) return list;
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                User p = new User();
-                p.setUsername(rs.getString("username"));
-                p.setEmail(rs.getString("email"));
-                personneList.add(p);
-
+                User u = new User();
+                u.setUsername(rs.getString("username"));
+                u.setEmail(rs.getString("email"));
+                u.setRole(rs.getString("role"));
+                u.setStatus(rs.getString("status"));
+                list.add(u);
             }
-
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Erreur recuperer : " + e.getMessage());
         }
-        return personneList;
+        return list;
     }
 }
