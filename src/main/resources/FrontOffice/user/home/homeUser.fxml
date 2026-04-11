@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0f172a;" stylesheets="@../../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.HomeUserController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            
+            <!-- 1. Navigation Bar (Glass effect) -->
+            <HBox alignment="CENTER" prefHeight="80.0" spacing="30.0" style="-fx-background-color: rgba(255, 255, 255, 0.03); -fx-border-color: rgba(255, 255, 255, 0.05); -fx-border-width: 0 0 1 0;">
+               <padding><Insets left="40.0" right="40.0" /></padding>
+               <children>
+                  <!-- Logo Section -->
+                  <HBox alignment="CENTER_LEFT" spacing="12.0">
+                     <children>
+                        <StackPane style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;">
+                           <children>
+                              <Label text="S" textFill="WHITE">
+                                 <font><Font name="System Bold" size="20.0" /></font>
+                              </Label>
+                           </children>
+                           <padding><Insets bottom="10.0" left="15.0" right="15.0" top="10.0" /></padding>
+                        </StackPane>
+                        <HBox alignment="BASELINE_LEFT">
+                           <children>
+                              <Label text="Skill" textFill="WHITE">
+                                 <font><Font name="System Bold" size="24.0" /></font>
+                              </Label>
+                              <Label text="Path" textFill="#8b5cf6">
+                                 <font><Font name="System Bold" size="24.0" /></font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+                  <Region HBox.hgrow="ALWAYS" />
+                  
+                  <!-- Nav Links -->
+                  <HBox alignment="CENTER" spacing="30.0">
+                     <children>
+                        <Label styleClass="nav-link" text="Événements" textFill="#94a3b8" />
+                        <Label styleClass="nav-link" text="Catalogue" textFill="#94a3b8" />
+                        <Label styleClass="nav-link" text="Mes Cours" textFill="#8b5cf6">
+                           <font><Font name="System Bold" size="13.0" /></font>
+                        </Label>
+                        <Label styleClass="nav-link" text="Recommandations" textFill="#94a3b8" />
+                     </children>
+                  </HBox>
+                  <Region HBox.hgrow="ALWAYS" />
+                  
+                  <!-- User Actions -->
+                  <HBox alignment="CENTER" spacing="15.0">
+                     <children>
+                        <!-- Notification Button -->
+                        <Button mnemonicParsing="false" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12;" text="🔔" textFill="#94a3b8" />
+                        
+                        <!-- User Profile Info -->
+                        <VBox alignment="CENTER_RIGHT">
+                           <children>
+                              <Label fx:id="usernameLabel" text="John Doe" textFill="WHITE">
+                                 <font><Font name="System Bold" size="12.0" /></font>
+                              </Label>
+                              <Label text="ÉTUDIANT" textFill="#64748b">
+                                 <font><Font size="10.0" /></font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        
+                        <!-- Avatar -->
+                        <StackPane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;">
+                           <children>
+                              <Label fx:id="avatarInitial" text="J" textFill="WHITE">
+                                 <font><Font name="System Bold" size="14.0" /></font>
+                              </Label>
+                           </children>
+                        </StackPane>
+                        
+                        <Button fx:id="logoutBtn" mnemonicParsing="false" style="-fx-background-color: transparent;" text="🚪" textFill="#64748b" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+
+            <!-- 2. Main Content (Scrollable) -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox spacing="40.0" style="-fx-padding: 60 80 60 80;">
+                     <children>
+                        
+                        <!-- Hero Section -->
+                        <HBox alignment="CENTER_LEFT" spacing="60.0">
+                           <children>
+                              <VBox spacing="25.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="150.0" spacing="8.0" style="-fx-background-color: rgba(139, 92, 246, 0.1); -fx-padding: 8 15; -fx-background-radius: 20; -fx-border-color: rgba(139, 92, 246, 0.2); -fx-border-radius: 20;">
+                                       <children>
+                                          <Circle fill="#8b5cf6" radius="3.0" />
+                                          <Label style="-fx-font-weight: bold; -fx-font-size: 10;" text="PLATEFORME 2026" textFill="#a78bfa">
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <Label text="Master your" textFill="WHITE">
+                                             <font><Font name="System Bold" size="64.0" /></font>
+                                          </Label>
+                                          <Label text="Future." textFill="#8b5cf6">
+                                             <font><Font name="System Bold" size="64.0" /></font>
+                                          </Label>
+                                       </children>
+                                    </VBox>
+                                    <Label maxWidth="450" text="Access world-class curricula designed by industry architects to optimize your career and dominate tomorrow's technologies." textFill="#94a3b8" wrapText="true">
+                                       <font><Font size="16.0" /></font>
+                                    </Label>
+                                    <HBox spacing="15.0">
+                                       <children>
+                                          <Button alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-primary" text="🚀 Start Adventure" />
+                                          <Button alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-secondary" text="Browse Courses" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              
+                              <!-- Bento Illustration Cards -->
+                              <VBox alignment="CENTER" spacing="20.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <!-- Course Detail Card -->
+                                    <VBox prefWidth="380.0" spacing="15.0" styleClass="glass-card">
+                                       <children>
+                                          <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                             <children>
+                                                <StackPane prefHeight="45.0" prefWidth="45.0" style="-fx-background-color: #8b5cf6; -fx-background-radius: 12;">
+                                                   <children><Label style="-fx-font-weight: 900;" text="JS" textFill="WHITE" /></children>
+                                                </StackPane>
+                                                <VBox>
+                                                   <children>
+                                                      <Label style="-fx-font-weight: bold;" text="JavaScript Expert" textFill="WHITE" />
+                                                      <Label style="-fx-font-size: 10;" text="COURS MASTERCLASS" textFill="#64748b" />
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                          <ProgressBar prefHeight="10.0" prefWidth="Infinity" progress="0.75" style="-fx-accent: #8b5cf6;" />
+                                          <Label alignment="CENTER_RIGHT" maxWidth="Infinity" style="-fx-font-size: 11;" text="75% Complété" textFill="#94a3b8" />
+                                       </children>
+                                       <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                                    </VBox>
+                                    
+                                    <HBox spacing="20.0">
+                                       <children>
+                                          <VBox alignment="CENTER" prefHeight="100.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
+                                             <children>
+                                                <Label style="-fx-font-size: 24; -fx-font-weight: 900;" text="92%" textFill="WHITE" />
+                                                <Label style="-fx-font-size: 11;" text="Taux de réussite" textFill="#64748b" />
+                                             </children>
+                                          </VBox>
+                                          <VBox alignment="CENTER" prefHeight="100.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
+                                             <children>
+                                                <Label style="-fx-font-size: 24; -fx-font-weight: 900;" text="14%" textFill="WHITE" />
+                                                <Label style="-fx-font-size: 11;" text="Certificats" textFill="#64748b" />
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <!-- CTA Support Section -->
+                        <VBox prefHeight="150.0" spacing="10.0" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #d946ef); -fx-background-radius: 30; -fx-padding: 40;">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                 <children>
+                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label text="Need Assistance?" textFill="WHITE">
+                                             <font><Font name="System Bold" size="28.0" /></font>
+                                          </Label>
+                                          <Label opacity="0.8" text="Our elite team is here for you. Initiate a request and receive a swift response." textFill="WHITE" />
+                                       </children>
+                                    </VBox>
+                                    <Button prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10;" text="New Request" />
+                                    <Button prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 10; -fx-background-radius: 10;" text="My Requests" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+
+                        <!-- Catalogue Grid (Dynamic part) -->
+                        <VBox spacing="30.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                 <children>
+                                    <Label text="Explore our Premium" textFill="WHITE">
+                                       <font><Font name="System Bold" size="32.0" /></font>
+                                    </Label>
+                                    <Label text="Masterclass" textFill="#8b5cf6">
+                                       <font><Font name="System Bold" size="32.0" /></font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              
+                              <!-- This FlowPane will contain your dynamically loaded course cards -->
+                              <FlowPane fx:id="courseContainer" hgap="30.0" vgap="30.0">
+                                 <!-- Logic to populate cards here via Controller -->
+                              </FlowPane>
+                           </children>
+                        </VBox>
+
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
