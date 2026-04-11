@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class Database {
-    private   final String URl = "jdbc:mysql://localhost:3306/skillpathdb";
-    private final String USERNAME = "root";
-    private final String PASSWORD = "";
+    private static final Dotenv dotenv = Dotenv.load();
+    private   final String URl = dotenv.get("DB_URL");
+    private final String USERNAME = dotenv.get("DB_USERNAME");
+    private final String PASSWORD = dotenv.get("DB_PASSWORD");
     private Connection connection;
     private  static Database instance ;
 

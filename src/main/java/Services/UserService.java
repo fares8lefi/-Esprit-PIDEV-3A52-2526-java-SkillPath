@@ -1,6 +1,7 @@
 package Services;
 
 import Models.User;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.Random;
 public class UserService implements Iservice<User> {
 
     private Connection connection;
-
+    private static final Dotenv dotenv = Dotenv.load();
     public UserService() {
         connection = Utils.Database.getInstance().getConnection();
     }
@@ -54,9 +55,9 @@ public class UserService implements Iservice<User> {
     public boolean sendVerificationEmail(String toEmail, String username, String code) {
         String host = "smtp.gmail.com";
         // skill path email
-        String from = "skillPathdonotreply@gmail.com";
+        String from = dotenv.get("MAIL_USERNAME");
         //password : xckmtvtgnmxutbfm
-        String appPassword = "xckmtvtgnmxutbfm"; 
+        String appPassword = dotenv.get("MAIL_PASSWORD"); 
 
         java.util.Properties props = new java.util.Properties();
         props.put("mail.smtp.auth", "true");
