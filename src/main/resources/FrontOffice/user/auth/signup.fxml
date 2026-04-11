@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane
+    styleClass="root-pane"
+    stylesheets="@style.css"
+    xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="Controllers.auth.SignupController"
+    prefWidth="1000" prefHeight="700">
+
+    <children>
+        <HBox alignment="CENTER" spacing="60"
+              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"  AnchorPane.topAnchor="0.0"
+              style="-fx-padding: 50px;">
+
+            <!-- ═══════════════ Left Panel ═══════════════ -->
+            <VBox alignment="CENTER_LEFT" spacing="30" maxWidth="450" HBox.hgrow="ALWAYS">
+
+                <!-- Logo -->
+                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 40 0;">
+                    <StackPane styleClass="icon-box"
+                               style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef);
+                                      -fx-effect: dropshadow(three-pass-box, rgba(139,92,246,0.3), 15, 0, 0, 5);
+                                      -fx-background-radius: 16px;"
+                               minWidth="56" minHeight="56">
+                        <Label text="SP" style="-fx-font-weight: 900; -fx-text-fill: white; -fx-font-size: 22px;"/>
+                    </StackPane>
+                    <VBox alignment="CENTER_LEFT">
+                        <HBox>
+                            <Label text="Skill" styleClass="logo-text"/>
+                            <Label text="Path"  styleClass="logo-text" style="-fx-text-fill: #8b5cf6;"/>
+                        </HBox>
+                        <Label text="START YOUR JOURNEY" styleClass="logo-subtext"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Headline -->
+                <VBox spacing="0">
+                    <Label text="Rejoignez la"   styleClass="title-text"/>
+                    <Label text="communauté !"   styleClass="title-text" style="-fx-text-fill: #06b6d4;"/>
+                </VBox>
+
+                <Label text="Commencez à apprendre gratuitement et accédez à des centaines de cours spécialisés."
+                       styleClass="subtitle-text" wrapText="true" maxWidth="350"
+                       style="-fx-padding: 0 0 20 0;"/>
+
+                <!-- Features -->
+                <VBox spacing="18">
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <StackPane styleClass="icon-box">
+                            <Label text="🚀" style="-fx-font-size: 20px;"/>
+                        </StackPane>
+                        <VBox alignment="CENTER_LEFT">
+                            <Label text="Apprentissage rapide"    styleClass="feature-title"/>
+                            <Label text="Parcours optimisés par IA" styleClass="feature-desc"/>
+                        </VBox>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <StackPane styleClass="icon-box">
+                            <Label text="💬" style="-fx-font-size: 20px;"/>
+                        </StackPane>
+                        <VBox alignment="CENTER_LEFT">
+                            <Label text="Support Entraide"         styleClass="feature-title"/>
+                            <Label text="Apprenez avec les autres" styleClass="feature-desc"/>
+                        </VBox>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <StackPane styleClass="icon-box">
+                            <Label text="🏆" style="-fx-font-size: 20px;"/>
+                        </StackPane>
+                        <VBox alignment="CENTER_LEFT">
+                            <Label text="Badges &amp; Récompenses" styleClass="feature-title"/>
+                            <Label text="Célébrez vos progrès"     styleClass="feature-desc"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- ═══════════════ Registration Card ═══════════════ -->
+            <VBox styleClass="glass-card" spacing="20" maxWidth="420" minWidth="380">
+
+                <!-- Card Header -->
+                <VBox spacing="6" alignment="CENTER_LEFT" style="-fx-padding: 0 0 5 0;">
+                    <Label text="Inscription"                           styleClass="card-title"/>
+                    <Label text="Créez votre compte en quelques secondes." styleClass="card-subtitle"/>
+                </VBox>
+
+                <!-- Alert Box (hidden by default) -->
+                <HBox fx:id="alertBox" spacing="10" alignment="CENTER_LEFT"
+                      style="-fx-background-color: rgba(244,63,94,0.12);
+                             -fx-border-color: rgba(244,63,94,0.25);
+                             -fx-border-radius: 10px; -fx-background-radius: 10px;
+                             -fx-padding: 12px;"
+                      visible="false" managed="false">
+                    <Label text="⚠" style="-fx-text-fill: #f43f5e; -fx-font-size: 16px;"/>
+                    <Label fx:id="alertLabel" wrapText="true"
+                           style="-fx-text-fill: #f43f5e; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <!-- Username -->
+                <VBox spacing="6">
+                    <Label text="NOM D'UTILISATEUR" styleClass="form-label"/>
+                    <TextField fx:id="usernameField" promptText="Ex: DevCraft2026" styleClass="form-input"/>
+                </VBox>
+
+                <!-- Email -->
+                <VBox spacing="6">
+                    <Label text="ADRESSE EMAIL" styleClass="form-label"/>
+                    <TextField fx:id="emailField" promptText="votre.email@exemple.com" styleClass="form-input"/>
+                </VBox>
+
+                <!-- Password -->
+                <VBox spacing="6">
+                    <Label text="MOT DE PASSE" styleClass="form-label"/>
+                    <PasswordField fx:id="passwordField" promptText="8 caractères minimum" styleClass="form-input"/>
+                </VBox>
+
+                <!-- Terms checkbox -->
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 5 0 5 0;">
+                    <CheckBox fx:id="termsCheckbox" styleClass="checkbox"/>
+                    <Label text="J'accepte les conditions d'utilisation et la politique de données."
+                           styleClass="checkbox" wrapText="true"/>
+                </HBox>
+
+                <!-- Submit -->
+                <Button fx:id="submitButton"
+                        text="Créer mon profil gratuit"
+                        styleClass="btn-primary"
+                        maxWidth="Infinity"
+                        onAction="#handleSignup">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+                </Button>
+
+                <!-- Footer -->
+                <VBox alignment="CENTER"
+                      style="-fx-padding: 18 0 0 0;
+                             -fx-border-color: rgba(255,255,255,0.05);
+                             -fx-border-width: 1 0 0 0;">
+                    <HBox alignment="CENTER" spacing="5">
+                        <Label text="Déjà inscrit ?" styleClass="footer-text"/>
+                        <Hyperlink fx:id="loginLink" text="Se connecter" styleClass="link"
+                                   onAction="#goToLogin"/>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </HBox>
+    </children>
+</AnchorPane>

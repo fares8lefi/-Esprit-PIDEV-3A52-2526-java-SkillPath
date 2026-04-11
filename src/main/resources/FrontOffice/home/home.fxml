@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane styleClass="root" stylesheets="@home_style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1200" prefHeight="800">
+    <children>
+        <!-- Static Navigation Top -->
+        <HBox styleClass="nav-bar" alignment="CENTER" spacing="40" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;" minWidth="40" minHeight="40">
+                    <Label text="S" style="-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 20px;"/>
+                </StackPane>
+                <HBox alignment="BASELINE_LEFT">
+                    <Label text="Skill" styleClass="logo-text"/>
+                    <Label text="Path" styleClass="logo-text" style="-fx-text-fill: #8b5cf6;"/>
+                </HBox>
+            </HBox>
+            
+            <Region HBox.hgrow="ALWAYS" />
+            
+            <HBox alignment="CENTER" spacing="30">
+                <Label text="Événements" styleClass="nav-link"/>
+                <Label text="Catalogue" styleClass="nav-link"/>
+                <Label text="Mes Cours" styleClass="nav-link" style="-fx-text-fill: #8b5cf6;"/>
+            </HBox>
+            
+            <Region HBox.hgrow="ALWAYS" />
+            
+            <HBox alignment="CENTER" spacing="15">
+                <Button text="Login" styleClass="nav-link" style="-fx-background-color: transparent;"/>
+                <Button text="Register" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+            </HBox>
+        </HBox>
+
+        <!-- Scrollable Content -->
+        <ScrollPane fitToWidth="true" styleClass="main-scroll-pane" AnchorPane.topAnchor="70.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <content>
+                <VBox spacing="0">
+                    
+                    <!-- 1. Hero Section -->
+                    <StackPane style="-fx-padding: 100 80 150 80;">
+                        <HBox alignment="CENTER_LEFT" spacing="60">
+                            <VBox spacing="25" maxWidth="600">
+                                <HBox styleClass="badge-ia" alignment="CENTER_LEFT" spacing="8" maxWidth="160">
+                                    <Circle radius="3" fill="#8b5cf6"/>
+                                    <Label text="PLATEFORME 2026" styleClass="badge-ia-text"/>
+                                </HBox>
+                                <VBox spacing="0">
+                                    <Label text="Master your" styleClass="hero-title"/>
+                                    <Label text="Future." styleClass="hero-title" style="-fx-text-fill: #8b5cf6;"/>
+                                </VBox>
+                                <Label text="Access world-class curricula designed by industry architects to optimize your career and dominate tomorrow's technologies." 
+                                       styleClass="hero-subtitle" wrapText="true" maxWidth="450"/>
+                                <HBox spacing="15">
+                                    <Button text="🚀 Start Adventure" styleClass="btn-primary" style="-fx-font-size: 16px; -fx-padding: 15 35;"/>
+                                    <Button text="Browse Courses" styleClass="btn-secondary" style="-fx-font-size: 16px; -fx-padding: 15 35;"/>
+                                </HBox>
+                            </VBox>
+                            
+                            <!-- Bento Illustration (Right Side) -->
+                            <VBox spacing="15" alignment="CENTER">
+                                <VBox styleClass="glass-card" minWidth="400">
+                                    <HBox alignment="CENTER_LEFT" spacing="15">
+                                        <StackPane style="-fx-background-color: #8b5cf6; -fx-background-radius: 12;" minWidth="45" minHeight="45">
+                                            <Label text="JS" style="-fx-text-fill: white; -fx-font-weight: 900;"/>
+                                        </StackPane>
+                                        <VBox>
+                                            <Label text="JavaScript Expert" styleClass="card-title"/>
+                                            <Label text="COURS MASTERCLASS" styleClass="card-desc"/>
+                                        </VBox>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label text="Nouveau" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: 900; -fx-padding: 4 10; -fx-background-radius: 10;"/>
+                                    </HBox>
+                                    <ProgressBar progress="0.65" maxWidth="Infinity" prefHeight="8" style="-fx-accent: #8b5cf6; -fx-padding: 15 0 0 0;"/>
+                                    <Label text="65% Complété" styleClass="card-desc" alignment="CENTER_RIGHT" maxWidth="Infinity"/>
+                                </VBox>
+                                
+                                <HBox spacing="15">
+                                    <VBox styleClass="glass-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                                        <Label text="92%" styleClass="hero-title" style="-fx-font-size: 28px;"/>
+                                        <Label text="Taux de réussite" styleClass="card-desc"/>
+                                    </VBox>
+                                    <VBox styleClass="glass-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                                        <Label text="14" styleClass="hero-title" style="-fx-font-size: 28px;"/>
+                                        <Label text="Certificats" styleClass="card-desc"/>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </StackPane>
+
+                    <!-- 2. Trusted By -->
+                    <VBox alignment="CENTER" spacing="30" style="-fx-background-color: rgba(255,255,255,0.02); -fx-padding: 50 0; -fx-border-color: rgba(255,255,255,0.05); -fx-border-width: 1 0 1 0;">
+                        <Label text="TRUSTED BY LEADING INNOVATORS" styleClass="card-desc" style="-fx-font-weight: 900; -fx-letter-spacing: 3px;"/>
+                        <HBox alignment="CENTER" spacing="60" style="-fx-opacity: 0.3;">
+                            <Label text="Google" styleClass="logo-text" style="-fx-font-size: 20px;"/>
+                            <Label text="Netflix" styleClass="logo-text" style="-fx-font-size: 20px;"/>
+                            <Label text="Adobe"  styleClass="logo-text" style="-fx-font-size: 20px;"/>
+                            <Label text="Spotify" styleClass="logo-text" style="-fx-font-size: 20px;"/>
+                            <Label text="Vercel"  styleClass="logo-text" style="-fx-font-size: 20px;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 3. AI Recommendation Spotlight -->
+                    <VBox spacing="40" style="-fx-padding: 100 80;">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <StackPane styleClass="icon-box" style="-fx-background-color: #8b5cf6; -fx-background-radius: 12;" minWidth="45" minHeight="45">
+                                <Label text="⚡" style="-fx-font-size: 22px;"/>
+                            </StackPane>
+                            <VBox>
+                                <Label text="INTELLIGENCE ARTIFICIELLE • IA PICK" styleClass="badge-ia-text" style="-fx-text-fill: #8b5cf6;"/>
+                                <Label text="Le Meilleur Cours Recommandé pour Vous" styleClass="section-title"/>
+                            </VBox>
+                        </HBox>
+                        
+                        <HBox styleClass="course-card" style="-fx-background-color: #0d1117; -fx-border-color: rgba(139, 92, 246, 0.4); -fx-border-width: 2;">
+                            <ImageView fitWidth="350" fitHeight="300" pickOnBounds="true" preserveRatio="false">
+                                <!-- Placeholder for course image -->
+                            </ImageView>
+                            <VBox spacing="20" HBox.hgrow="ALWAYS" style="-fx-padding: 40;">
+                                <HBox spacing="10">
+                                    <Label text="AVANCÉ" styleClass="badge-ia-text" style="-fx-border-color: rgba(255,255,255,0.1); -fx-padding: 3 10; -fx-border-radius: 5;"/>
+                                    <Label text="12 MODULES" styleClass="badge-ia-text" style="-fx-text-fill: #94a3b8;"/>
+                                    <Label text="150 DT" styleClass="badge-ia-text" style="-fx-text-fill: #8b5cf6;"/>
+                                </HBox>
+                                <Label text="Full-Stack Web Architect" styleClass="section-title" style="-fx-font-size: 42px;"/>
+                                <Label text="Maîtrisez les architectures modernes avec Next.js 14, Spring Boot 3 et Kubernetes. Conçu pour les experts souhaitant propulser leur carrière." 
+                                       styleClass="hero-subtitle" wrapText="true"/>
+                                <HBox spacing="20" alignment="CENTER_LEFT">
+                                    <Button text="▶ Découvrir ce cours" styleClass="btn-primary" style="-fx-padding: 15 40;"/>
+                                    <Label text="Voir le catalogue →" styleClass="nav-link"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- 4. Catalogue Filters & Grid -->
+                    <VBox spacing="50" style="-fx-padding: 0 80 100 80;">
+                        <VBox alignment="CENTER" spacing="15">
+                            <Label text="Masterclass" style="-fx-background-color: rgba(139, 92, 246, 0.1); -fx-text-fill: #a78bfa; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: 900; -fx-font-size: 10px;"/>
+                            <Label text="Explore our Premium Masterclass" styleClass="section-title"/>
+                            <Label text="Discover structured learning paths designed to master the most elite skills." styleClass="hero-subtitle"/>
+                        </VBox>
+
+                        <HBox spacing="20" alignment="BOTTOM_LEFT">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="SEARCH COURSE" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                                <TextField promptText="What do you want to learn today?" styleClass="form-input" prefHeight="55"/>
+                            </VBox>
+                            <VBox spacing="8" minWidth="200">
+                                <Label text="LEVEL" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                                <ComboBox promptText="All Levels" styleClass="form-input" maxWidth="Infinity" prefHeight="55"/>
+                            </VBox>
+                            <VBox spacing="8" minWidth="200">
+                                <Label text="CATEGORY" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                                <ComboBox promptText="All Categories" styleClass="form-input" maxWidth="Infinity" prefHeight="55"/>
+                            </VBox>
+                        </HBox>
+
+                        <GridPane hgap="30" vgap="30">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <!-- Course Row 1 -->
+                            <HBox styleClass="course-card" GridPane.columnIndex="0">
+                                <VBox spacing="15" style="-fx-padding: 25;">
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                        <Label text="⭐⭐⭐⭐⭐" style="-fx-font-size: 10px;"/>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label text="DÉBUTANT" styleClass="badge-ia-text" style="-fx-font-size: 9px;"/>
+                                    </HBox>
+                                    <Label text="Java Backend 2026" styleClass="card-title" style="-fx-font-size: 22px;"/>
+                                    <Label text="Apprenez Spring Boot 3 de zéro jusqu'à la production cloud." styleClass="card-desc" wrapText="true" prefHeight="40"/>
+                                    <Separator style="-fx-opacity: 0.1;"/>
+                                    <HBox alignment="CENTER_LEFT" spacing="15">
+                                        <Label text="8 Chapters" styleClass="badge-ia-text" style="-fx-text-fill: #94a3b8;"/>
+                                        <Label text="99 DT" styleClass="badge-ia-text" style="-fx-text-fill: #8b5cf6;"/>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button text="Enroll Now" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+
+                            <HBox styleClass="course-card" GridPane.columnIndex="1">
+                                <VBox spacing="15" style="-fx-padding: 25;">
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                        <Label text="⭐⭐⭐⭐⭐" style="-fx-font-size: 10px;"/>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label text="INTERMÉDIAIRE" styleClass="badge-ia-text" style="-fx-font-size: 9px;"/>
+                                    </HBox>
+                                    <Label text="UI/UX Pro Design" styleClass="card-title" style="-fx-font-size: 22px;"/>
+                                    <Label text="Créez des interfaces modernes et des design systems avec Figma." styleClass="card-desc" wrapText="true" prefHeight="40"/>
+                                    <Separator style="-fx-opacity: 0.1;"/>
+                                    <HBox alignment="CENTER_LEFT" spacing="15">
+                                        <Label text="15 Chapters" styleClass="badge-ia-text" style="-fx-text-fill: #94a3b8;"/>
+                                        <Label text="120 DT" styleClass="badge-ia-text" style="-fx-text-fill: #8b5cf6;"/>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button text="Enroll Now" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- 5. Footer -->
+                    <VBox styleClass="footer" spacing="50">
+                        <HBox spacing="100" alignment="TOP_CENTER">
+                            <VBox spacing="20" maxWidth="300">
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <StackPane style="-fx-background-color: #8b5cf6; -fx-background-radius: 8;" minWidth="32" minHeight="32">
+                                        <Label text="S" style="-fx-text-fill: white; -fx-font-weight: 900;"/>
+                                    </StackPane>
+                                    <Label text="SkillPath" styleClass="logo-text" style="-fx-font-size: 18px;"/>
+                                </HBox>
+                                <Label text="Transformer l'éducation par la technologie pour tout le monde, partout." 
+                                       styleClass="card-desc" wrapText="true"/>
+                            </VBox>
+                            
+                            <VBox spacing="15">
+                                <Label text="PLATEFORME" styleClass="badge-ia-text" style="-fx-text-fill: white;"/>
+                                <Label text="Tous les cours" styleClass="nav-link"/>
+                                <Label text="Abonnements" styleClass="nav-link"/>
+                                <Label text="IA Guidance" styleClass="nav-link"/>
+                            </VBox>
+
+                            <VBox spacing="15">
+                                <Label text="SOCIÉTÉ" styleClass="badge-ia-text" style="-fx-text-fill: white;"/>
+                                <Label text="Notre équipe" styleClass="nav-link"/>
+                                <Label text="Carrières"   styleClass="nav-link"/>
+                                <Label text="Contact"     styleClass="nav-link"/>
+                            </VBox>
+
+                            <VBox spacing="15">
+                                <Label text="SUPPORT" styleClass="badge-ia-text" style="-fx-text-fill: white;"/>
+                                <Label text="FAQ"           styleClass="nav-link"/>
+                                <Label text="Centre d'aide" styleClass="nav-link"/>
+                                <Label text="Sécurité"      styleClass="nav-link"/>
+                            </VBox>
+                        </HBox>
+                        
+                        <Separator style="-fx-opacity: 0.05;"/>
+                        
+                        <HBox alignment="CENTER_LEFT" spacing="20">
+                            <Label text="© 2026 SkillPath Inc. Tous droits réservés." styleClass="card-desc" style="-fx-font-size: 11px;"/>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label text="Confidentialité" styleClass="nav-link" style="-fx-font-size: 11px;"/>
+                            <Label text="Conditions"       styleClass="nav-link" style="-fx-font-size: 11px;"/>
+                        </HBox>
+                    </VBox>
+
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</AnchorPane>

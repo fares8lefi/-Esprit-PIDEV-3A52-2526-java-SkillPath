@@ -1,0 +1,195 @@
+.root-pane {
+    -fx-background-color: #0f172a; /* dark blue background */
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Left Pane Text */
+.logo-text {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.logo-subtext {
+    -fx-font-size: 10px;
+    -fx-text-fill: #9333ea; /* secondary/primary */
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 2px;
+}
+
+.title-text {
+    -fx-font-size: 40px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.subtitle-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b; /* slate-500 */
+    -fx-line-spacing: 4px;
+}
+
+/* Feature item */
+.feature-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.feature-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.icon-box {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 12px;
+    -fx-min-width: 44px;
+    -fx-min-height: 44px;
+    -fx-alignment: center;
+    -fx-border-color: rgba(255,255,255,0.05);
+    -fx-border-radius: 12px;
+}
+
+/* Glass Card */
+.glass-card {
+    -fx-background-color: rgba(30, 41, 59, 0.7); /* slate-800 with opacity */
+    -fx-background-radius: 24px;
+    -fx-padding: 40px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 24px;
+}
+
+.card-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.card-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+/* Form Styles */
+.form-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+}
+
+.form-input {
+    -fx-background-color: rgba(15, 23, 42, 0.5);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 14px;
+    -fx-font-size: 13px;
+}
+
+.form-input:focused {
+    -fx-border-color: #8b5cf6;
+}
+
+.btn-primary {
+    -fx-background-color: #8b5cf6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 14px;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #7c3aed;
+}
+
+.checkbox {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.link:visited, .link {
+    -fx-text-fill: #8b5cf6;
+    -fx-underline: false;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+.link:hover {
+    -fx-underline: true;
+}
+
+.footer-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Login specific styles */
+.glass-card-small {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-background-radius: 16px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 16px;
+}
+
+.btn-google {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-google:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+.divider-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.divider-line {
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1 0 0 0;
+}
+
+.alert-success {
+    -fx-background-color: rgba(16, 185, 129, 0.1);
+    -fx-border-color: rgba(16, 185, 129, 0.2);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 15px;
+}
+
+.alert-success-text {
+    -fx-text-fill: #10b981;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.alert-error {
+    -fx-background-color: rgba(244, 63, 94, 0.1);
+    -fx-border-color: rgba(244, 63, 94, 0.2);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 15px;
+}
+
+.alert-error-text {
+    -fx-text-fill: #f43f5e;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1000" prefHeight="700">
+    <children>
+        <HBox alignment="CENTER" spacing="60" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-padding: 50px;">
+            
+            <!-- Branding Side (Left) -->
+            <VBox alignment="CENTER_LEFT" spacing="30" maxWidth="450" HBox.hgrow="ALWAYS">
+                
+                <!-- Logo & Title -->
+                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 40 0;">
+                    <StackPane styleClass="icon-box" style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-effect: dropshadow(three-pass-box, rgba(139,92,246,0.3), 15, 0, 0, 5); -fx-background-radius: 16px;" minWidth="56" minHeight="56">
+                        <Label text="SP" style="-fx-font-weight: 900; -fx-text-fill: white; -fx-font-size: 22px;"/>
+                    </StackPane>
+                    <VBox alignment="CENTER_LEFT">
+                        <HBox>
+                            <Label text="Skill" styleClass="logo-text"/>
+                            <Label text="Path" styleClass="logo-text" style="-fx-text-fill: #8b5cf6;"/>
+                        </HBox>
+                        <Label text="ELEVATE YOUR FUTURE" styleClass="logo-subtext"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Big Welcome Text -->
+                <VBox spacing="0">
+                    <Label text="Prêt pour votre" styleClass="title-text"/>
+                    <Label text="prochaine étape ?" styleClass="title-text" style="-fx-text-fill: #8b5cf6;"/>
+                </VBox>
+                
+                <Label text="Accédez à votre espace personnel pour continuer votre apprentissage et suivre vos progrès." styleClass="subtitle-text" wrapText="true" maxWidth="380" style="-fx-padding: 0 0 20 0;"/>
+
+                <!-- Features cards -->
+                <HBox spacing="15">
+                    <HBox styleClass="glass-card-small" alignment="CENTER_LEFT" spacing="10">
+                        <StackPane style="-fx-background-color: rgba(139,92,246,0.1); -fx-background-radius: 10px;" minWidth="40" minHeight="40">
+                             <Label text="📚" style="-fx-font-size: 18px;"/>
+                        </StackPane>
+                        <Label text="+500 Cours Premium" styleClass="feature-title"/>
+                    </HBox>
+                    <HBox styleClass="glass-card-small" alignment="CENTER_LEFT" spacing="10">
+                        <StackPane style="-fx-background-color: rgba(16,185,129,0.1); -fx-background-radius: 10px;" minWidth="40" minHeight="40">
+                             <Label text="🎓" style="-fx-font-size: 18px;"/>
+                        </StackPane>
+                        <Label text="Certificats Reconnus" styleClass="feature-title"/>
+                    </HBox>
+                </HBox>
+            </VBox>
+
+            <!-- Login Card (Right) -->
+            <VBox styleClass="glass-card" spacing="18" maxWidth="400" minWidth="380">
+                <VBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 0 0 5 0;">
+                    <Label text="Bon retour !" styleClass="card-title"/>
+                    <Label text="Content de vous revoir parmi nous." styleClass="card-subtitle"/>
+                </VBox>
+
+                <!-- Mocked Flash Messages (Can be toggled via Java Code) -->
+                <!-- Success Message Example
+                <HBox styleClass="alert-success" alignment="CENTER_LEFT" spacing="10">
+                    <Label text="✓" styleClass="alert-success-text"/>
+                    <Label text="Message de succès" styleClass="alert-success-text"/>
+                </HBox> 
+                -->
+
+                <!-- Google Auth Button -->
+                <Button text="Continuer avec Google" styleClass="btn-google" maxWidth="Infinity">
+                    <graphic>
+                        <!-- G character mocking the Google Logo -> you can link a google.png ImageView here -->
+                        <Label text="G" style="-fx-text-fill: #4285F4; -fx-font-weight: 900; -fx-font-size: 16px; -fx-padding: 0 8 0 0;"/>
+                    </graphic>
+                </Button>
+
+                <!-- Divider -->
+                <HBox alignment="CENTER" spacing="10" style="-fx-padding: 5 0;">
+                    <HBox HBox.hgrow="ALWAYS" styleClass="divider-line" maxHeight="1"/>
+                    <Label text="OU AVEC EMAIL" styleClass="divider-text"/>
+                    <HBox HBox.hgrow="ALWAYS" styleClass="divider-line" maxHeight="1"/>
+                </HBox>
+
+                <!-- Form Fields -->
+                <VBox spacing="6">
+                    <Label text="VOTRE EMAIL" styleClass="form-label"/>
+                    <TextField promptText="user@email.com" styleClass="form-input"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="MOT DE PASSE" styleClass="form-label"/>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Hyperlink text="Oublié ?" style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 0;"/>
+                    </HBox>
+                    <PasswordField promptText="8 caractères minimum" styleClass="form-input"/>
+                </VBox>
+
+                <!-- Checkbox -->
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 5 0 2 0;">
+                    <CheckBox styleClass="checkbox"/>
+                    <Label text="Rester connecté" styleClass="checkbox"/>
+                </HBox>
+
+                <Button text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
+                    <VBox.margin>
+                        <Insets top="5"/>
+                    </VBox.margin>
+                </Button>
+
+                <VBox alignment="CENTER" style="-fx-padding: 20 0 0 0; -fx-border-color: rgba(255,255,255,0.05); -fx-border-width: 1 0 0 0;">
+                    <HBox alignment="CENTER" spacing="5">
+                        <Label text="Pas encore de compte ?" styleClass="footer-text"/>
+                        <Hyperlink text="Créer un profil" styleClass="link"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+        </HBox>
+    </children>
+</AnchorPane>

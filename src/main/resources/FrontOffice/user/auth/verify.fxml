@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane
+    styleClass="root-pane"
+    stylesheets="@style.css"
+    xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="Controllers.auth.VerifyController"
+    prefWidth="1000" prefHeight="700">
+
+    <children>
+        <VBox alignment="CENTER" spacing="30"
+              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+              style="-fx-padding: 50px;">
+
+            <!-- Logo -->
+            <StackPane style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef);
+                              -fx-background-radius: 20px;
+                              -fx-effect: dropshadow(three-pass-box, rgba(139,92,246,0.4), 20, 0, 0, 6);"
+                       minWidth="72" minHeight="72">
+                <Label text="✉" style="-fx-font-size: 32px; -fx-text-fill: white;"/>
+            </StackPane>
+
+            <!-- Title -->
+            <VBox alignment="CENTER" spacing="8">
+                <Label text="Vérification de l'email" styleClass="card-title" style="-fx-text-fill: white;"/>
+                <Label fx:id="emailLabel"
+                       text="Un code a été envoyé à votre adresse email."
+                       styleClass="card-subtitle" wrapText="true" style="-fx-text-fill: #64748b;"/>
+            </VBox>
+
+            <!-- Card -->
+            <VBox styleClass="glass-card" spacing="20" maxWidth="420" minWidth="360" alignment="CENTER_LEFT">
+
+                <!-- Alert box -->
+                <HBox fx:id="alertBox" spacing="10" alignment="CENTER_LEFT"
+                      visible="false" managed="false"
+                      style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-padding: 12px;">
+                    <Label text="⚠" style="-fx-font-size: 16px;"/>
+                    <Label fx:id="alertLabel" wrapText="true"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <!-- Code input -->
+                <VBox spacing="6">
+                    <Label text="CODE DE VÉRIFICATION" styleClass="form-label"/>
+                    <TextField fx:id="codeField"
+                               promptText="Entrez le code à 6 chiffres"
+                               styleClass="form-input"
+                               style="-fx-font-size: 20px; -fx-letter-spacing: 8px; -fx-alignment: center;"/>
+                </VBox>
+
+                <!-- Verify Button -->
+                <Button fx:id="verifyButton"
+                        text="Vérifier mon compte"
+                        styleClass="btn-primary"
+                        maxWidth="Infinity"
+                        onAction="#handleVerify">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+                </Button>
+
+            </VBox>
+
+            <Label text="Vous n'avez pas reçu d'email ? Vérifiez vos spams."
+                   style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+        </VBox>
+    </children>
+</AnchorPane>
