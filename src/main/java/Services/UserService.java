@@ -1,11 +1,15 @@
 package Services;
 
 import Models.User;
+import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.nio.ByteBuffer;
+import java.util.Properties;
 import java.util.Random;
 
 public class UserService implements Iservice<User> {
@@ -40,7 +44,7 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérifie si un email existe déjà ───
     public boolean emailExists(String email) {
-        String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -100,20 +104,32 @@ public class UserService implements Iservice<User> {
     // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
-        String sql = "INSERT INTO user (email, username, password, status, role, is_verified, verification_code, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // Génération de l'UUID v7 (Time-ordered)
+            UUID uuid = UuidCreator.getTimeOrderedEpoch();
+            
+            // Conversion de l'UUID en byte[] (16 octets) pour le format BINARY(16) de Symfony
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            byte[] uuidBytes = bb.array();
+            
             String hashedPassword = hashPassword(user.getPassword());
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getUsername());
-            ps.setString(3, hashedPassword);
-            ps.setString(4, "pending");
-            ps.setString(5, "student");
-            ps.setBoolean(6, false);
-            ps.setString(7, user.getVerificationCode());
-            ps.setTimestamp(8, Timestamp.valueOf(user.getCreatedAt()));
+            
+            ps.setBytes(1, uuidBytes);
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getUsername());
+            ps.setString(4, hashedPassword);
+            ps.setString(5, user.getStatus());
+            ps.setString(6, user.getRole());
+            ps.setBoolean(7, false);
+            ps.setString(8, user.getVerificationCode());
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            
             ps.executeUpdate();
-            System.out.println("Utilisateur enregistré : " + user.getEmail());
+            System.out.println("Utilisateur ajouté avec succès !");
         } catch (SQLException e) {
             System.out.println("Erreur ajouter : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -122,20 +138,20 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérification du code ───
     public boolean verifyCode(String email, String code) {
-        String sql = "SELECT verification_code FROM user WHERE email = ?";
+        String sql = "SELECT verification_code FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String storedCode = rs.getString("verification_code");
-                if (code.equals(storedCode)) {
+                if (storedCode != null && code.equals(storedCode)) {
                     // Activer le compte
-                    String updateSql = "UPDATE user SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
+                    String updateSql = "UPDATE users SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
                     try (PreparedStatement ps2 = connection.prepareStatement(updateSql)) {
                         ps2.setString(1, email);
                         ps2.executeUpdate();
+                        return true;
                     }
-                    return true;
                 }
             }
         } catch (SQLException e) {
@@ -146,7 +162,7 @@ public class UserService implements Iservice<User> {
 
     // ─── Connexion ───
     public User login(String email, String password) {
-        String sql = "SELECT * FROM user WHERE email = ? AND password = ? AND is_verified = true";
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ? AND is_verified = true";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, hashPassword(password));
@@ -167,7 +183,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void supprimer(User user) throws SQLDataException {
-        String sql = "DELETE FROM user WHERE email = ?";
+        String sql = "DELETE FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
             ps.executeUpdate();
@@ -178,7 +194,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void modifier(User user) throws SQLDataException {
-        String sql = "UPDATE user SET username = ?, status = ?, role = ? WHERE email = ?";
+        String sql = "UPDATE users SET username = ?, status = ?, role = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getStatus());
@@ -192,7 +208,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public List<User> recuperer() throws SQLDataException {
-        String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM users";
         List<User> list = new ArrayList<>();
         if (connection == null) return list;
         try (Statement st = connection.createStatement();
