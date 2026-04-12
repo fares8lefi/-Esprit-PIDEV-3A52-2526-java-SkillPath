@@ -84,7 +84,7 @@
                            </children>
                         </StackPane>
                         
-                        <Button fx:id="logoutBtn" mnemonicParsing="false" style="-fx-background-color: transparent;" text="🚪" textFill="#64748b" />
+                        <Button fx:id="logoutBtn" onAction="#handleLogout" mnemonicParsing="false" style="-fx-background-color: transparent;" text="🚪" textFill="#64748b" />
                      </children>
                   </HBox>
                </children>
