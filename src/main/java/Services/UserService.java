@@ -287,8 +287,32 @@ public class UserService implements Iservice<User> {
     }
     return list;
 }
+public List<User> getClientList() throws SQLDataException {
+    String sql = "SELECT * FROM users WHERE role LIKE ?";
+    List<User> list = new ArrayList<>();
+    
+    if (connection == null) return list;
 
-  
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, "client");
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            User u = new User();
+            u.setUsername(rs.getString("username"));
+            u.setEmail(rs.getString("email"));
+            u.setRole(rs.getString("role"));
+            u.setStatus(rs.getString("status"));
+            list.add(u);
+        }
+
+    } catch (SQLException e) {
+        System.out.println("Erreur getClientList : " + e.getMessage());
+    }
+
+    return list; 
+}
 
 
 }
