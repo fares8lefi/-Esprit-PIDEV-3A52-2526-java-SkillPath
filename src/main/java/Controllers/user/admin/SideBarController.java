@@ -42,7 +42,7 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleDashboard(ActionEvent event) {
         setActive(btnDashboard);
-        navigateTo(event, "/BackOffice/Admin/homeAdmin.fxml", "Tableau de Bord Admin");
+        navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
     }
 
     @FXML

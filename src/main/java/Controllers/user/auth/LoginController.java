@@ -45,7 +45,7 @@ public class LoginController {
             
             // Redirection selon le rôle
             if ("admin".equalsIgnoreCase(user.getRole())) {
-                navigateTo(event, "/BackOffice/Admin/homeAdmin.fxml", "Tableau de Bord Admin");
+                navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
             } else {
                 navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
             }
