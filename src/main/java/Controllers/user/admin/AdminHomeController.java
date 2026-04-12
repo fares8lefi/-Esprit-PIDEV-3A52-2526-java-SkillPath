@@ -166,6 +166,10 @@ public class AdminHomeController implements Initializable {
     }
 
     @FXML
+    private void handleNouvelArchitecte(ActionEvent event) {
+        navigateTo(event, "/BackOffice/Admin/user/ajouterArchitecte.fxml", "Ajouter un architecte - SkillPath");
+    }
+    @FXML
     private void handleLogout(ActionEvent event) {
         Session.logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
