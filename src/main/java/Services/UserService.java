@@ -86,13 +86,11 @@ public class UserService implements Iservice<User> {
         return false;
     }
 
-    // ─── Envoi de l'email de vérification via JavaMail ───
-    public boolean sendVerificationEmail(String toEmail, String username, String code) {
+    // ─── Envoi de l'email via JavaMail ───
+    private boolean sendMail(String toEmail, String username, String code) {
         String host = "smtp.gmail.com";
-        // skill path email
         String from = dotenv.get("MAIL_USERNAME");
-        //password : xckmtvtgnmxutbfm
-        String appPassword = dotenv.get("MAIL_PASSWORD"); 
+        String appPassword = dotenv.get("MAIL_PASSWORD");
 
         java.util.Properties props = new java.util.Properties();
         props.put("mail.smtp.auth", "true");
@@ -124,7 +122,7 @@ public class UserService implements Iservice<User> {
 
             message.setContent(htmlContent, "text/html; charset=UTF-8");
             jakarta.mail.Transport.send(message);
-            System.out.println("Email envoyé à " + toEmail);
+            System.out.println("Email envoyé avec succès à " + toEmail);
             return true;
         } catch (jakarta.mail.MessagingException e) {
             System.out.println("Erreur envoi email : " + e.getMessage());
@@ -132,6 +130,78 @@ public class UserService implements Iservice<User> {
         }
     }
 
+    public boolean sendVerificationEmail(String toEmail, String username, String code) {
+        return sendMail(toEmail, username, code);
+    }
+
+    public boolean resendEmail(String toEmail, String username, String code) {
+        return sendMail(toEmail, username, code);
+    }
+
+    /**
+     * Étape 1 : Demander une réinitialisation de mot de passe.
+     * Génère un code, le stocke en base et l'envoie par email.
+     */
+    public boolean requestPasswordReset(String email) {
+        if (!emailExists(email)) return false;
+
+        String code = generateVerificationCode();
+        String sql = "UPDATE users SET verification_code = ? WHERE email = ?";
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, code);
+            ps.setString(2, email);
+            ps.executeUpdate();
+            
+            // On peut chercher le nom d'utilisateur pour personnaliser l'email
+            String username = "Collaborateur";
+            String findUser = "SELECT username FROM users WHERE email = ?";
+            try (PreparedStatement ps2 = connection.prepareStatement(findUser)) {
+                ps2.setString(1, email);
+                ResultSet rs = ps2.executeQuery();
+                if(rs.next()) username = rs.getString("username");
+            }
+
+            return sendMail(email, username, code);
+        } catch (SQLException e) {
+            System.err.println("Erreur requestPasswordReset : " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Étape 2 : Finaliser la réinitialisation après vérification du code.
+     * Vérifie le code, hache le nouveau mot de passe et l'enregistre.
+     */
+    public boolean finalizePasswordReset(String email, String code, String newPassword) {
+        String sql = "SELECT verification_code FROM users WHERE email = ?";
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                String storedCode = rs.getString("verification_code");
+                if (storedCode != null && storedCode.equals(code)) {
+                    // Sécurité : Hachage du nouveau mot de passe
+                    String hashed = hashPassword(newPassword);
+                    
+                    // On met à jour le mot de passe et on invalide le code utilisé
+                    String updateSql = "UPDATE users SET password = ?, verification_code = NULL WHERE email = ?";
+                    try (PreparedStatement ups = connection.prepareStatement(updateSql)) {
+                        ups.setString(1, hashed);
+                        ups.setString(2, email);
+                        ups.executeUpdate();
+                        System.out.println("Mot de passe mis à jour pour : " + email);
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur finalizePasswordReset : " + e.getMessage());
+        }
+        return false;
+    }
     // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
