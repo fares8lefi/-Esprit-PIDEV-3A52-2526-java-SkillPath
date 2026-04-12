@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -10,215 +9,251 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="900.0" prefWidth="1300.0" style="-fx-background-color: #0f172a;" stylesheets="@../../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.admin.AdminHomeController">
+<!--
+    Layout global : HBox(Sidebar | ScrollPane(content))
+    Le sidebar est chargé via fx:include — son controller est SideBarController.
+    Le contenu défilable est géré par AdminHomeController.
+-->
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.user.admin.AdminHomeController"
+      prefHeight="900.0"
+      prefWidth="1440.0"
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../../FrontOffice/user/auth/style.css">
+
    <children>
-      <VBox spacing="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <padding><Insets bottom="40.0" left="50.0" right="50.0" top="40.0" /></padding>
-         <children>
-            
-            <!-- 1. Header Section -->
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <children>
-                  <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <HBox spacing="10.0">
-                           <children>
-                              <Label text="Tableau de Bord" textFill="WHITE">
-                                 <font><Font name="System Bold" size="32.0" /></font>
-                              </Label>
-                              <Label text="Admin" textFill="#8b5cf6">
-                                 <font><Font name="System Bold" size="32.0" /></font>
-                              </Label>
-                           </children>
-                        </HBox>
-                        <Label fx:id="welcomeLabel" text="Bon retour, Administrateur. Voici l'aperçu analytique de SkillPath." textFill="#94a3b8" />
-                     </children>
-                  </VBox>
-                  
-                  <HBox spacing="12.0">
-                     <children>
-                        <Button styleClass="btn-secondary" text="📄 PDF" />
-                        <Button styleClass="btn-secondary" text="📊 Excel" />
-                        <Button styleClass="btn-primary" text="+ Nouvel Architecte" />
-                     </children>
-                  </HBox>
-               </children>
-            </HBox>
 
-            <!-- 2. Stats Bento Grid (6 Columns) -->
-            <GridPane hgap="20.0" vgap="20.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="120.0" prefHeight="120.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <!-- Users Stat -->
-                  <VBox spacing="10.0" style="-fx-border-color: #8b5cf6; -fx-border-width: 0 0 4 0;" styleClass="glass-card">
-                     <children>
-                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="UTILISATEURS" textFill="#64748b" />
-                        <Label fx:id="userCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="1,284" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  <!-- Urgences Stat -->
-                  <VBox spacing="10.0" style="-fx-border-color: #ef4444; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="1">
-                     <children>
-                        <HBox spacing="10.0">
-                           <children>
-                              <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="URGENCES IA" textFill="#64748b" />
-                              <Label style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 8; -fx-padding: 2 5; -fx-background-radius: 5;" text="ALERTE" />
-                           </children>
-                        </HBox>
-                        <Label fx:id="urgentCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="12" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  <!-- Courses Stat -->
-                  <VBox spacing="10.0" style="-fx-border-color: #F59E0B; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="2">
-                     <children>
-                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="COURS" textFill="#64748b" />
-                        <Label fx:id="courseCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="86" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  <!-- Modules Stat -->
-                  <VBox spacing="10.0" style="-fx-border-color: #06B6D4; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="3">
-                     <children>
-                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="MODULES" textFill="#64748b" />
-                        <Label fx:id="moduleCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="452" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  <!-- Reclamations -->
-                  <VBox spacing="10.0" style="-fx-border-color: #FB7185; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="4">
-                     <children>
-                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="RÉCLAMATIONS" textFill="#64748b" />
-                        <Label fx:id="reclamationCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="24" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  <!-- Results -->
-                  <VBox spacing="10.0" style="-fx-border-color: #34D399; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="5">
-                     <children>
-                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="RÉSULTATS" textFill="#64748b" />
-                        <Label fx:id="resultatCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="1,042" textFill="WHITE" />
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-               </children>
-            </GridPane>
+      <!-- ══════════════════════════════════ -->
+      <!--         SIDEBAR  (fixe, gauche)    -->
+      <!-- ══════════════════════════════════ -->
+      <fx:include fx:id="sideBar" source="SideBar.fxml" />
 
-            <!-- 3. Charts Section -->
-            <HBox spacing="25.0" VBox.vgrow="ALWAYS">
-               <children>
-                  <!-- Growth Chart -->
-                  <VBox spacing="15.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Croissance des Utilisateurs" textFill="WHITE" />
-                        <LineChart fx:id="registrationChart" style="-fx-background-color: transparent;">
-                          <xAxis><CategoryAxis side="BOTTOM" tickLabelFill="#94a3b8" /></xAxis>
-                          <yAxis><NumberAxis side="LEFT" tickLabelFill="#94a3b8" /></yAxis>
-                        </LineChart>
-                     </children>
-                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
-                  </VBox>
-                  
-                  <!-- Distribution Charts -->
-                  <VBox prefWidth="400.0" spacing="20.0">
-                     <children>
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
-                           <children>
-                              <Label style="-fx-font-weight: bold;" text="Répartition des Rôles" textFill="WHITE" />
-                              <PieChart fx:id="rolesChart" labelsVisible="false" prefHeight="200.0" />
-                           </children>
-                           <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
-                        </VBox>
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
-                           <children>
-                              <Label style="-fx-font-weight: bold;" text="Cours par Catégorie" textFill="WHITE" />
-                              <BarChart fx:id="categoryChart" legendVisible="false" prefHeight="200.0">
-                                <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
-                                <yAxis><NumberAxis side="LEFT" /></yAxis>
-                              </BarChart>
-                           </children>
-                           <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
-                        </VBox>
-                     </children>
-                  </VBox>
-               </children>
-            </HBox>
+      <!-- ══════════════════════════════════════════ -->
+      <!--   CONTENU PRINCIPAL  (scrollable, droite)  -->
+      <!-- ══════════════════════════════════════════ -->
+      <ScrollPane
+          fitToWidth="true"
+          hbarPolicy="NEVER"
+          vbarPolicy="AS_NEEDED"
+          style="-fx-background-color: transparent; -fx-background: transparent;"
+          HBox.hgrow="ALWAYS">
 
-            <!-- 4. Bottom Grid (Recent Recruits & Quick Access) -->
-            <HBox spacing="25.0">
-               <children>
-                  <!-- Recent Users Table-like VBox -->
-                  <VBox spacing="20.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
-                     <children>
-                        <HBox alignment="CENTER_LEFT">
-                           <children>
-                              <VBox HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 18;" text="Recrues Récentes" textFill="WHITE" />
-                                    <Label style="-fx-font-size: 12;" text="Les 5 derniers membres inscrits." textFill="#64748b" />
-                                 </children>
-                              </VBox>
-                              <Button style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6;" text="Tout Voir →" />
-                           </children>
-                        </HBox>
-                        
-                        <VBox fx:id="recentUsersContainer" spacing="12.0">
-                           <!-- Dynamic User Rows will be added here -->
-                        </VBox>
-                     </children>
-                     <padding><Insets bottom="30.0" left="30.0" right="30.0" top="30.0" /></padding>
-                  </VBox>
-                  
-                  <!-- Quick Access -->
-                  <VBox prefWidth="350.0" spacing="20.0">
-                     <children>
-                        <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #d946ef); -fx-background-radius: 20; -fx-padding: 30;">
-                           <children>
-                              <Label style="-fx-font-weight: 900; -fx-font-size: 20;" text="Gestion des&#10;Cours" textFill="WHITE" />
-                              <Label opacity="0.7" style="-fx-font-size: 12;" text="Contrôlez les contenus pédagogiques." textFill="WHITE" />
-                              <Button maxWidth="Infinity" style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12;" text="Accéder aux Cours" />
-                           </children>
-                        </VBox>
-                        
-                        <VBox spacing="15.0" styleClass="glass-card">
-                           <children>
-                              <Label style="-fx-font-weight: bold;" text="Raccourcis Rapides" textFill="WHITE" />
-                              <GridPane hgap="10.0" vgap="10.0">
-                                <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                </columnConstraints>
-                                <rowConstraints>
-                                  <RowConstraints minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
-                                </rowConstraints>
-                                 <children>
-                                    <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;">
-                                       <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Soutien" textFill="#94a3b8" /></children>
-                                    </VBox>
-                                    <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.columnIndex="1">
-                                       <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Ma Vue" textFill="#94a3b8" /></children>
-                                    </VBox>
-                                 </children>
-                              </GridPane>
-                           </children>
-                           <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
-                        </VBox>
-                     </children>
-                  </VBox>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
+        <content>
+          <VBox spacing="30.0">
+             <padding><Insets bottom="40.0" left="50.0" right="50.0" top="40.0" /></padding>
+             <children>
+
+                <!-- 1. Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                   <children>
+                      <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                         <children>
+                            <HBox spacing="10.0">
+                               <children>
+                                  <Label text="Tableau de Bord" textFill="WHITE">
+                                     <font><Font name="System Bold" size="32.0" /></font>
+                                  </Label>
+                                  <Label text="Admin" textFill="#8b5cf6">
+                                     <font><Font name="System Bold" size="32.0" /></font>
+                                  </Label>
+                               </children>
+                            </HBox>
+                            <Label fx:id="welcomeLabel"
+                                   text="Bon retour, Administrateur. Voici l'aperçu analytique de SkillPath."
+                                   textFill="#94a3b8" />
+                         </children>
+                      </VBox>
+
+                      <HBox spacing="12.0">
+                         <children>
+                            <Button styleClass="btn-secondary" text="📄 PDF" />
+                            <Button styleClass="btn-secondary" text="📊 Excel" />
+                            <Button styleClass="btn-primary" text="+ Nouvel Architecte" />
+                         </children>
+                      </HBox>
+                   </children>
+                </HBox>
+
+                <!-- 2. Stats Bento Grid (6 colonnes) -->
+                <GridPane hgap="20.0" vgap="20.0">
+                  <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  </columnConstraints>
+                  <rowConstraints>
+                    <RowConstraints minHeight="120.0" prefHeight="120.0" vgrow="SOMETIMES" />
+                  </rowConstraints>
+                   <children>
+                      <!-- Utilisateurs -->
+                      <VBox spacing="10.0" style="-fx-border-color: #8b5cf6; -fx-border-width: 0 0 4 0;" styleClass="glass-card">
+                         <children>
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="UTILISATEURS" textFill="#64748b" />
+                            <Label fx:id="userCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="—" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                      <!-- Urgences IA -->
+                      <VBox spacing="10.0" style="-fx-border-color: #ef4444; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="1">
+                         <children>
+                            <HBox spacing="10.0">
+                               <children>
+                                  <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="URGENCES IA" textFill="#64748b" />
+                                  <Label style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 8; -fx-padding: 2 5; -fx-background-radius: 5;" text="ALERTE" />
+                               </children>
+                            </HBox>
+                            <Label fx:id="urgentCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="0" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                      <!-- Cours -->
+                      <VBox spacing="10.0" style="-fx-border-color: #F59E0B; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="2">
+                         <children>
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="COURS" textFill="#64748b" />
+                            <Label fx:id="courseCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="—" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                      <!-- Modules -->
+                      <VBox spacing="10.0" style="-fx-border-color: #06B6D4; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="3">
+                         <children>
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="MODULES" textFill="#64748b" />
+                            <Label fx:id="moduleCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="—" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                      <!-- Réclamations -->
+                      <VBox spacing="10.0" style="-fx-border-color: #FB7185; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="4">
+                         <children>
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="RÉCLAMATIONS" textFill="#64748b" />
+                            <Label fx:id="reclamationCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="0" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                      <!-- Résultats -->
+                      <VBox spacing="10.0" style="-fx-border-color: #34D399; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="5">
+                         <children>
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="RÉSULTATS" textFill="#64748b" />
+                            <Label fx:id="resultatCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="—" textFill="WHITE" />
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+                   </children>
+                </GridPane>
+
+                <!-- 3. Graphiques -->
+                <HBox spacing="25.0">
+                   <children>
+                      <!-- Courbe de croissance -->
+                      <VBox spacing="15.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
+                         <children>
+                            <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Croissance des Utilisateurs" textFill="WHITE" />
+                            <LineChart fx:id="registrationChart" style="-fx-background-color: transparent;" prefHeight="280.0">
+                              <xAxis><CategoryAxis side="BOTTOM" tickLabelFill="#94a3b8" /></xAxis>
+                              <yAxis><NumberAxis side="LEFT" tickLabelFill="#94a3b8" /></yAxis>
+                            </LineChart>
+                         </children>
+                         <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                      </VBox>
+
+                      <!-- Graphiques de distribution -->
+                      <VBox prefWidth="380.0" spacing="20.0">
+                         <children>
+                            <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
+                               <children>
+                                  <Label style="-fx-font-weight: bold;" text="Répartition des Rôles" textFill="WHITE" />
+                                  <PieChart fx:id="rolesChart" labelsVisible="false" prefHeight="200.0" />
+                               </children>
+                               <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
+                            </VBox>
+                            <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
+                               <children>
+                                  <Label style="-fx-font-weight: bold;" text="Cours par Catégorie" textFill="WHITE" />
+                                  <BarChart fx:id="categoryChart" legendVisible="false" prefHeight="200.0">
+                                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                                    <yAxis><NumberAxis side="LEFT" /></yAxis>
+                                  </BarChart>
+                               </children>
+                               <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
+                            </VBox>
+                         </children>
+                      </VBox>
+                   </children>
+                </HBox>
+
+                <!-- 4. Recrues récentes + Accès rapide -->
+                <HBox spacing="25.0">
+                   <children>
+                      <!-- Table utilisateurs récents -->
+                      <VBox spacing="20.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
+                         <children>
+                            <HBox alignment="CENTER_LEFT">
+                               <children>
+                                  <VBox HBox.hgrow="ALWAYS">
+                                     <children>
+                                        <Label style="-fx-font-weight: bold; -fx-font-size: 18;" text="Recrues Récentes" textFill="WHITE" />
+                                        <Label style="-fx-font-size: 12;" text="Les 5 derniers membres inscrits." textFill="#64748b" />
+                                     </children>
+                                  </VBox>
+                                  <Button style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6;" text="Tout Voir →" />
+                               </children>
+                            </HBox>
+                            <VBox fx:id="recentUsersContainer" spacing="12.0">
+                               <!-- Lignes dynamiques injectées par AdminHomeController -->
+                            </VBox>
+                         </children>
+                         <padding><Insets bottom="30.0" left="30.0" right="30.0" top="30.0" /></padding>
+                      </VBox>
+
+                      <!-- Accès rapide -->
+                      <VBox prefWidth="340.0" spacing="20.0">
+                         <children>
+                            <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #d946ef); -fx-background-radius: 20; -fx-padding: 30;">
+                               <children>
+                                  <Label style="-fx-font-weight: 900; -fx-font-size: 20;" text="Gestion des&#10;Cours" textFill="WHITE" />
+                                  <Label opacity="0.7" style="-fx-font-size: 12;" text="Contrôlez les contenus pédagogiques." textFill="WHITE" />
+                                  <Button maxWidth="Infinity"
+                                          style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12;"
+                                          text="Accéder aux Cours" />
+                               </children>
+                            </VBox>
+
+                            <VBox spacing="15.0" styleClass="glass-card">
+                               <children>
+                                  <Label style="-fx-font-weight: bold;" text="Raccourcis Rapides" textFill="WHITE" />
+                                  <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                      <RowConstraints minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                     <children>
+                                        <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;">
+                                           <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Soutien" textFill="#94a3b8" /></children>
+                                        </VBox>
+                                        <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.columnIndex="1">
+                                           <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Ma Vue" textFill="#94a3b8" /></children>
+                                        </VBox>
+                                     </children>
+                                  </GridPane>
+                               </children>
+                               <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                            </VBox>
+                         </children>
+                      </VBox>
+                   </children>
+                </HBox>
+
+             </children>
+          </VBox>
+        </content>
+      </ScrollPane>
+
    </children>
-</AnchorPane>
+</HBox>
