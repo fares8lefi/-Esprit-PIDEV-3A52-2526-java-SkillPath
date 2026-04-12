@@ -193,3 +193,109 @@
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
+
+/* Sidebar Container */
+.sidebar {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Sidebar Navigation Items */
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 18px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.nav-item:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: white;
+}
+
+.nav-item-active {
+    -fx-background-color: rgba(139, 92, 246, 0.1);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(139, 92, 246, 0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.nav-item-active:hover {
+    -fx-background-color: rgba(139, 92, 246, 0.2);
+}
+
+.nav-item .label, .nav-item-active .label {
+    -fx-text-fill: inherit;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.nav-item-active .label {
+    -fx-text-fill: #a78bfa;
+}
+
+/* Sidebar Logo Area */
+.sidebar-logo-container {
+    -fx-padding: 0 0 30 0;
+}
+
+/* Logout Button Special Style */
+.btn-logout {
+    -fx-background-color: rgba(244, 63, 94, 0.1);
+    -fx-text-fill: #f43f5e;
+    -fx-background-radius: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 12px 18px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.btn-logout:hover {
+    -fx-background-color: rgba(244, 63, 94, 0.2);
+}
+
+/* Quick Access & Bento enhancements */
+.glass-card {
+    -fx-background-color: rgba(30, 41, 59, 0.7);
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 20px;
+}
+
+.btn-secondary {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 18px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ScrollPane Custom Styling */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10px;
+}
+#sideBar {
+    -fx-min-width: 280px;
+}
