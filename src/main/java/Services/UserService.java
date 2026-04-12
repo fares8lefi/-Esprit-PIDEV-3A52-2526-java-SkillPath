@@ -146,7 +146,7 @@ public class UserService implements Iservice<User> {
             bb.putLong(uuid.getMostSignificantBits());
             bb.putLong(uuid.getLeastSignificantBits());
             byte[] uuidBytes = bb.array();
-            
+
             String hashedPassword = hashPassword(user.getPassword());
             
             ps.setBytes(1, uuidBytes);
@@ -166,6 +166,38 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException(e.getMessage());
         }
     }
+    
+    public void ajouterUserParAdmin(User user) throws SQLDataException {
+        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            UUID uuid = UuidCreator.getTimeOrderedEpoch();
+            
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            byte[] uuidBytes = bb.array();
+            
+            String hashedPassword = hashPassword(user.getPassword());
+            
+            ps.setBytes(1, uuidBytes);
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getUsername());
+            ps.setString(4, hashedPassword);
+            ps.setString(5, "active");
+            ps.setString(6, user.getRole());
+            ps.setBoolean(7, true);
+            ps.setNull(8, Types.VARCHAR);
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+
+            ps.executeUpdate();
+            System.out.println("Compte Admin ajouté avec succès !");
+        } catch (SQLException e) {
+            System.out.println("Erreur ajouterUserParAdmin : " + e.getMessage());
+            throw new SQLDataException(e.getMessage());
+        }          
+    }
+
 
     // ─── Vérification du code ───
     public boolean verifyCode(String email, String code) {
@@ -313,6 +345,7 @@ public List<User> getClientList() throws SQLDataException {
 
     return list; 
 }
+
 
 
 }
