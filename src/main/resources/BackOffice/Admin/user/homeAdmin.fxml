@@ -69,7 +69,7 @@
                          <children>
                             <Button styleClass="btn-secondary" text="📄 PDF" />
                             <Button styleClass="btn-secondary" text="📊 Excel" />
-                            <Button fx:id="btnNouvelArchitecte" styleClass="btn-primary" text="Ajouter un utulisateur" />
+                            <Button fx:id="btnNouvelArchitecte" onAction="#handleNouvelArchitecte" styleClass="btn-primary" text="Ajouter un utilisateur" />
                          </children>
                       </HBox>
                    </children>
