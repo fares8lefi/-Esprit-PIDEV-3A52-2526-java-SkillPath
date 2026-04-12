@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+
+<VBox
+    prefWidth="280.0"
+    minWidth="280.0"
+    maxWidth="280.0"
+    spacing="0"
+    styleClass="sidebar"
+    xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="Controllers.user.admin.SideBarController">
+
+    <padding><Insets top="35" right="20" bottom="30" left="20"/></padding>
+
+    <!-- Logo Section -->
+    <VBox spacing="5" styleClass="sidebar-logo-container">
+        <children>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <children>
+                    <StackPane prefWidth="48" prefHeight="48"
+                               style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef);
+                                      -fx-background-radius: 14;
+                                      -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.4), 12, 0, 0, 4);">
+                        <Label text="S" style="-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 24;"/>
+                    </StackPane>
+                    <VBox alignment="CENTER_LEFT">
+                        <HBox>
+                            <Label text="Skill" style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-weight: 900;"/>
+                            <Label text="Path" style="-fx-text-fill: #a78bfa; -fx-font-size: 24; -fx-font-weight: 900;"/>
+                        </HBox>
+                        <Label text="ARCHITECTE PRINCIPAL" style="-fx-text-fill: #64748b; -fx-font-size: 10; -fx-font-weight: 900; -fx-letter-spacing: 1px;"/>
+                    </VBox>
+                </children>
+            </HBox>
+        </children>
+    </VBox>
+
+    <Region prefHeight="1" style="-fx-background-color: rgba(255,255,255,0.06);">
+        <VBox.margin><Insets top="10" bottom="30"/></VBox.margin>
+    </Region>
+
+    <!-- Navigation Section -->
+    <VBox spacing="10" VBox.vgrow="ALWAYS">
+        <Button fx:id="btnDashboard" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleDashboard" styleClass="nav-item nav-item-active">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="⊞" style="-fx-font-size: 18;"/>
+                    <Label text="Tableau de Bord"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnCourses" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleCourses" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="📚" style="-fx-font-size: 18;"/>
+                    <Label text="Système de Cours"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnModules" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleModules" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="🗂" style="-fx-font-size: 18;"/>
+                    <Label text="Unités d'Apprentissage"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnReclamations" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleReclamations" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="💬" style="-fx-font-size: 18;"/>
+                    <Label text="Demandes des Membres"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnUsers" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleUsers" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="👥" style="-fx-font-size: 18;"/>
+                    <Label text="Annuaire des Utilisateurs"/>
+                </HBox>
+            </graphic>
+        </Button>
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <Button fx:id="btnLogout" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleLogout" styleClass="btn-logout" text="⏻  Déconnexion"/>
+</VBox>
