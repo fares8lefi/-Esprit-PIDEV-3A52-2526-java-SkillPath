@@ -20,7 +20,7 @@
       prefHeight="900.0"
       prefWidth="1440.0"
       style="-fx-background-color: #0f172a;"
-      stylesheets="@../../../FrontOffice/user/auth/style.css">
+      stylesheets="@../../FrontOffice/user/auth/style.css">
 
    <children>
 

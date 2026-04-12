@@ -14,7 +14,8 @@
     styleClass="sidebar"
     xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="Controllers.user.admin.SideBarController">
+    fx:controller="Controllers.user.admin.SideBarController"
+    stylesheets="@../../FrontOffice/user/auth/style.css">
 
     <padding><Insets top="35" right="20" bottom="30" left="20"/></padding>
 
