@@ -1,4 +1,4 @@
-package Controllers.auth;
+package Controllers.user.auth;
 
 import Models.User;
 import Services.UserService;

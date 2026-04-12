@@ -8,7 +8,7 @@
     stylesheets="@style.css"
     xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="Controllers.auth.VerifyController"
+    fx:controller="Controllers.user.auth.VerifyController"
     prefWidth="1000" prefHeight="700">
 
     <children>
