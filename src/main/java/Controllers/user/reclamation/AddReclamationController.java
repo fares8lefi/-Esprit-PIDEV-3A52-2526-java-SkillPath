@@ -10,12 +10,19 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLDataException;
+import java.util.UUID;
 
 public class AddReclamationController {
 
@@ -25,10 +32,38 @@ public class AddReclamationController {
     @FXML
     private TextArea txtDescription;
 
+    @FXML
+    private Label selectedFileLabel;
+
     private ReclamationService reclamationService;
+    private File selectedFile;
+    private static final Path UPLOAD_DIR = Path.of("uploads", "reclamations");
 
     public void initialize() {
         reclamationService = new ReclamationService();
+        if (selectedFileLabel != null) {
+            selectedFileLabel.setText("Aucun fichier choisi");
+        }
+    }
+
+    @FXML
+    void chooseAttachment(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choisir une piece jointe");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Tous les fichiers", "*.*"),
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"),
+                new FileChooser.ExtensionFilter("Documents", "*.pdf", "*.doc", "*.docx", "*.txt")
+        );
+
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        File chosen = fileChooser.showOpenDialog(stage);
+        if (chosen != null) {
+            selectedFile = chosen;
+            if (selectedFileLabel != null) {
+                selectedFileLabel.setText(chosen.getName());
+            }
+        }
     }
 
     @FXML
@@ -37,30 +72,35 @@ public class AddReclamationController {
         String description = txtDescription.getText().trim();
 
         if (sujet.isEmpty() || description.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Erreur de Saisie", "Veuillez remplir tous les champs obligatoires.");
+            showAlert(Alert.AlertType.WARNING, "Erreur de saisie", "Veuillez remplir tous les champs obligatoires.");
             return;
         }
 
-        if (!Session.isLoggedIn() || Session.getCurrentUser().getId() == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur Session", "Vous devez être connecté pour soumettre une réclamation.");
+        if (!Session.isLoggedIn() || Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
+            showAlert(Alert.AlertType.ERROR, "Erreur session", "Vous devez etre connecte pour soumettre une reclamation.");
             return;
         }
 
         try {
-            // Convert UUID to byte[]
             java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(new byte[16]);
             bb.putLong(Session.getCurrentUser().getId().getMostSignificantBits());
             bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
             byte[] userIdBytes = bb.array();
 
-            Reclamation reclamation = new Reclamation(sujet, description, null, userIdBytes);
+            String pieceJointePath = null;
+            if (selectedFile != null) {
+                pieceJointePath = storeAttachment(selectedFile);
+            }
+
+            Reclamation reclamation = new Reclamation(sujet, description, pieceJointePath, userIdBytes);
             reclamationService.ajouter(reclamation);
 
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Votre réclamation a été soumise avec succès.");
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete soumise avec succes.");
             navigateToReclamationsList(event);
-
         } catch (SQLDataException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur Base de Données", "Impossible d'enregistrer la réclamation: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erreur base de donnees", "Impossible d'enregistrer la reclamation: " + e.getMessage());
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur fichier", "Impossible d'enregistrer la piece jointe: " + e.getMessage());
         }
     }
 
@@ -86,5 +126,18 @@ public class AddReclamationController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private String storeAttachment(File sourceFile) throws IOException {
+        Files.createDirectories(UPLOAD_DIR);
+
+        String originalName = sourceFile.getName();
+        int dot = originalName.lastIndexOf('.');
+        String extension = dot >= 0 ? originalName.substring(dot) : "";
+        String storedFileName = UUID.randomUUID() + extension;
+
+        Path destination = UPLOAD_DIR.resolve(storedFileName);
+        Files.copy(sourceFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+        return destination.toString();
     }
 }
