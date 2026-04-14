@@ -337,12 +337,15 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void modifier(User user) throws SQLDataException {
-        String sql = "UPDATE users SET username = ?, status = ?, role = ? WHERE email = ?";
+        String sql = "UPDATE users SET username = ?, status = ?, role = ?, domaine = ?, niveau = ?, style_dapprentissage = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getStatus());
             ps.setString(3, user.getRole());
-            ps.setString(4, user.getEmail());
+            ps.setString(4, user.getDomaine());
+            ps.setString(5, user.getNiveau());
+            ps.setString(6, user.getStyleDapprentissage());
+            ps.setString(7, user.getEmail());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
