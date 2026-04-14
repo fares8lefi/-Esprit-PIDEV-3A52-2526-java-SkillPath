@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="500.0" prefWidth="600.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.reclamation.AddReclamationController">
+   <children>
+      <VBox layoutX="30.0" layoutY="30.0" prefHeight="440.0" prefWidth="540.0" spacing="20.0" styleClass="card" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <children>
+            <VBox spacing="5.0">
+               <children>
+                  <Label styleClass="title-header" text="Soumettre une Réclamation" />
+                  <Label styleClass="subtitle" text="Veuillez détailler votre problème ci-dessous." />
+               </children>
+            </VBox>
+            
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label text="Sujet" textFill="#1e293b">
+                     <font>
+                        <javafx.scene.text.Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtSujet" promptText="Exemple: Problème de connexion..." styleClass="text-field-modern" />
+                  
+                  <Label text="Description" textFill="#1e293b">
+                     <font>
+                        <javafx.scene.text.Font name="System Bold" size="14.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextArea fx:id="txtDescription" prefHeight="150.0" promptText="Décrivez votre problème en détail..." styleClass="text-area-modern" wrapText="true" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>            
+            <HBox alignment="CENTER_RIGHT" spacing="15.0">
+               <children>
+                  <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="Annuler" />
+                  <Button fx:id="btnSubmit" mnemonicParsing="false" onAction="#submitReclamation" styleClass="btn-primary" text="Soumettre" />
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
