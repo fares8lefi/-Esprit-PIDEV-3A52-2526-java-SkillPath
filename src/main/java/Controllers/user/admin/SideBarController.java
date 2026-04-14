@@ -69,8 +69,7 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleUsers(ActionEvent event) {
         setActive(btnUsers);
-        // navigateTo(event, "/BackOffice/user/userList.fxml", "Annuaire des Utilisateurs");
-        System.out.println("[Navigation] → Annuaire des Utilisateurs (à implémenter)");
+        navigateTo(event, "/BackOffice/Admin/user/gererUser.fxml", "Annuaire des Membres - Administrateur");
     }
 
     @FXML
