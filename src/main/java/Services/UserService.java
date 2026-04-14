@@ -362,6 +362,15 @@ public class UserService implements Iservice<User> {
                 u.setEmail(rs.getString("email"));
                 u.setRole(rs.getString("role"));
                 u.setStatus(rs.getString("status"));
+                u.setVerified(rs.getBoolean("is_verified"));
+                
+                Timestamp ts = rs.getTimestamp("created_at");
+                if(ts != null) u.setCreatedAt(ts.toLocalDateTime());
+                
+                u.setDomaine(rs.getString("domaine"));
+                u.setStyleDapprentissage(rs.getString("style_dapprentissage"));
+                u.setNiveau(rs.getString("niveau"));
+                
                 list.add(u);
             }
         } catch (SQLException e) {
@@ -382,6 +391,15 @@ public class UserService implements Iservice<User> {
             u.setEmail(rs.getString("email"));
             u.setRole(rs.getString("role"));
             u.setStatus(rs.getString("status"));
+            u.setVerified(rs.getBoolean("is_verified"));
+            
+            Timestamp ts = rs.getTimestamp("created_at");
+            if(ts != null) u.setCreatedAt(ts.toLocalDateTime());
+            
+            u.setDomaine(rs.getString("domaine"));
+            u.setStyleDapprentissage(rs.getString("style_dapprentissage"));
+            u.setNiveau(rs.getString("niveau"));
+            
             list.add(u);
         }
     } catch (SQLException e) {
