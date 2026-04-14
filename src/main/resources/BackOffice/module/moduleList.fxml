@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.module.ModuleListController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" HBox.hgrow="ALWAYS">
+            <content>
+                <VBox spacing="30.0">
+                    <padding><Insets bottom="40.0" left="50.0" right="50.0" top="40.0" /></padding>
+                    <children>
+                        <!-- Header -->
+                        <HBox alignment="CENTER_LEFT" spacing="20.0">
+                            <children>
+                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Label text="Unités de" textFill="WHITE">
+                                                    <font><Font name="System Bold" size="32.0" /></font>
+                                                </Label>
+                                                <Label text="Module" textFill="#06B6D4">
+                                                    <font><Font name="System Bold" size="32.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                        <Label text="Gérez les chapitres et les unités d'apprentissage rattachées aux cours." textFill="#94a3b8" />
+                                    </children>
+                                </VBox>
+                                <Button fx:id="btnRefresh" onAction="#handleRefresh" styleClass="btn-secondary" text="🔄 Actualiser" />
+                            </children>
+                        </HBox>
+
+                        <HBox spacing="30.0">
+                            <children>
+                                <!-- Table Section -->
+                                <VBox spacing="20.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <TableView fx:id="moduleTable" prefHeight="500.0" style="-fx-background-color: transparent;">
+                                            <columns>
+                                                <TableColumn fx:id="colTitle" text="Titre" prefWidth="180.0" />
+                                                <TableColumn fx:id="colType" text="Type" prefWidth="100.0" />
+                                                <TableColumn fx:id="colCourse" text="Cours" prefWidth="150.0" />
+                                                <TableColumn fx:id="colScheduledAt" text="Planifié" prefWidth="150.0" />
+                                                <TableColumn fx:id="colActions" text="Actions" prefWidth="120.0" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+
+                                <!-- Form Section -->
+                                <VBox prefWidth="450.0" spacing="15.0" styleClass="glass-card">
+                                    <padding><Insets bottom="25.0" left="25.0" right="25.0" top="25.0" /></padding>
+                                    <children>
+                                        <Label text="Détails du Module" textFill="WHITE" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+                                        
+                                        <VBox spacing="5.0">
+                                            <Label text="TITRE" styleClass="form-label" />
+                                            <TextField fx:id="txtTitle" styleClass="form-input" />
+                                        </VBox>
+
+                                        <VBox spacing="5.0">
+                                            <Label text="DESCRIPTION" styleClass="form-label" />
+                                            <TextArea fx:id="txtDescription" styleClass="form-input" prefHeight="60.0" wrapText="true" />
+                                        </VBox>
+
+                                        <HBox spacing="10.0">
+                                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                <Label text="COURS" styleClass="form-label" />
+                                                <ComboBox fx:id="comboCourse" styleClass="form-input" maxWidth="Infinity" />
+                                            </VBox>
+                                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                <Label text="TYPE" styleClass="form-label" />
+                                                <ComboBox fx:id="comboType" styleClass="form-input" maxWidth="Infinity" />
+                                            </VBox>
+                                        </HBox>
+
+                                        <VBox spacing="5.0">
+                                            <Label text="CONTENU (LONGTEXT)" styleClass="form-label" />
+                                            <TextArea fx:id="txtContent" styleClass="form-input" prefHeight="100.0" wrapText="true" />
+                                        </VBox>
+
+                                        <HBox spacing="10.0">
+                                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                <Label text="DOCUMENT (URL)" styleClass="form-label" />
+                                                <TextField fx:id="txtDocument" styleClass="form-input" />
+                                            </VBox>
+                                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                <Label text="PLANIFICATION" styleClass="form-label" />
+                                                <DatePicker fx:id="dateScheduled" styleClass="form-input" maxWidth="Infinity" />
+                                            </VBox>
+                                        </HBox>
+
+                                        <VBox spacing="10.0" style="-fx-padding: 10 0 0 0;">
+                                            <Button fx:id="btnSave" onAction="#handleSave" styleClass="btn-primary" maxWidth="Infinity" text="Enregistrer" />
+                                            <Button fx:id="btnClear" onAction="#handleClear" styleClass="btn-secondary" maxWidth="Infinity" text="Annuler" />
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</HBox>
