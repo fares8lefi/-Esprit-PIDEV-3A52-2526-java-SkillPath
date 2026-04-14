@@ -93,6 +93,16 @@
     -fx-border-color: #8b5cf6;
 }
 
+/* Specific TextArea content fix for dark mode */
+.text-area .content {
+    -fx-background-color: transparent;
+}
+
+.text-area {
+    -fx-background-color: rgba(15, 23, 42, 0.5);
+    -fx-text-fill: white;
+}
+
 .btn-primary {
     -fx-background-color: #8b5cf6;
     -fx-text-fill: white;
