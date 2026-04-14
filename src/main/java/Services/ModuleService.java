@@ -92,4 +92,20 @@ public class ModuleService implements Iservice<Module> {
         }
         return modules;
     }
+
+    /**
+     * Returns the number of modules belonging to the given course.
+     */
+    public int countByCourse(int courseId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) FROM module WHERE course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+        return 0;
+    }
 }
