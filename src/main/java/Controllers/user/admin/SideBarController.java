@@ -15,29 +15,25 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-/**
- * Contrôleur de la barre latérale admin.
- * Gère la navigation entre les modules et la déconnexion.
- * Chargé via fx:include dans homeAdmin.fxml.
- */
 public class SideBarController implements Initializable {
 
-    @FXML private Button btnDashboard;
-    @FXML private Button btnCourses;
-    @FXML private Button btnModules;
-    @FXML private Button btnReclamations;
-    @FXML private Button btnUsers;
-    @FXML private Button btnLogout;
+    @FXML
+    private Button btnDashboard;
+    @FXML
+    private Button btnCourses;
+    @FXML
+    private Button btnModules;
+    @FXML
+    private Button btnReclamations;
+    @FXML
+    private Button btnUsers;
+    @FXML
+    private Button btnLogout;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Appliquer le style actif sur le bouton Dashboard par défaut
         setActive(btnDashboard);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Handlers navigation
-    // ─────────────────────────────────────────────────────────────
 
     @FXML
     private void handleDashboard(ActionEvent event) {
@@ -48,29 +44,25 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleCourses(ActionEvent event) {
         setActive(btnCourses);
-        // navigateTo(event, "/BackOffice/course/courseList.fxml", "Système de Cours");
-        System.out.println("[Navigation] → Système de Cours (à implémenter)");
+        System.out.println("[Navigation] Cours non implemente.");
     }
 
     @FXML
     private void handleModules(ActionEvent event) {
         setActive(btnModules);
-        // navigateTo(event, "/BackOffice/module/moduleList.fxml", "Unités d'Apprentissage");
-        System.out.println("[Navigation] → Unités d'Apprentissage (à implémenter)");
+        System.out.println("[Navigation] Modules non implemente.");
     }
 
     @FXML
     private void handleReclamations(ActionEvent event) {
         setActive(btnReclamations);
-        // navigateTo(event, "/BackOffice/reclamation/reclamationList.fxml", "Demandes des Membres");
-        System.out.println("[Navigation] → Demandes des Membres (à implémenter)");
+        navigateTo(event, "/BackOffice/Admin/reclamation/manageReclamations.fxml", "Demandes des Membres");
     }
 
     @FXML
     private void handleUsers(ActionEvent event) {
         setActive(btnUsers);
-        // navigateTo(event, "/BackOffice/user/userList.fxml", "Annuaire des Utilisateurs");
-        System.out.println("[Navigation] → Annuaire des Utilisateurs (à implémenter)");
+        System.out.println("[Navigation] Utilisateurs non implemente.");
     }
 
     @FXML
@@ -79,17 +71,12 @@ public class SideBarController implements Initializable {
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Met en surbrillance le bouton actif et retire le style actif des autres.
-     */
     private void setActive(Button active) {
         Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnUsers};
         for (Button btn : all) {
-            if (btn == null) continue;
+            if (btn == null) {
+                continue;
+            }
             btn.getStyleClass().remove("nav-item-active");
             if (!btn.getStyleClass().contains("nav-item")) {
                 btn.getStyleClass().add("nav-item");
@@ -100,9 +87,6 @@ public class SideBarController implements Initializable {
         }
     }
 
-    /**
-     * Charge un FXML et remplace la scène courante.
-     */
     private void navigateTo(ActionEvent event, String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -113,7 +97,7 @@ public class SideBarController implements Initializable {
             stage.setMaximized(stage.isMaximized());
             stage.show();
         } catch (IOException e) {
-            System.err.println("[SideBarController] Erreur navigation → " + fxmlPath + " : " + e.getMessage());
+            System.err.println("[SideBarController] Erreur navigation vers " + fxmlPath + " : " + e.getMessage());
             e.printStackTrace();
         }
     }

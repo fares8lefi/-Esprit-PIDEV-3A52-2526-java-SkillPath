@@ -107,4 +107,106 @@ public class ReclamationService implements Iservice<Reclamation> {
         }
         return reclamations;
     }
+
+    public List<Reclamation> getAllReclamationsWithUsername(String usernameSearch, String statusFilter) throws SQLDataException {
+        List<Reclamation> reclamations = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT r.id, r.sujet, r.description, r.statut, r.piece_jointe, r.user_id, u.username " +
+                "FROM reclamation r " +
+                "JOIN user u ON u.id = r.user_id "
+        );
+
+        boolean hasSearch = usernameSearch != null && !usernameSearch.isBlank();
+        boolean hasStatusFilter = statusFilter != null && !statusFilter.isBlank();
+
+        if (hasSearch || hasStatusFilter) {
+            sql.append("WHERE ");
+        }
+        if (hasSearch) {
+            sql.append("LOWER(u.username) LIKE ? ");
+        }
+        if (hasSearch && hasStatusFilter) {
+            sql.append("AND ");
+        }
+        if (hasStatusFilter) {
+            sql.append("LOWER(r.statut) = ? ");
+        }
+
+        sql.append("ORDER BY r.id DESC");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (hasSearch) {
+                ps.setString(paramIndex++, "%" + usernameSearch.trim().toLowerCase() + "%");
+            }
+            if (hasStatusFilter) {
+                ps.setString(paramIndex, statusFilter.trim().toLowerCase());
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reclamation r = new Reclamation();
+                r.setId(rs.getInt("id"));
+                r.setSujet(rs.getString("sujet"));
+                r.setDescription(rs.getString("description"));
+                r.setStatut(rs.getString("statut"));
+                r.setPieceJointe(rs.getString("piece_jointe"));
+                r.setUserIdBytes(rs.getBytes("user_id"));
+                r.setUsername(rs.getString("username"));
+                reclamations.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur getAllReclamationsWithUsername : " + e.getMessage());
+            throw new SQLDataException(e.getMessage());
+        }
+
+        return reclamations;
+    }
+
+    public void updateStatut(int reclamationId, String statut) throws SQLDataException {
+        String sql = "UPDATE reclamation SET statut = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, statut);
+            ps.setInt(2, reclamationId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Erreur updateStatut : " + e.getMessage());
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public void deleteWithResponses(int reclamationId) throws SQLDataException {
+        String deleteResponsesSql = "DELETE FROM reponse WHERE reclamation_id = ?";
+        String deleteReclamationSql = "DELETE FROM reclamation WHERE id = ?";
+
+        try {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement psResp = connection.prepareStatement(deleteResponsesSql);
+                 PreparedStatement psRecl = connection.prepareStatement(deleteReclamationSql)) {
+                psResp.setInt(1, reclamationId);
+                psResp.executeUpdate();
+
+                psRecl.setInt(1, reclamationId);
+                psRecl.executeUpdate();
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                System.err.println("Erreur rollback deleteWithResponses : " + rollbackEx.getMessage());
+            }
+            System.err.println("Erreur deleteWithResponses : " + e.getMessage());
+            throw new SQLDataException(e.getMessage());
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                System.err.println("Erreur reset autoCommit : " + e.getMessage());
+            }
+        }
+    }
 }

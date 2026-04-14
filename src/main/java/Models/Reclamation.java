@@ -8,6 +8,7 @@ public class Reclamation {
     private String statut;
     private String pieceJointe;
     private byte[] userIdBytes; // To store BINARY(16) array in Java cleanly, or map it manually
+    private String username;
 
     // ================= Constructeurs =================
     public Reclamation() {
@@ -69,6 +70,14 @@ public class Reclamation {
 
     public void setUserIdBytes(byte[] userIdBytes) {
         this.userIdBytes = userIdBytes;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

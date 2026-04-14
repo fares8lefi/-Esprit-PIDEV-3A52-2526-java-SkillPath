@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.user.admin.AdminReclamationsController"
+      prefHeight="900.0"
+      prefWidth="1440.0"
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../../FrontOffice/user/auth/style.css">
+   <children>
+      <fx:include source="../SideBar.fxml" />
+
+      <AnchorPane HBox.hgrow="ALWAYS">
+         <children>
+            <VBox spacing="18.0" AnchorPane.topAnchor="28.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.bottomAnchor="28.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="14.0">
+                     <children>
+                        <VBox HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label text="Gestion des reclamations" textFill="WHITE" style="-fx-font-size: 30; -fx-font-weight: 900;" />
+                              <Label text="Card view admin: rechercher par username, filtrer par statut, repondre et supprimer." textFill="#94a3b8" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <HBox spacing="10.0" alignment="CENTER_LEFT">
+                     <children>
+                        <TextField fx:id="searchUsernameField" promptText="Rechercher par username..." HBox.hgrow="ALWAYS" styleClass="form-input" />
+                        <ComboBox fx:id="sortStatusCombo" onAction="#handleSortChange" prefWidth="170.0" />
+                        <Button text="Rechercher" styleClass="btn-primary" onAction="#handleSearch" />
+                        <Button text="Reset" styleClass="btn-secondary" onAction="#handleResetSearch" />
+                     </children>
+                  </HBox>
+
+                  <HBox spacing="16.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <VBox styleClass="glass-card" spacing="10.0" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets top="16.0" right="16.0" bottom="16.0" left="16.0" />
+                           </padding>
+                           <children>
+                              <Label text="Reclamations (Card View)" textFill="WHITE" style="-fx-font-size: 15; -fx-font-weight: 800;" />
+                              <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                 <content>
+                                    <VBox fx:id="reclamationCardsContainer" spacing="10.0" />
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+
+                        <VBox spacing="8.0" styleClass="glass-card" prefWidth="420.0">
+                           <padding>
+                              <Insets top="14.0" right="14.0" bottom="14.0" left="14.0" />
+                           </padding>
+                           <children>
+                              <Label fx:id="selectedReclamationLabel" text="Aucune reclamation selectionnee" textFill="WHITE" style="-fx-font-size: 14; -fx-font-weight: 700;" />
+                              <Label text="Description" textFill="#94a3b8" />
+                              <Label fx:id="selectedDescriptionLabel" wrapText="true" text="-" textFill="#e2e8f0" />
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Piece jointe :" textFill="#94a3b8" />
+                                    <Label fx:id="selectedPieceJointeLabel" text="-" textFill="#e2e8f0" />
+                                    <Button fx:id="openAttachmentButton" text="Ouvrir" styleClass="btn-secondary" onAction="#handleOpenAttachment" />
+                                 </children>
+                              </HBox>
+                              <Label text="Reponse admin" textFill="#94a3b8" />
+                              <TextArea fx:id="adminResponseArea" promptText="Ecrire la reponse au client..." prefRowCount="5" wrapText="true" />
+                              <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Button fx:id="deleteButton" text="Supprimer" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 10;" onAction="#handleDelete" />
+                                    <Button fx:id="replyButton" text="Repondre" styleClass="btn-primary" onAction="#handleReply" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
+   </children>
+</HBox>
