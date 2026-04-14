@@ -16,6 +16,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -48,14 +49,30 @@ public class UserReclamationsController {
         colSujet.setCellValueFactory(new PropertyValueFactory<>("sujet"));
         colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
 
-        // Action Column: Add a "Voir Details" button
         colAction.setCellValueFactory(param -> new javafx.beans.property.SimpleObjectProperty<>(param.getValue()));
-        colAction.setCellFactory(param -> new TableCell<Reclamation, Reclamation>() {
-            private final Button btn = new Button("Détails");
+        colAction.setCellFactory(param -> new TableCell<>() {
+            private final Button btnDetails = new Button("Details");
+            private final Button btnModifier = new Button("Modifier");
+            private final HBox actionsBox = new HBox(8, btnDetails, btnModifier);
 
             {
-                btn.getStyleClass().add("btn-secondary");
-                btn.setOnAction(event -> openDetails(getItem(), event));
+                btnDetails.getStyleClass().add("btn-secondary");
+                btnModifier.getStyleClass().add("btn-primary");
+                actionsBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+                btnDetails.setOnAction(event -> {
+                    Reclamation current = getItem();
+                    if (current != null) {
+                        openDetails(current, event);
+                    }
+                });
+
+                btnModifier.setOnAction(event -> {
+                    Reclamation current = getItem();
+                    if (current != null) {
+                        openEditReclamation(current, event);
+                    }
+                });
             }
 
             @Override
@@ -64,7 +81,7 @@ public class UserReclamationsController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(btn);
+                    setGraphic(actionsBox);
                     setAlignment(javafx.geometry.Pos.CENTER);
                 }
             }
@@ -72,13 +89,12 @@ public class UserReclamationsController {
     }
 
     private void loadReclamations() {
-        if (!Session.isLoggedIn() || Session.getCurrentUser().getId() == null) {
-            System.err.println("Aucun utilisateur connecté ou UUID manquant !");
+        if (!Session.isLoggedIn() || Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
+            System.err.println("Aucun utilisateur connecte ou UUID manquant.");
             return;
         }
 
         try {
-            // Get user bytes from Session User
             java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(new byte[16]);
             bb.putLong(Session.getCurrentUser().getId().getMostSignificantBits());
             bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
@@ -123,6 +139,22 @@ public class UserReclamationsController {
 
             ReclamationDetailsController controller = loader.getController();
             controller.initData(reclamation);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openEditReclamation(Reclamation reclamation, ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/reclamation/AddReclamation.fxml"));
+            Parent root = loader.load();
+
+            AddReclamationController controller = loader.getController();
+            controller.initForEdit(reclamation);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));

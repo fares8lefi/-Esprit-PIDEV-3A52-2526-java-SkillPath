@@ -10,6 +10,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -35,8 +36,13 @@ public class AddReclamationController {
     @FXML
     private Label selectedFileLabel;
 
+    @FXML
+    private Button btnSubmit;
+
     private ReclamationService reclamationService;
     private File selectedFile;
+    private Reclamation reclamationToEdit;
+    private String currentPieceJointePath;
     private static final Path UPLOAD_DIR = Path.of("uploads", "reclamations");
 
     public void initialize() {
@@ -44,6 +50,24 @@ public class AddReclamationController {
         if (selectedFileLabel != null) {
             selectedFileLabel.setText("Aucun fichier choisi");
         }
+    }
+
+    public void initForEdit(Reclamation reclamation) {
+        if (reclamation == null) {
+            return;
+        }
+
+        this.reclamationToEdit = reclamation;
+        this.currentPieceJointePath = reclamation.getPieceJointe();
+        this.selectedFile = null;
+
+        txtSujet.setText(reclamation.getSujet());
+        txtDescription.setText(reclamation.getDescription());
+
+        if (btnSubmit != null) {
+            btnSubmit.setText("Mettre a jour");
+        }
+        updateSelectedFileLabel(currentPieceJointePath);
     }
 
     @FXML
@@ -87,15 +111,28 @@ public class AddReclamationController {
             bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
             byte[] userIdBytes = bb.array();
 
-            String pieceJointePath = null;
+            String pieceJointePath = currentPieceJointePath;
             if (selectedFile != null) {
                 pieceJointePath = storeAttachment(selectedFile);
             }
 
-            Reclamation reclamation = new Reclamation(sujet, description, pieceJointePath, userIdBytes);
-            reclamationService.ajouter(reclamation);
+            if (reclamationToEdit != null) {
+                Reclamation updated = new Reclamation();
+                updated.setId(reclamationToEdit.getId());
+                updated.setSujet(sujet);
+                updated.setDescription(description);
+                updated.setStatut(resolveStatutForUpdate(reclamationToEdit.getStatut()));
+                updated.setPieceJointe(pieceJointePath);
+                updated.setUserIdBytes(userIdBytes);
+                reclamationService.modifier(updated);
 
-            showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete soumise avec succes.");
+                showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete modifiee avec succes.");
+            } else {
+                Reclamation reclamation = new Reclamation(sujet, description, pieceJointePath, userIdBytes);
+                reclamationService.ajouter(reclamation);
+                showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete soumise avec succes.");
+            }
+
             navigateToReclamationsList(event);
         } catch (SQLDataException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur base de donnees", "Impossible d'enregistrer la reclamation: " + e.getMessage());
@@ -139,5 +176,29 @@ public class AddReclamationController {
         Path destination = UPLOAD_DIR.resolve(storedFileName);
         Files.copy(sourceFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
         return destination.toString();
+    }
+
+    private String resolveStatutForUpdate(String statut) {
+        if (statut == null || statut.isBlank()) {
+            return "En attente";
+        }
+        return statut;
+    }
+
+    private void updateSelectedFileLabel(String pieceJointePath) {
+        if (selectedFileLabel == null) {
+            return;
+        }
+
+        if (pieceJointePath == null || pieceJointePath.isBlank()) {
+            selectedFileLabel.setText("Aucun fichier choisi");
+            return;
+        }
+
+        try {
+            selectedFileLabel.setText(Path.of(pieceJointePath).getFileName().toString());
+        } catch (Exception e) {
+            selectedFileLabel.setText(pieceJointePath);
+        }
     }
 }
