@@ -11,100 +11,91 @@
       fx:controller="Controllers.course.CourseListController"
       prefHeight="900.0" prefWidth="1440.0" 
       style="-fx-background-color: #0f172a;"
-      stylesheets="@../../../FrontOffice/user/auth/style.css">
+      stylesheets="@../../FrontOffice/user/auth/style.css">
 
     <children>
         <!-- Sidebar -->
         <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
 
-        <!-- Main Content -->
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" HBox.hgrow="ALWAYS">
-            <content>
-                <VBox spacing="30.0">
-                    <padding><Insets bottom="40.0" left="50.0" right="50.0" top="40.0" /></padding>
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="40" right="40" top="40"/></padding>
+            <children>
+                
+                <!-- Header Section -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
                     <children>
-                        <!-- Header -->
-                        <HBox alignment="CENTER_LEFT" spacing="20.0">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
                             <children>
-                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <HBox spacing="10" alignment="BOTTOM_LEFT">
                                     <children>
-                                        <HBox spacing="10.0">
-                                            <children>
-                                                <Label text="Gestion des" textFill="WHITE">
-                                                    <font><Font name="System Bold" size="32.0" /></font>
-                                                </Label>
-                                                <Label text="Cours" textFill="#8b5cf6">
-                                                    <font><Font name="System Bold" size="32.0" /></font>
-                                                </Label>
-                                            </children>
-                                        </HBox>
-                                        <Label text="Administrez les contenus pédagogiques de SkillPath." textFill="#94a3b8" />
+                                        <Text text="Gestion des" style="-fx-font-size: 32; -fx-font-weight: 800; -fx-fill: white;" />
+                                        <Text text="Formations" styleClass="gradient-text" style="-fx-font-size: 32; -fx-font-weight: 800;" />
                                     </children>
-                                </VBox>
-                                <Button fx:id="btnRefresh" onAction="#handleRefresh" styleClass="btn-secondary" text="🔄 Actualiser" />
+                                </HBox>
+                                <Label text="Découvrez et gérez les cours disponibles sur SkillPath." textFill="#64748b" style="-fx-font-size: 14;" />
                             </children>
-                        </HBox>
-
-                        <HBox spacing="30.0">
-                            <children>
-                                <!-- Table Section -->
-                                <VBox spacing="20.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <TableView fx:id="courseTable" prefHeight="500.0" style="-fx-background-color: transparent;">
-                                            <columns>
-                                                <TableColumn fx:id="colTitle" text="Titre" prefWidth="200.0" />
-                                                <TableColumn fx:id="colLevel" text="Niveau" prefWidth="100.0" />
-                                                <TableColumn fx:id="colCategory" text="Catégorie" prefWidth="150.0" />
-                                                <TableColumn fx:id="colCreatedAt" text="Date de création" prefWidth="150.0" />
-                                                <TableColumn fx:id="colActions" text="Actions" prefWidth="150.0" />
-                                            </columns>
-                                        </TableView>
-                                    </children>
-                                </VBox>
-
-                                <!-- Form Section -->
-                                <VBox prefWidth="400.0" spacing="20.0" styleClass="glass-card">
-                                    <padding><Insets bottom="30.0" left="30.0" right="30.0" top="30.0" /></padding>
-                                    <children>
-                                        <Label text="Détails du Cours" textFill="WHITE" style="-fx-font-size: 20; -fx-font-weight: bold;" />
-                                        
-                                        <VBox spacing="8.0">
-                                            <Label text="TITRE DU COURS" styleClass="form-label" />
-                                            <TextField fx:id="txtTitle" styleClass="form-input" promptText="Ex: Programmation Java" />
-                                        </VBox>
-
-                                        <VBox spacing="8.0">
-                                            <Label text="DESCRIPTION" styleClass="form-label" />
-                                            <TextArea fx:id="txtDescription" styleClass="form-input" prefHeight="100.0" promptText="Décrivez le contenu..." wrapText="true" />
-                                        </VBox>
-
-                                        <HBox spacing="15.0">
-                                            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                <Label text="NIVEAU" styleClass="form-label" />
-                                                <ComboBox fx:id="comboLevel" styleClass="form-input" maxWidth="Infinity" />
-                                            </VBox>
-                                            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                <Label text="CATÉGORIE" styleClass="form-label" />
-                                                <TextField fx:id="txtCategory" styleClass="form-input" promptText="Ex: Tech" />
-                                            </VBox>
-                                        </HBox>
-
-                                        <VBox spacing="8.0">
-                                            <Label text="IMAGE URL" styleClass="form-label" />
-                                            <TextField fx:id="txtImage" styleClass="form-input" promptText="https://..." />
-                                        </VBox>
-
-                                        <VBox spacing="15.0">
-                                            <Button fx:id="btnSave" onAction="#handleSave" styleClass="btn-primary" maxWidth="Infinity" text="Enregistrer" />
-                                            <Button fx:id="btnClear" onAction="#handleClear" styleClass="btn-secondary" maxWidth="Infinity" text="Vider les champs" />
-                                        </VBox>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
+                        </VBox>
+                        <Button fx:id="btnAdd" onAction="#handleAdd" text="+ Nouveau Cours" styleClass="btn-primary-elite" />
                     </children>
-                </VBox>
-            </content>
-        </ScrollPane>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- FILTERS BAR -->
+                <HBox spacing="20" alignment="CENTER_LEFT" styleClass="glass-card" style="-fx-padding: 20;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: #94a3b8; -fx-font-size: 16;" />
+                                <TextField fx:id="txtSearch" promptText="Rechercher un cours..." styleClass="form-input" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <ComboBox fx:id="comboFilterLevel" promptText="Tous les niveaux" prefWidth="200" styleClass="form-input" />
+                        <Button fx:id="btnReset" onAction="#handleReset" text="Réinitialiser" styleClass="btn-secondary" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- CARDS CONTAINER -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" 
+                            style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox spacing="20">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 10 0;">
+                                    <children>
+                                        <Label fx:id="lblCount" text="0 cours trouvé" style="-fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="btnRefresh" onAction="#handleRefresh" text="↻" styleClass="btn-secondary" />
+                                    </children>
+                                </HBox>
+                                
+                                <FlowPane fx:id="cardsContainer" hgap="25" vgap="25">
+                                    <padding><Insets bottom="40"/></padding>
+                                    <!-- Cards will be injected here via Controller -->
+                                </FlowPane>
+
+                                <!-- Empty State -->
+                                <VBox fx:id="emptyState" alignment="CENTER" spacing="20" managed="false" visible="false">
+                                    <padding><Insets top="100"/></padding>
+                                    <children>
+                                        <Text text="∅" style="-fx-fill: #1e293b; -fx-font-size: 80;" />
+                                        <Label text="Aucun cours ne correspond à votre recherche" style="-fx-text-fill: #64748b; -fx-font-size: 18; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <!-- FLASH MESSAGE -->
+                <HBox fx:id="flashBox" alignment="CENTER_LEFT" spacing="12" managed="false" visible="false">
+                    <VBox.margin><Insets top="20"/></VBox.margin>
+                    <padding><Insets bottom="16" left="20" right="20" top="16"/></padding>
+                    <Label fx:id="flashLabel" />
+                </HBox>
+
+            </children>
+        </VBox>
     </children>
 </HBox>
