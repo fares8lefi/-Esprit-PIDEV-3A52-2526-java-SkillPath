@@ -5,9 +5,18 @@ import Services.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
+import java.io.IOException;
 
 import java.net.URL;
 import java.sql.SQLDataException;
@@ -23,11 +32,15 @@ public class GererUserController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Label lblTotalUsers;
     @FXML private FlowPane usersContainer;
+    @FXML private ComboBox<String> comboTri;
 
     private final UserService userService = new UserService();
+    private List<User> currentUsers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        comboTri.getItems().addAll("Nom (A-Z)", "Nom (Z-A)", "Plus Récent", "Plus Ancien", "Rôle");
+        comboTri.getSelectionModel().select("Nom (A-Z)");
         loadUsers(null);
     }
 
@@ -43,25 +56,86 @@ public class GererUserController implements Initializable {
         loadUsers(null);
     }
 
+    @FXML
+    private void handleAddUser(ActionEvent event) {
+        navigateTo(event, "/BackOffice/Admin/user/ajouterArchitecte.fxml", "Créer un Utilisateur - SkillPath");
+    }
+
+    @FXML
+    private void handleSort(ActionEvent event) {
+        if (currentUsers != null && !currentUsers.isEmpty()) {
+            sortUsers();
+        }
+    }
+
     private void loadUsers(String query) {
         usersContainer.getChildren().clear();
         try {
-            List<User> users;
             if (query != null && !query.trim().isEmpty()) {
                 User fake = new User();
                 fake.setUsername(query.trim());
-                users = userService.serchByName(fake);
+                currentUsers = userService.serchByName(fake);
             } else {
-                users = userService.recuperer();
+                currentUsers = userService.recuperer();
             }
 
-            lblTotalUsers.setText("Total: " + users.size() + " utilisateur" + (users.size() > 1 ? "s" : ""));
-
-            for (User user : users) {
-                usersContainer.getChildren().add(createUserCard(user));
-            }
+            lblTotalUsers.setText("Total: " + currentUsers.size() + " utilisateur" + (currentUsers.size() > 1 ? "s" : ""));
+            
+            sortUsers();
         } catch (SQLDataException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur BD", "Impossible de charger les utilisateurs : " + e.getMessage());
+        }
+    }
+
+    private void sortUsers() {
+        if (currentUsers == null) return;
+        
+        String tri = comboTri.getValue();
+        if (tri == null) tri = "Nom (A-Z)";
+        
+        switch (tri) {
+            case "Nom (Z-A)":
+                currentUsers.sort((u1, u2) -> {
+                    String n1 = u1.getUsername() == null ? "" : u1.getUsername();
+                    String n2 = u2.getUsername() == null ? "" : u2.getUsername();
+                    return n2.compareToIgnoreCase(n1);
+                });
+                break;
+            case "Plus Récent":
+                currentUsers.sort((u1, u2) -> {
+                    if (u1.getCreatedAt() == null) return 1;
+                    if (u2.getCreatedAt() == null) return -1;
+                    return u2.getCreatedAt().compareTo(u1.getCreatedAt());
+                });
+                break;
+            case "Plus Ancien":
+                currentUsers.sort((u1, u2) -> {
+                    if (u1.getCreatedAt() == null) return 1;
+                    if (u2.getCreatedAt() == null) return -1;
+                    return u1.getCreatedAt().compareTo(u2.getCreatedAt());
+                });
+                break;
+            case "Rôle":
+                currentUsers.sort((u1, u2) -> {
+                    String r1 = u1.getRole() == null ? "" : u1.getRole();
+                    String r2 = u2.getRole() == null ? "" : u2.getRole();
+                    return r1.compareToIgnoreCase(r2);
+                });
+                break;
+            case "Nom (A-Z)":
+            default:
+                currentUsers.sort((u1, u2) -> {
+                    String n1 = u1.getUsername() == null ? "" : u1.getUsername();
+                    String n2 = u2.getUsername() == null ? "" : u2.getUsername();
+                    return n1.compareToIgnoreCase(n2);
+                });
+                break;
+        }
+        
+        // Re-render
+        usersContainer.getChildren().clear();
+        for (User user : currentUsers) {
+            usersContainer.getChildren().add(createUserCard(user));
         }
     }
 
@@ -194,7 +268,7 @@ public class GererUserController implements Initializable {
         btnEdit.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10 18; -fx-cursor: hand;");
         btnEdit.setOnMouseEntered(e -> btnEdit.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10 18; -fx-cursor: hand;"));
         btnEdit.setOnMouseExited(e -> btnEdit.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10 18; -fx-cursor: hand;"));
-        btnEdit.setOnAction(e -> showAlert(Alert.AlertType.INFORMATION, "Modifier", "Ouverture du formulaire d'édition pour " + user.getUsername()));
+        btnEdit.setOnAction(e -> openEditModal(user));
 
         Button btnDelete = new Button("Supprimer");
         btnDelete.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(239,68,68,0.2); -fx-border-radius: 12; -fx-text-fill: #ef4444; -fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10 18; -fx-cursor: hand;");
@@ -232,5 +306,38 @@ public class GererUserController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.show();
+    }
+
+    private void openEditModal(User user) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/Admin/user/ModifyUser.fxml"));
+            Parent root = loader.load();
+
+            ModifyUserController controller = loader.getController();
+            controller.initData(user, () -> loadUsers(searchField.getText()));
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ouvrir le formulaire : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateTo(ActionEvent event, String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setTitle(title);
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation", "Erreur de navigation : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
