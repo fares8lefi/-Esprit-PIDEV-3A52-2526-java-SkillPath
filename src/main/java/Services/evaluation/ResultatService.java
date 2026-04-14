@@ -1,6 +1,6 @@
-package Services;
+package Services.evaluation;
 
-import Models.Resultat;
+import Models.evaluation.Resultat;
 import Utils.Database;
 
 import java.sql.*;

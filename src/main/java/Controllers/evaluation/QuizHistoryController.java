@@ -1,9 +1,9 @@
-package Controllers;
+package Controllers.evaluation;
 
-import Models.Quiz;
-import Models.Resultat;
-import Services.QuizService;
-import Services.ResultatService;
+import Models.evaluation.Quiz;
+import Models.evaluation.Resultat;
+import Services.evaluation.QuizService;
+import Services.evaluation.ResultatService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -96,7 +96,7 @@ public class QuizHistoryController {
     @FXML
     public void goToFrontOffice(MouseEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/Quiz/QuizFrontOffice.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
             Stage stage = (Stage) resultsGrid.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

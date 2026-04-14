@@ -1,8 +1,8 @@
-package Controllers;
+package Controllers.evaluation;
 
-import Models.Quiz;
-import Services.QuestionService;
-import Services.QuizService;
+import Models.evaluation.Quiz;
+import Services.evaluation.QuestionService;
+import Services.evaluation.QuizService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -176,7 +176,7 @@ public class QuizFrontOfficeController {
         // Navigation Logic
         cardContainer.setOnMouseClicked(e -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/Quiz/QuizPass.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/evaluation/QuizPass.fxml"));
                 Parent root = loader.load();
 
                 QuizPassController passController = loader.getController();
@@ -195,7 +195,7 @@ public class QuizFrontOfficeController {
     @FXML
     void goToHistory(javafx.scene.input.MouseEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/Quiz/QuizHistory.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizHistory.fxml"));
             Stage stage = (Stage) txtSearch.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

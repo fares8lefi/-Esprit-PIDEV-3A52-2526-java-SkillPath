@@ -13,7 +13,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/BackOffice/QuizManagement.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    Main.class.getResource("/BackOffice/evaluation/QuizManagement.fxml"));
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             stage.setTitle("SkillPath");

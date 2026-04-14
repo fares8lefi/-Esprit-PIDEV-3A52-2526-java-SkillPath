@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="700.0" prefWidth="1000.0" alignment="TOP_CENTER" spacing="0.0" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.QuizPassController">
+<VBox prefHeight="700.0" prefWidth="1000.0" alignment="TOP_CENTER" spacing="0.0" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuizPassController">
    <stylesheets>
       <URL value="@QuizFrontOffice.css" />
    </stylesheets>

@@ -1,9 +1,10 @@
-package Controllers;
+package Controllers.evaluation;
 
-import Models.Question;
-import Models.Quiz;
-import Services.QuestionService;
-import Services.ResultatService;
+import Models.evaluation.Question;
+import Models.evaluation.Quiz;
+import Models.evaluation.Resultat;
+import Services.evaluation.QuestionService;
+import Services.evaluation.ResultatService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -158,7 +159,7 @@ public class QuizPassController {
         // Save Resultat in DB (assuming user id = 1 for mock)
         ResultatService rs = new ResultatService();
         try {
-            rs.ajouter(new Models.Resultat(currentScore, totalPoints,
+            rs.ajouter(new Models.evaluation.Resultat(currentScore, totalPoints,
                     new java.sql.Timestamp(System.currentTimeMillis()), quiz.getId_quiz(), 1));
         } catch (Exception e) {
             System.err.println("Failed to save result: " + e.getMessage());
@@ -188,7 +189,7 @@ public class QuizPassController {
     @FXML
     void goBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/Quiz/QuizFrontOffice.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
             Stage stage = (Stage) viewIntro.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

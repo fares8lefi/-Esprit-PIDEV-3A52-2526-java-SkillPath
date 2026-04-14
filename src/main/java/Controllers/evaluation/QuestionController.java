@@ -1,8 +1,8 @@
-package Controllers;
+package Controllers.evaluation;
 
-import Models.Question;
-import Models.Quiz;
-import Services.QuestionService;
+import Models.evaluation.Question;
+import Models.evaluation.Quiz;
+import Services.evaluation.QuestionService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -212,7 +212,7 @@ public class QuestionController {
     @FXML
     void handleBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/BackOffice/QuizManagement.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/BackOffice/evaluation/QuizManagement.fxml"));
             Stage stage = (Stage) questionGrid.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

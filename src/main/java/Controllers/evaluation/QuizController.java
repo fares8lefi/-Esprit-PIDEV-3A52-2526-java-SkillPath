@@ -1,8 +1,8 @@
-package Controllers;
+package Controllers.evaluation;
 
-import Models.CourseDTO;
-import Models.Quiz;
-import Services.QuizService;
+import Models.evaluation.CourseDTO;
+import Models.evaluation.Quiz;
+import Services.evaluation.QuizService;
 import Utils.Database;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -243,7 +243,8 @@ public class QuizController {
     void handleManageQuestions(ActionEvent event) {
         if (selectedQuiz != null) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/QuestionManagement.fxml"));
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/BackOffice/evaluation/QuestionManagement.fxml"));
                 Parent root = loader.load();
 
                 QuestionController controller = loader.getController();

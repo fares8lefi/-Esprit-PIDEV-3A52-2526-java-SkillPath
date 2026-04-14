@@ -1,4 +1,4 @@
-package Models;
+package Models.evaluation;
 
 public class Question {
     private int id_question;

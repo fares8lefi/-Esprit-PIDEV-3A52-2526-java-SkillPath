@@ -1,4 +1,4 @@
-package Models;
+package Models.evaluation;
 
 import java.sql.Timestamp;
 

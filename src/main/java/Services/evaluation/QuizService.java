@@ -1,6 +1,7 @@
-package Services;
+package Services.evaluation;
 
-import Models.Quiz;
+import Models.evaluation.Quiz;
+import Services.Iservice;
 import Utils.Database;
 
 import java.sql.*;
