@@ -31,14 +31,18 @@
                         <Label text="Consultez et gérez les comptes de la plateforme." textFill="#94a3b8" />
                     </VBox>
                     <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                        <TextField fx:id="searchField" promptText="Rechercher par nom..." style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-padding: 12 20; -fx-background-radius: 20; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 20;" prefWidth="300.0" />
-                        <Button styleClass="btn-primary" text="Rechercher" onAction="#handleSearch" />
+                        <TextField fx:id="searchField" promptText="Rechercher par nom..." style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-padding: 12 20; -fx-background-radius: 20; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 20;" prefWidth="250.0" />
+                        <Button styleClass="btn-secondary" text="Rechercher" onAction="#handleSearch" />
                         <Button styleClass="btn-secondary" text="Actualiser" onAction="#handleRefresh" />
+                        <Button styleClass="btn-primary" text="+ Ajouter un Membre" onAction="#handleAddUser" />
                     </HBox>
                 </HBox>
 
-                <HBox spacing="20">
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
                      <Label fx:id="lblTotalUsers" style="-fx-font-weight: bold; -fx-font-size: 14;" text="Total: 0 utilisateurs" textFill="#94a3b8" />
+                     <Region HBox.hgrow="ALWAYS" />
+                     <Label text="Trier par :" textFill="#94a3b8" style="-fx-font-size: 13; -fx-font-weight: bold;" />
+                     <ComboBox fx:id="comboTri" onAction="#handleSort" prefWidth="180.0" style="-fx-background-color: rgba(15, 23, 42, 0.5); -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 2; -fx-text-fill: white; -fx-cursor: hand;" />
                 </HBox>
 
                 <!-- LIST CONTAINER -->
