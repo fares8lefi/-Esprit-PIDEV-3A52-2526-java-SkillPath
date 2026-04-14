@@ -116,15 +116,28 @@ public class GererUserController implements Initializable {
         VBox nameBox = new VBox(4);
         nameBox.setAlignment(Pos.CENTER);
         
+        HBox nameLine = new HBox(5);
+        nameLine.setAlignment(Pos.CENTER);
+        
         Label lblName = new Label(user.getUsername() != null ? user.getUsername() : "Inconnu");
         lblName.setStyle("-fx-font-size: 18; -fx-font-weight: 900; -fx-text-fill: white;");
+        nameLine.getChildren().add(lblName);
+        
+        if (user.isVerified()) {
+            Label lblVerified = new Label("✓");
+            // Tooltip for verified
+            Tooltip tooltip = new Tooltip("Compte Vérifié");
+            Tooltip.install(lblVerified, tooltip);
+            lblVerified.setStyle("-fx-text-fill: #4ade80; -fx-font-weight: 900; -fx-font-size: 16;");
+            nameLine.getChildren().add(lblVerified);
+        }
         
         Label lblEmail = new Label(user.getEmail() != null ? user.getEmail() : "N/A");
         lblEmail.setStyle("-fx-font-size: 13; -fx-text-fill: #94a3b8;");
         lblEmail.setWrapText(true);
         lblEmail.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         
-        nameBox.getChildren().addAll(lblName, lblEmail);
+        nameBox.getChildren().addAll(nameLine, lblEmail);
 
         // Member since 
         Label lblDate = new Label("Membre depuis: " + (user.getCreatedAt() != null ? user.getCreatedAt().toLocalDate().toString() : "N/A"));
@@ -150,6 +163,28 @@ public class GererUserController implements Initializable {
         }
         badges.getChildren().addAll(roleBadge, statusBadge);
 
+        // Extra Info Tags (Domaine, Niveau, Style)
+        FlowPane tagsPane = new FlowPane();
+        tagsPane.setHgap(5);
+        tagsPane.setVgap(5);
+        tagsPane.setAlignment(Pos.CENTER);
+        
+        if (user.getDomaine() != null && !user.getDomaine().trim().isEmpty()) {
+            Label tagDomaine = new Label(user.getDomaine());
+            tagDomaine.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #cbd5e1; -fx-padding: 3 8; -fx-background-radius: 6; -fx-font-size: 10; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 6;");
+            tagsPane.getChildren().add(tagDomaine);
+        }
+        if (user.getNiveau() != null && !user.getNiveau().trim().isEmpty()) {
+            Label tagNiveau = new Label(user.getNiveau());
+            tagNiveau.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #cbd5e1; -fx-padding: 3 8; -fx-background-radius: 6; -fx-font-size: 10; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 6;");
+            tagsPane.getChildren().add(tagNiveau);
+        }
+        if (user.getStyleDapprentissage() != null && !user.getStyleDapprentissage().trim().isEmpty()) {
+            Label tagStyle = new Label(user.getStyleDapprentissage());
+            tagStyle.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #cbd5e1; -fx-padding: 3 8; -fx-background-radius: 6; -fx-font-size: 10; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 6;");
+            tagsPane.getChildren().add(tagStyle);
+        }
+
         // Actions (Modifier & Supprimer)
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER);
@@ -170,7 +205,7 @@ public class GererUserController implements Initializable {
         actions.getChildren().addAll(btnEdit, btnDelete);
 
         // Adding an empty region for spacing if needed, but spacing is handled by VBox
-        card.getChildren().addAll(avatar, nameBox, lblDate, badges, actions);
+        card.getChildren().addAll(avatar, nameBox, lblDate, badges, tagsPane, actions);
         return card;
     }
 
