@@ -108,4 +108,36 @@ public class ModuleService implements Iservice<Module> {
         }
         return 0;
     }
+
+    /**
+     * Returns all modules belonging to the given course.
+     */
+    public List<Module> getByCourse(int courseId) throws SQLDataException {
+        List<Module> modules = new ArrayList<>();
+        String sql = "SELECT * FROM module WHERE course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Module m = new Module();
+                    m.setId(rs.getInt("id"));
+                    m.setTitle(rs.getString("title"));
+                    m.setDescription(rs.getString("description"));
+                    m.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    m.setUpdatedAt(rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
+                    m.setLevel(rs.getString("level"));
+                    m.setImage(rs.getString("image"));
+                    m.setType(rs.getString("type"));
+                    m.setContent(rs.getString("content"));
+                    m.setDocument(rs.getString("document"));
+                    m.setCourseId(rs.getInt("course_id"));
+                    m.setScheduledAt(rs.getTimestamp("scheduled_at") != null ? rs.getTimestamp("scheduled_at").toLocalDateTime() : null);
+                    modules.add(m);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+        return modules;
+    }
 }

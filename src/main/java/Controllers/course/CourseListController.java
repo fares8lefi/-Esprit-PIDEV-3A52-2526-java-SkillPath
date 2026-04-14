@@ -9,10 +9,12 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -20,6 +22,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLDataException;
 import java.util.ResourceBundle;
@@ -150,17 +153,49 @@ public class CourseListController implements Initializable {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Actions
+        // Actions Row
         HBox actions = new HBox(8);
+        
+        Button btnShow = new Button("👁");
+        btnShow.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #60a5fa; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnShow.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/course/courseDetails.fxml"));
+                Parent root = loader.load();
+                CourseDetailsController controller = loader.getController();
+                controller.setCourse(course);
+                Stage stage = (Stage) btnShow.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException ex) {
+                showFlash("Erreur de navigation", false);
+            }
+        });
+
         Button btnEdit = new Button("✏");
         btnEdit.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #4ade80; -fx-background-radius: 8; -fx-cursor: hand;");
-        btnEdit.setOnAction(e -> openEditDialog(course));
+        btnEdit.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/course/editCourse.fxml"));
+                Parent root = loader.load();
+                
+                // Pass the course to the controller
+                EditCourseController controller = loader.getController();
+                controller.setCourse(course);
+                
+                Stage stage = (Stage) btnEdit.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException ex) {
+                showFlash("Erreur de navigation", false);
+            }
+        });
 
         Button btnDelete = new Button("🗑");
         btnDelete.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #f87171; -fx-background-radius: 8; -fx-cursor: hand;");
         btnDelete.setOnAction(e -> confirmDelete(course));
         
-        actions.getChildren().addAll(btnEdit, btnDelete);
+        actions.getChildren().addAll(btnShow, btnEdit, btnDelete);
         footer.getChildren().addAll(lblMods, spacer, actions);
 
         card.getChildren().addAll(header, meta, lblDesc, sep, footer);
@@ -181,10 +216,21 @@ public class CourseListController implements Initializable {
         });
         renderCards();
     }
-
     @FXML private void handleRefresh(ActionEvent event) { loadData(); showFlash("Données synchronisées", true); }
     @FXML private void handleReset(ActionEvent event) { txtSearch.clear(); comboFilterLevel.setValue("Tous les niveaux"); }
-    @FXML private void handleAdd(ActionEvent event) { openEditDialog(null); }
+
+    @FXML 
+    private void handleAdd(ActionEvent event) { 
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/course/addCourse.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showFlash("Erreur de navigation", false);
+        }
+    }
 
     public void openEditDialog(Course course) {
         Stage dialog = new Stage();
@@ -228,16 +274,57 @@ public class CourseListController implements Initializable {
     }
 
     public void confirmDelete(Course course) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("ALERTE"); alert.setHeaderText("Supprimer «" + course.getTitle() + "» ?");
-        alert.showAndWait().ifPresent(resp -> {
-            if (resp == ButtonType.OK) {
-                try {
-                    courseService.supprimer(course); loadData();
-                    showFlash("Contenu supprimé", true);
-                } catch (Exception e) { showFlash("Erreur", false); }
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+        
+        VBox root = new VBox(25);
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #0f172a; -fx-padding: 40; -fx-border-color: rgba(248,113,113,0.3); -fx-border-width: 2; -fx-background-radius: 20; -fx-border-radius: 20;");
+
+        // Icon (Trash)
+        Label icon = new Label("🗑");
+        icon.setStyle("-fx-font-size: 50; -fx-text-fill: #f87171;");
+
+        VBox textContent = new VBox(10);
+        textContent.setAlignment(Pos.CENTER);
+        Label title = new Label("CONFIRMATION");
+        title.setStyle("-fx-text-fill: #f87171; -fx-font-weight: 900; -fx-letter-spacing: 2; -fx-font-size: 14;");
+        
+        Label message = new Label("Voulez-vous vraiment supprimer\n« " + course.getTitle() + " » ?");
+        message.setStyle("-fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold; -fx-text-alignment: center;");
+        message.setWrapText(true);
+        textContent.getChildren().addAll(title, message);
+
+        HBox actions = new HBox(15);
+        actions.setAlignment(Pos.CENTER);
+        
+        Button btnCancel = new Button("ANNULER");
+        btnCancel.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-font-weight: 900; -fx-padding: 12 30; -fx-background-radius: 10; -fx-cursor: hand;");
+        btnCancel.setOnAction(e -> dialog.close());
+
+        Button btnConfirm = new Button("SUPPRIMER");
+        btnConfirm.setStyle("-fx-background-color: #f87171; -fx-text-fill: white; -fx-font-weight: 900; -fx-padding: 12 30; -fx-background-radius: 10; -fx-cursor: hand;");
+        btnConfirm.setOnAction(e -> {
+            try {
+                courseService.supprimer(course);
+                loadData();
+                showFlash("Contenu supprimé définitivement", true);
+            } catch (Exception ex) {
+                showFlash("Impossible de supprimer : ce cours contient peut-être déjà des modules.", false);
+                ex.printStackTrace();
+            } finally {
+                dialog.close();
             }
         });
+
+        actions.getChildren().addAll(btnCancel, btnConfirm);
+        root.getChildren().addAll(icon, textContent, actions);
+
+        Scene scene = new Scene(root);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        dialog.setScene(scene);
+        dialog.showAndWait();
     }
 
     private TextField createEliteField(String val, String pr) { TextField tf = new TextField(val); tf.setPromptText(pr); tf.setStyle(fieldStyle()); return tf; }
