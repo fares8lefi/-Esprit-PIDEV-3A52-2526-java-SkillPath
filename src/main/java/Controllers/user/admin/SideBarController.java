@@ -31,8 +31,8 @@ public class SideBarController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Appliquer le style actif sur le bouton Dashboard par défaut
-        setActive(btnDashboard);
+        // Le style par défaut est géré par l'injection dans le contrôleur parent
+        // ou via setSelected() après le chargement.
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -75,6 +75,23 @@ public class SideBarController implements Initializable {
     private void handleLogout(ActionEvent event) {
         Session.logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Public API
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Permet aux contrôleurs parents de définir quel bouton est actif.
+     */
+    public void setSelected(String pageName) {
+        switch (pageName.toLowerCase()) {
+            case "dashboard"    -> setActive(btnDashboard);
+            case "courses"      -> setActive(btnCourses);
+            case "modules"      -> setActive(btnModules);
+            case "reclamations" -> setActive(btnReclamations);
+            case "users"        -> setActive(btnUsers);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

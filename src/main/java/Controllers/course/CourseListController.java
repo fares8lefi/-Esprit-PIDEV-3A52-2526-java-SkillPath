@@ -1,5 +1,6 @@
 package Controllers.course;
 
+import Controllers.user.admin.SideBarController;
 import Models.Course;
 import Services.CourseService;
 import Services.ModuleService;
@@ -29,6 +30,7 @@ public class CourseListController implements Initializable {
     @FXML private FlowPane cardsContainer;
     @FXML private VBox emptyState;
     @FXML private Label lblCount;
+    @FXML private SideBarController sideBarController;
 
     // ── Controls ──
     @FXML private TextField txtSearch;
@@ -46,6 +48,9 @@ public class CourseListController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (sideBarController != null) {
+            sideBarController.setSelected("courses");
+        }
         setupFilters();
         loadData();
     }
