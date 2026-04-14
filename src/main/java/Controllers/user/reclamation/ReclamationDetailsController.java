@@ -12,6 +12,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -20,7 +22,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLDataException;
 import java.util.List;
 
@@ -32,6 +37,10 @@ public class ReclamationDetailsController {
     private Label lblDescription;
     @FXML
     private Label lblStatut;
+    @FXML
+    private Label lblPieceJointe;
+    @FXML
+    private Button btnOpenPieceJointe;
     @FXML
     private VBox chatContainer;
     @FXML
@@ -51,6 +60,7 @@ public class ReclamationDetailsController {
         lblSujet.setText(reclamation.getSujet());
         lblDescription.setText(reclamation.getDescription());
         lblStatut.setText(reclamation.getStatut());
+        configurePieceJointe(reclamation.getPieceJointe());
         
         loadResponses();
     }
@@ -147,7 +157,63 @@ public class ReclamationDetailsController {
         }
     }
 
+    @FXML
+    void openPieceJointe(ActionEvent event) {
+        if (currentReclamation == null || currentReclamation.getPieceJointe() == null || currentReclamation.getPieceJointe().isBlank()) {
+            showAlert(Alert.AlertType.INFORMATION, "Piece jointe", "Aucune piece jointe disponible.");
+            return;
+        }
+
+        try {
+            Path attachmentPath = Path.of(currentReclamation.getPieceJointe());
+            File file = attachmentPath.toFile();
+            if (!file.exists()) {
+                showAlert(Alert.AlertType.ERROR, "Piece jointe", "Le fichier n'existe plus: " + attachmentPath);
+                return;
+            }
+
+            if (!Desktop.isDesktopSupported()) {
+                showAlert(Alert.AlertType.ERROR, "Piece jointe", "Ouverture de fichier non supportee sur cette machine.");
+                return;
+            }
+
+            Desktop.getDesktop().open(file);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Piece jointe", "Impossible d'ouvrir la piece jointe: " + e.getMessage());
+        }
+    }
+
     private void scrollToBottom() {
         Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
+    }
+
+    private void configurePieceJointe(String pieceJointePath) {
+        if (pieceJointePath == null || pieceJointePath.isBlank()) {
+            lblPieceJointe.setText("Aucune piece jointe");
+            btnOpenPieceJointe.setDisable(true);
+            btnOpenPieceJointe.setVisible(false);
+            btnOpenPieceJointe.setManaged(false);
+            return;
+        }
+
+        String fileName;
+        try {
+            fileName = Path.of(pieceJointePath).getFileName().toString();
+        } catch (Exception e) {
+            fileName = pieceJointePath;
+        }
+
+        lblPieceJointe.setText(fileName);
+        btnOpenPieceJointe.setDisable(false);
+        btnOpenPieceJointe.setVisible(true);
+        btnOpenPieceJointe.setManaged(true);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -3,7 +3,6 @@ package Controllers.user.reclamation;
 import Models.Reclamation;
 import Services.ReclamationService;
 import Utils.Session;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -97,6 +96,18 @@ public class UserReclamationsController {
     void openAddReclamation(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/reclamation/AddReclamation.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goBackHome(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
