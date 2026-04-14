@@ -48,15 +48,13 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleCourses(ActionEvent event) {
         setActive(btnCourses);
-        // navigateTo(event, "/BackOffice/course/courseList.fxml", "Système de Cours");
-        System.out.println("[Navigation] → Système de Cours (à implémenter)");
+        navigateTo(event, "/BackOffice/course/courseList.fxml", "Système de Cours");
     }
 
     @FXML
     private void handleModules(ActionEvent event) {
         setActive(btnModules);
-        // navigateTo(event, "/BackOffice/module/moduleList.fxml", "Unités d'Apprentissage");
-        System.out.println("[Navigation] → Unités d'Apprentissage (à implémenter)");
+        navigateTo(event, "/BackOffice/module/moduleList.fxml", "Unités d'Apprentissage");
     }
 
     @FXML

@@ -15,7 +15,7 @@ import java.util.Random;
 public class UserService implements Iservice<User> {
 
     private Connection connection;
-    private static final Dotenv dotenv = Dotenv.load();
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
     public UserService() {
         connection = Utils.Database.getInstance().getConnection();
     }
