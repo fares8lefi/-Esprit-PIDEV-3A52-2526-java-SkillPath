@@ -16,43 +16,43 @@
       fx:controller="Controllers.user.admin.AdminReclamationsController"
       prefHeight="900.0"
       prefWidth="1440.0"
-      style="-fx-background-color: #0f172a;"
-      stylesheets="@../../../FrontOffice/user/auth/style.css">
+      styleClass="admin-reclamation-root"
+      stylesheets="@../../../FrontOffice/user/auth/style.css,@style.css">
    <children>
       <fx:include source="../SideBar.fxml" />
 
-      <AnchorPane HBox.hgrow="ALWAYS">
+      <AnchorPane HBox.hgrow="ALWAYS" styleClass="admin-content-pane">
          <children>
-            <VBox spacing="18.0" AnchorPane.topAnchor="28.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.bottomAnchor="28.0">
+            <VBox spacing="18.0" styleClass="admin-shell" AnchorPane.topAnchor="28.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.bottomAnchor="28.0">
                <children>
-                  <HBox alignment="CENTER_LEFT" spacing="14.0">
+                  <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="hero-strip">
                      <children>
                         <VBox HBox.hgrow="ALWAYS">
                            <children>
                               <Label text="Gestion des reclamations" textFill="WHITE" style="-fx-font-size: 30; -fx-font-weight: 900;" />
-                              <Label text="Card view admin: rechercher par username, filtrer par statut, repondre et supprimer." textFill="#94a3b8" />
+                              <Label text="Rechercher par username, filtrer par statut, repondre et supprimer." textFill="#94a3b8" />
                            </children>
                         </VBox>
                      </children>
                   </HBox>
 
-                  <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <HBox spacing="10.0" alignment="CENTER_LEFT" styleClass="toolbar-strip">
                      <children>
-                        <TextField fx:id="searchUsernameField" promptText="Rechercher par username..." HBox.hgrow="ALWAYS" styleClass="form-input" />
+                        <TextField fx:id="searchUsernameField" promptText="Rechercher par username..." HBox.hgrow="ALWAYS" styleClass="admin-input" />
                         <ComboBox fx:id="sortStatusCombo" onAction="#handleSortChange" prefWidth="170.0" />
                         <Button text="Rechercher" styleClass="btn-primary" onAction="#handleSearch" />
                         <Button text="Reset" styleClass="btn-secondary" onAction="#handleResetSearch" />
                      </children>
                   </HBox>
 
-                  <HBox spacing="16.0" VBox.vgrow="ALWAYS">
+                  <HBox spacing="16.0" VBox.vgrow="ALWAYS" styleClass="admin-columns">
                      <children>
-                        <VBox styleClass="glass-card" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="admin-list-panel" spacing="10.0" HBox.hgrow="ALWAYS">
                            <padding>
                               <Insets top="16.0" right="16.0" bottom="16.0" left="16.0" />
                            </padding>
                            <children>
-                              <Label text="Reclamations (Card View)" textFill="WHITE" style="-fx-font-size: 15; -fx-font-weight: 800;" />
+                              <Label text="Reclamations" textFill="WHITE" style="-fx-font-size: 15; -fx-font-weight: 800;" />
                               <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
                                  <content>
                                     <VBox fx:id="reclamationCardsContainer" spacing="10.0" />
@@ -61,7 +61,7 @@
                            </children>
                         </VBox>
 
-                        <VBox spacing="8.0" styleClass="glass-card" prefWidth="420.0">
+                        <VBox spacing="8.0" styleClass="admin-detail-panel" prefWidth="420.0">
                            <padding>
                               <Insets top="14.0" right="14.0" bottom="14.0" left="14.0" />
                            </padding>
@@ -78,6 +78,12 @@
                               </HBox>
                               <Label text="Reponse admin" textFill="#94a3b8" />
                               <TextArea fx:id="adminResponseArea" promptText="Ecrire la reponse au client..." prefRowCount="5" wrapText="true" />
+                              <Label text="Historique des reponses" textFill="#94a3b8" />
+                              <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" prefHeight="160.0" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                 <content>
+                                    <VBox fx:id="responsesContainer" spacing="8.0" />
+                                 </content>
+                              </ScrollPane>
                               <HBox spacing="10.0" alignment="CENTER_RIGHT">
                                  <children>
                                     <Button fx:id="deleteButton" text="Supprimer" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 10;" onAction="#handleDelete" />

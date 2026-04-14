@@ -25,6 +25,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.sql.SQLDataException;
+import java.util.Arrays;
 import java.util.List;
 
 public class AdminReclamationsController {
@@ -49,10 +50,13 @@ public class AdminReclamationsController {
     private Button deleteButton;
     @FXML
     private Button openAttachmentButton;
+    @FXML
+    private VBox responsesContainer;
 
     private final ReclamationService reclamationService = new ReclamationService();
     private final ReponseService reponseService = new ReponseService();
     private Reclamation selectedReclamation;
+    private VBox selectedCardNode;
 
     @FXML
     public void initialize() {
@@ -195,35 +199,55 @@ public class AdminReclamationsController {
 
     private VBox buildCard(Reclamation reclamation) {
         Label idLabel = new Label("#" + reclamation.getId());
-        idLabel.setStyle("-fx-text-fill: #a78bfa; -fx-font-weight: 900;");
+        idLabel.getStyleClass().add("reclamation-id");
 
         Label userLabel = new Label(safe(reclamation.getUsername()));
-        userLabel.setStyle("-fx-text-fill: white; -fx-font-weight: 700;");
+        userLabel.getStyleClass().add("reclamation-user");
 
         Label sujetLabel = new Label(safe(reclamation.getSujet()));
         sujetLabel.setWrapText(true);
-        sujetLabel.setStyle("-fx-text-fill: #e2e8f0;");
+        sujetLabel.getStyleClass().add("reclamation-subject");
 
         Label statutLabel = new Label(safe(reclamation.getStatut()));
-        statutLabel.setStyle("-fx-background-color: rgba(139,92,246,0.2); -fx-text-fill: #c4b5fd; -fx-padding: 4 10; -fx-background-radius: 10;");
+        statutLabel.getStyleClass().add("status-pill");
+        String lowerStatut = safe(reclamation.getStatut()).toLowerCase();
+        if (lowerStatut.contains("traitee")) {
+            statutLabel.getStyleClass().add("status-traitee");
+        } else {
+            statutLabel.getStyleClass().add("status-attente");
+        }
 
         Button selectBtn = new Button("Selectionner");
-        selectBtn.getStyleClass().add("btn-secondary");
-        selectBtn.setOnAction(e -> setSelectedReclamation(reclamation));
+        selectBtn.getStyleClass().add("card-select-btn");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox topRow = new HBox(10, idLabel, userLabel, spacer, statutLabel, selectBtn);
         topRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        topRow.getStyleClass().add("card-top-row");
 
         VBox card = new VBox(8, topRow, sujetLabel);
         card.setPadding(new Insets(12));
-        card.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 10; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 10;");
+        card.getStyleClass().add("reclamation-card");
+
+        selectBtn.setOnAction(e -> setSelectedReclamation(reclamation, card));
         return card;
     }
 
     private void setSelectedReclamation(Reclamation reclamation) {
+        setSelectedReclamation(reclamation, null);
+    }
+
+    private void setSelectedReclamation(Reclamation reclamation, VBox cardNode) {
+        if (selectedCardNode != null) {
+            selectedCardNode.getStyleClass().remove("reclamation-card-selected");
+        }
+        selectedCardNode = cardNode;
+        if (selectedCardNode != null && !selectedCardNode.getStyleClass().contains("reclamation-card-selected")) {
+            selectedCardNode.getStyleClass().add("reclamation-card-selected");
+        }
+
         selectedReclamation = reclamation;
         if (reclamation == null) {
             clearSelectionDetails();
@@ -248,17 +272,80 @@ public class AdminReclamationsController {
 
         replyButton.setDisable(false);
         deleteButton.setDisable(false);
+        loadResponsesForSelection();
     }
 
     private void clearSelectionDetails() {
+        if (selectedCardNode != null) {
+            selectedCardNode.getStyleClass().remove("reclamation-card-selected");
+        }
+        selectedCardNode = null;
         selectedReclamation = null;
         selectedReclamationLabel.setText("Aucune reclamation selectionnee");
         selectedDescriptionLabel.setText("-");
         selectedPieceJointeLabel.setText("-");
         adminResponseArea.clear();
+        responsesContainer.getChildren().clear();
+        Label empty = new Label("Aucune reponse.");
+        empty.setStyle("-fx-text-fill: #94a3b8;");
+        responsesContainer.getChildren().add(empty);
         replyButton.setDisable(true);
         deleteButton.setDisable(true);
         openAttachmentButton.setDisable(true);
+    }
+
+    private void loadResponsesForSelection() {
+        responsesContainer.getChildren().clear();
+
+        if (selectedReclamation == null) {
+            return;
+        }
+
+        try {
+            List<Reponse> responses = reponseService.getReponsesByReclamation(selectedReclamation.getId());
+            if (responses == null || responses.isEmpty()) {
+                Label empty = new Label("Aucune reponse.");
+                empty.setStyle("-fx-text-fill: #94a3b8;");
+                responsesContainer.getChildren().add(empty);
+                return;
+            }
+
+            for (Reponse response : responses) {
+                responsesContainer.getChildren().add(buildResponseBubble(response));
+            }
+        } catch (SQLDataException e) {
+            Label error = new Label("Erreur chargement reponses: " + e.getMessage());
+            error.setStyle("-fx-text-fill: #fca5a5;");
+            responsesContainer.getChildren().add(error);
+        }
+    }
+
+    private VBox buildResponseBubble(Reponse response) {
+        boolean fromClient = selectedReclamation != null
+                && selectedReclamation.getUserIdBytes() != null
+                && response.getUserIdBytes() != null
+                && Arrays.equals(selectedReclamation.getUserIdBytes(), response.getUserIdBytes());
+
+        Label fromLabel = new Label(fromClient ? "Client" : "Admin");
+        fromLabel.getStyleClass().add("response-author");
+        if (fromClient) {
+            fromLabel.getStyleClass().add("response-author-client");
+        } else {
+            fromLabel.getStyleClass().add("response-author-admin");
+        }
+
+        Label messageLabel = new Label(safe(response.getMessage()));
+        messageLabel.setWrapText(true);
+        messageLabel.getStyleClass().add("response-message");
+        if (fromClient) {
+            messageLabel.getStyleClass().add("response-message-client");
+        } else {
+            messageLabel.getStyleClass().add("response-message-admin");
+        }
+
+        VBox bubble = new VBox(4, fromLabel, messageLabel);
+        bubble.getStyleClass().add("response-bubble");
+        return bubble;
     }
 
     private String safe(String value) {

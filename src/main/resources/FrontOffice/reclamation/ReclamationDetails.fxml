@@ -17,7 +17,7 @@
                <children>
                   <Button mnemonicParsing="false" onAction="#goBack" styleClass="btn-secondary" text="&lt; Retour" />
                   <AnchorPane HBox.hgrow="ALWAYS" />
-                  <Label fx:id="lblStatut" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-background-color: #e2e8f0; -fx-padding: 5 10; -fx-background-radius: 12;" text="En attente" />
+                  <Label fx:id="lblStatut" styleClass="status-pill-client" text="En attente" />
                </children>
             </HBox>
 

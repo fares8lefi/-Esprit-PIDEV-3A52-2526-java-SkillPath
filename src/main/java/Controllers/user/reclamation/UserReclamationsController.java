@@ -3,20 +3,18 @@ package Controllers.user.reclamation;
 import Models.Reclamation;
 import Services.ReclamationService;
 import Utils.Session;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -26,71 +24,17 @@ import java.util.List;
 public class UserReclamationsController {
 
     @FXML
-    private TableView<Reclamation> reclamationTable;
-    @FXML
-    private TableColumn<Reclamation, Integer> colId;
-    @FXML
-    private TableColumn<Reclamation, String> colSujet;
-    @FXML
-    private TableColumn<Reclamation, String> colStatut;
-    @FXML
-    private TableColumn<Reclamation, Reclamation> colAction;
+    private VBox reclamationCardsContainer;
 
     private ReclamationService reclamationService;
 
     public void initialize() {
         reclamationService = new ReclamationService();
-        setupTable();
         loadReclamations();
-    }
-
-    private void setupTable() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colSujet.setCellValueFactory(new PropertyValueFactory<>("sujet"));
-        colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
-
-        colAction.setCellValueFactory(param -> new javafx.beans.property.SimpleObjectProperty<>(param.getValue()));
-        colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button btnDetails = new Button("Details");
-            private final Button btnModifier = new Button("Modifier");
-            private final HBox actionsBox = new HBox(8, btnDetails, btnModifier);
-
-            {
-                btnDetails.getStyleClass().add("btn-secondary");
-                btnModifier.getStyleClass().add("btn-primary");
-                actionsBox.setAlignment(javafx.geometry.Pos.CENTER);
-
-                btnDetails.setOnAction(event -> {
-                    Reclamation current = getItem();
-                    if (current != null) {
-                        openDetails(current, event);
-                    }
-                });
-
-                btnModifier.setOnAction(event -> {
-                    Reclamation current = getItem();
-                    if (current != null) {
-                        openEditReclamation(current, event);
-                    }
-                });
-            }
-
-            @Override
-            protected void updateItem(Reclamation reclamation, boolean empty) {
-                super.updateItem(reclamation, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(actionsBox);
-                    setAlignment(javafx.geometry.Pos.CENTER);
-                }
-            }
-        });
     }
 
     private void loadReclamations() {
         if (!Session.isLoggedIn() || Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
-            System.err.println("Aucun utilisateur connecte ou UUID manquant.");
             return;
         }
 
@@ -101,15 +45,65 @@ public class UserReclamationsController {
             byte[] userIdBytes = bb.array();
 
             List<Reclamation> myReclamations = reclamationService.getReclamationsByUser(userIdBytes);
-            ObservableList<Reclamation> observableList = FXCollections.observableArrayList(myReclamations);
-            reclamationTable.setItems(observableList);
+            renderCards(myReclamations);
         } catch (SQLDataException e) {
             e.printStackTrace();
         }
     }
 
+    private void renderCards(List<Reclamation> reclamations) {
+        reclamationCardsContainer.getChildren().clear();
+
+        if (reclamations == null || reclamations.isEmpty()) {
+            Label empty = new Label("Aucune reclamation pour le moment.");
+            empty.getStyleClass().add("subtitle");
+            reclamationCardsContainer.getChildren().add(empty);
+            return;
+        }
+
+        for (Reclamation reclamation : reclamations) {
+            reclamationCardsContainer.getChildren().add(buildCard(reclamation));
+        }
+    }
+
+    private VBox buildCard(Reclamation reclamation) {
+        Label idLabel = new Label("#" + reclamation.getId());
+        idLabel.getStyleClass().add("reclamation-id");
+
+        Label sujetLabel = new Label(reclamation.getSujet() == null ? "" : reclamation.getSujet());
+        sujetLabel.getStyleClass().add("reclamation-subject");
+        sujetLabel.setWrapText(true);
+
+        Label statutLabel = new Label(reclamation.getStatut() == null ? "En attente" : reclamation.getStatut());
+        statutLabel.getStyleClass().add("status-pill");
+        if (statutLabel.getText().toLowerCase().contains("traitee")) {
+            statutLabel.getStyleClass().add("status-traitee");
+        } else {
+            statutLabel.getStyleClass().add("status-attente");
+        }
+
+        Button detailsBtn = new Button("Details");
+        detailsBtn.getStyleClass().add("btn-secondary");
+        detailsBtn.setOnAction(event -> openDetails(reclamation, event));
+
+        Button editBtn = new Button("Modifier");
+        editBtn.getStyleClass().add("btn-primary");
+        editBtn.setOnAction(event -> openEditReclamation(reclamation, event));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox top = new HBox(10, idLabel, statutLabel, spacer, detailsBtn, editBtn);
+        top.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        VBox card = new VBox(10, top, sujetLabel);
+        card.setPadding(new Insets(14));
+        card.getStyleClass().add("reclamation-card");
+        return card;
+    }
+
     @FXML
-    void openAddReclamation(ActionEvent event) {
+    void openAddReclamation(javafx.event.ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/reclamation/AddReclamation.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -121,7 +115,7 @@ public class UserReclamationsController {
     }
 
     @FXML
-    void goBackHome(ActionEvent event) {
+    void goBackHome(javafx.event.ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -132,7 +126,7 @@ public class UserReclamationsController {
         }
     }
 
-    private void openDetails(Reclamation reclamation, ActionEvent event) {
+    private void openDetails(Reclamation reclamation, javafx.event.ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/reclamation/ReclamationDetails.fxml"));
             Parent root = loader.load();
@@ -148,7 +142,7 @@ public class UserReclamationsController {
         }
     }
 
-    private void openEditReclamation(Reclamation reclamation, ActionEvent event) {
+    private void openEditReclamation(Reclamation reclamation, javafx.event.ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/reclamation/AddReclamation.fxml"));
             Parent root = loader.load();

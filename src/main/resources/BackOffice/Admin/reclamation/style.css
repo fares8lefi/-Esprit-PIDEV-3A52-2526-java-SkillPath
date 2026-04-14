@@ -1,0 +1,152 @@
+.admin-reclamation-root {
+    -fx-background-color: linear-gradient(to bottom right, #0b1224, #121a33);
+}
+
+.admin-content-pane {
+    -fx-background-color: transparent;
+}
+
+.admin-shell {
+    -fx-padding: 0;
+}
+
+.hero-strip {
+    -fx-background-color: linear-gradient(to right, rgba(99, 102, 241, 0.24), rgba(6, 182, 212, 0.2));
+    -fx-background-radius: 18;
+    -fx-padding: 16 20;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 18;
+}
+
+.toolbar-strip {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 14;
+    -fx-padding: 10;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 14;
+}
+
+.admin-input {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #93a4bd;
+    -fx-border-color: rgba(255, 255, 255, 0.18);
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 12;
+}
+
+.admin-input:focused {
+    -fx-border-color: #60a5fa;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.admin-list-panel {
+    -fx-background-color: rgba(15, 23, 42, 0.76);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(148, 163, 184, 0.25);
+    -fx-border-radius: 16;
+}
+
+.admin-detail-panel {
+    -fx-background-color: rgba(15, 23, 42, 0.82);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(148, 163, 184, 0.25);
+    -fx-border-radius: 16;
+}
+
+.reclamation-card {
+    -fx-background-color: linear-gradient(to right, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.04));
+    -fx-border-color: rgba(148, 163, 184, 0.22);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.reclamation-card:hover {
+    -fx-background-color: linear-gradient(to right, rgba(96, 165, 250, 0.18), rgba(14, 165, 233, 0.1));
+    -fx-border-color: rgba(96, 165, 250, 0.45);
+}
+
+.reclamation-card-selected {
+    -fx-background-color: linear-gradient(to right, rgba(99, 102, 241, 0.34), rgba(6, 182, 212, 0.26));
+    -fx-border-color: rgba(129, 140, 248, 0.9);
+}
+
+.reclamation-id {
+    -fx-text-fill: #c4b5fd;
+    -fx-font-weight: 900;
+}
+
+.reclamation-user {
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+}
+
+.reclamation-subject {
+    -fx-text-fill: #dbeafe;
+}
+
+.status-pill {
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10;
+    -fx-background-radius: 100;
+}
+
+.status-attente {
+    -fx-background-color: rgba(250, 204, 21, 0.2);
+    -fx-text-fill: #fde68a;
+}
+
+.status-traitee {
+    -fx-background-color: rgba(52, 211, 153, 0.2);
+    -fx-text-fill: #86efac;
+}
+
+.card-select-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 8;
+}
+
+.card-select-btn:hover {
+    -fx-background-color: rgba(96, 165, 250, 0.28);
+    -fx-border-color: rgba(96, 165, 250, 0.45);
+}
+
+.response-bubble {
+    -fx-padding: 8 10;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(148, 163, 184, 0.22);
+    -fx-border-radius: 10;
+}
+
+.response-author {
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+}
+
+.response-author-client {
+    -fx-text-fill: #fef08a;
+}
+
+.response-author-admin {
+    -fx-text-fill: #93c5fd;
+}
+
+.response-message {
+    -fx-text-fill: #e2e8f0;
+    -fx-wrap-text: true;
+}
+
+.response-message-client {
+    -fx-text-fill: #f8fafc;
+}
+
+.response-message-admin {
+    -fx-text-fill: #dbeafe;
+}
