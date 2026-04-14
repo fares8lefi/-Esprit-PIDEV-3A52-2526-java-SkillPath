@@ -6,7 +6,6 @@ import Services.evaluation.QuizService;
 import Services.evaluation.ResultatService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;

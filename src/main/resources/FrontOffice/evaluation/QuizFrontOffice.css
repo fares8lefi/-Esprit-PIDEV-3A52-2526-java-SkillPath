@@ -112,16 +112,38 @@
 
 .combo-box {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    -fx-text-fill: white;
+    -fx-padding: 5;
     -fx-background-radius: 12;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12;
+}
+
+.combo-box .label {
+    -fx-text-fill: white;
 }
 
 .combo-box .list-cell {
+    -fx-background-color: transparent;
     -fx-text-fill: white;
+    -fx-padding: 8 12;
 }
 
 .combo-box-popup .list-view {
     -fx-background-color: #1e293b;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12;
+    -fx-padding: 5;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #334155;
+    -fx-background-radius: 8;
+}
+
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 8;
 }
 
 /* Buttons */

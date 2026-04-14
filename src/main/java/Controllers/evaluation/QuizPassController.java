@@ -2,7 +2,6 @@ package Controllers.evaluation;
 
 import Models.evaluation.Question;
 import Models.evaluation.Quiz;
-import Models.evaluation.Resultat;
 import Services.evaluation.QuestionService;
 import Services.evaluation.ResultatService;
 import javafx.event.ActionEvent;
