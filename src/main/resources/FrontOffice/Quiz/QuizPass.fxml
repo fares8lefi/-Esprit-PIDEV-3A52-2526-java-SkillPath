@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="700.0" prefWidth="1000.0" alignment="TOP_CENTER" spacing="0.0" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.QuizPassController">
+   <stylesheets>
+      <URL value="@QuizFrontOffice.css" />
+   </stylesheets>
+
+   <!-- Navigation Bar -->
+   <HBox alignment="CENTER_LEFT" styleClass="glass-nav" prefHeight="65.0">
+      <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 16px;" text="← Retour aux quiz" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Label fx:id="lblNavTitle" style="-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;" text="Titre du Quiz" />
+   </HBox>
+
+   <StackPane VBox.vgrow="ALWAYS" >
+      <padding>
+         <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+      </padding>
+
+      <!-- INTRO VIEW -->
+      <VBox fx:id="viewIntro" alignment="CENTER" maxWidth="600" spacing="20.0" styleClass="glass-card">
+         <Label styleClass="badge-purple" text="Prêt ?" />
+         <Label fx:id="lblIntroTitle" styleClass="text-4xl" text="Titre Quiz" textAlignment="CENTER" wrapText="true" />
+         <Label fx:id="lblIntroDesc" styleClass="text-slate-400, text-lg" text="Description" textAlignment="CENTER" wrapText="true" />
+         
+         <HBox alignment="CENTER" spacing="30.0">
+             <Label fx:id="lblIntroQuestions" styleClass="text-slate-400, font-bold" text="0 Questions" />
+             <Label text="|" styleClass="text-slate-500" />
+             <Label fx:id="lblIntroTime" styleClass="text-slate-400, font-bold" text="0 min" />
+         </HBox>
+         <Region prefHeight="20.0" />
+         <Button mnemonicParsing="false" onAction="#startQuiz" styleClass="btn-primary" style="-fx-font-size: 18px; -fx-padding: 15 40;" text="Commencer l'évaluation" />
+      </VBox>
+
+      <!-- QUESTION VIEW -->
+      <VBox fx:id="viewQuestion" alignment="CENTER" maxWidth="800" spacing="30.0" styleClass="glass-card" visible="false">
+         <HBox alignment="CENTER_LEFT" spacing="20">
+             <Label fx:id="lblQuestionProgress" styleClass="badge-purple" text="Question 1 / 10" />
+             <Region HBox.hgrow="ALWAYS" />
+             <Label fx:id="lblQuestionPoints" styleClass="badge-green" text="10 pts" />
+         </HBox>
+         
+         <Label fx:id="lblEnonce" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: white;" textAlignment="CENTER" wrapText="true" />
+         
+         <VBox fx:id="optionsContainer" spacing="15.0" alignment="CENTER_LEFT">
+             <!-- Radio buttons injected dynamically -->
+         </VBox>
+         
+         <Region prefHeight="20.0" />
+         <HBox alignment="CENTER_RIGHT">
+             <Button fx:id="btnNext" mnemonicParsing="false" onAction="#nextQuestion" styleClass="btn-primary" style="-fx-font-size: 16px;" text="Suivant →" />
+         </HBox>
+      </VBox>
+
+      <!-- RESULT VIEW -->
+      <VBox fx:id="viewResult" alignment="CENTER" maxWidth="600" spacing="20.0" styleClass="glass-card" visible="false">
+         <Label styleClass="text-4xl, gradient-text" text="Terminé !" />
+         <Label style="-fx-font-size: 20px; -fx-text-fill: white;" text="Votre Score Final :" />
+         <Label fx:id="lblScore" style="-fx-font-size: 64px; -fx-font-weight: 900; -fx-text-fill: #4ade80;" text="0 / 0" />
+         <Label fx:id="lblFeedback" styleClass="text-slate-400, text-lg" text="Excellent travail." />
+         
+         <Region prefHeight="20.0" />
+         <Button mnemonicParsing="false" onAction="#goBack" styleClass="btn-secondary" style="-fx-font-size: 16px;" text="Retour à l'accueil" />
+      </VBox>
+   </StackPane>
+</VBox>
