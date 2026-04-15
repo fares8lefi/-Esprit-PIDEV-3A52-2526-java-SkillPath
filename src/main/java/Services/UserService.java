@@ -438,5 +438,29 @@ public List<User> getClientList() throws SQLDataException {
 }
 
 
+    public void updatePassword(String email, String newPassword) throws SQLDataException {
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, hashPassword(newPassword));
+            ps.setString(2, email);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
 
+    public boolean checkCurrentPassword(String email, String plainPassword) {
+        String sql = "SELECT password FROM users WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String storedHash = rs.getString("password");
+                return verifyPassword(plainPassword, storedHash);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur checkCurrentPassword : " + e.getMessage());
+        }
+        return false;
+    }
 }
