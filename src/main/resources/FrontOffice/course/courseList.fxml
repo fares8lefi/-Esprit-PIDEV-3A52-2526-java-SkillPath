@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="Controllers.course.FrontCourseListController"
+            prefHeight="900.0" prefWidth="1440.0"
+            style="-fx-background-color: #0b1120;"
+            stylesheets="@../user/auth/style.css">
+
+    <children>
+        <!-- Layer 1: Main Application Structure -->
+        <BorderPane AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            
+            <!-- Navbar Area -->
+            <top>
+                <HBox alignment="CENTER" prefHeight="90.0" style="-fx-background-color: #0f172a; -fx-border-color: rgba(255,255,255,0.06); -fx-border-width: 0 0 1 0;">
+                    <padding><Insets left="80" right="80"/></padding>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
+                            <children>
+                                <StackPane prefHeight="48" prefWidth="48" style="-fx-background-color: linear-gradient(to bottom right, #6366f1, #a855f7); -fx-background-radius: 14;">
+                                    <children><Label text="S" textFill="WHITE" style="-fx-font-size: 24; -fx-font-weight: 900;" /></children>
+                                </StackPane>
+                                <Label text="SkillPath" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: white;" />
+                            </children>
+                        </HBox>
+                        
+                        <HBox alignment="CENTER" spacing="50">
+                            <children>
+                                <Hyperlink text="ACCUEIL" onAction="#goToHome" style="-fx-text-fill: #94a3b8; -fx-font-weight: 900; -fx-font-size: 11; -fx-letter-spacing: 2.5;" />
+                                <Hyperlink text="MES COURS" onAction="#goToCourses" style="-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 11; -fx-letter-spacing: 2.5;" />
+                                <Hyperlink text="ÉVÉNEMENTS" style="-fx-text-fill: #94a3b8; -fx-font-weight: 900; -fx-font-size: 11; -fx-letter-spacing: 2.5;" />
+                                <Hyperlink text="RECOMMANDATIONS" style="-fx-text-fill: #94a3b8; -fx-font-weight: 900; -fx-font-size: 11; -fx-letter-spacing: 2.5;" />
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="25" HBox.hgrow="ALWAYS">
+                            <children>
+                                <!-- Premium Notification Icon -->
+                                <StackPane fx:id="notifBtn" style="-fx-cursor: hand; -fx-padding: 5;">
+                                    <children>
+                                        <Label text="🔔" style="-fx-font-size: 24; -fx-text-fill: #94a3b8;" />
+                                        <StackPane StackPane.alignment="TOP_RIGHT" maxHeight="18" maxWidth="18" minHeight="18" minWidth="18"
+                                                   style="-fx-background-color: #ef4444; -fx-background-radius: 10; -fx-border-color: #0f172a; -fx-border-width: 2; -fx-border-radius: 10;">
+                                            <children>
+                                                <Label text="2" textFill="WHITE" style="-fx-font-size: 9; -fx-font-weight: 900;" />
+                                            </children>
+                                            <StackPane.margin>
+                                                <Insets top="-2" right="-2"/>
+                                            </StackPane.margin>
+                                        </StackPane>
+                                    </children>
+                                </StackPane>
+                                
+                                <Separator orientation="VERTICAL" maxHeight="30" opacity="0.1" />
+                                <Button text="DÉCONNEXION" style="-fx-background-color: transparent; -fx-text-fill: #f43f5e; -fx-font-weight: bold; -fx-font-size: 11; -fx-letter-spacing: 2;" />
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+            </top>
+
+            <!-- Scrollable Content Area -->
+            <center>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox spacing="0">
+                            <children>
+                                <!-- Hero Header -->
+                                <VBox prefHeight="250.0" style="-fx-background-color: #111827; -fx-border-color: rgba(255,255,255,0.04); -fx-border-width: 0 0 1 0;">
+                                    <padding><Insets left="150" right="150" top="80" bottom="80"/></padding>
+                                    <children>
+                                        <VBox spacing="15">
+                                            <children>
+                                                <Label text="Exploration des Cours" style="-fx-font-size: 56; -fx-font-weight: bold; -fx-text-fill: white; -fx-letter-spacing: -2;" />
+                                                <HBox spacing="15" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Label text="Accueil" textFill="#6366f1" style="-fx-font-size: 16; -fx-font-weight: 800;" />
+                                                        <Label text="›" textFill="#4b5563" style="-fx-font-size: 20;" />
+                                                        <Label text="Catalogue" textFill="WHITE" style="-fx-font-weight: 900; -fx-font-size: 16;" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <!-- Grid Section -->
+                                <HBox spacing="60">
+                                    <padding><Insets left="150" right="150" top="60" bottom="120"/></padding>
+                                    <children>
+                                        <!-- Main Feed -->
+                                        <VBox spacing="45" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" spacing="25">
+                                                    <children>
+                                                        <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: rgba(99,102,241,0.1); -fx-padding: 10 20; -fx-background-radius: 30;">
+                                                            <children>
+                                                                <Label text="💎" style="-fx-font-size: 16;" />
+                                                                <Label fx:id="lblResultCount" text="Recherche en cours..." style="-fx-text-fill: #818cf8; -fx-font-weight: 900; -fx-font-size: 13;" />
+                                                            </children>
+                                                        </HBox>
+                                                        <Region HBox.hgrow="ALWAYS" />
+                                                        <HBox spacing="12">
+                                                            <children>
+                                                                <Button fx:id="btnNewest" text="Nouveautés" onAction="#handleSortNewest" styleClass="btn-secondary" />
+                                                                <Button fx:id="btnPopular" text="Mieux notés" onAction="#handleSortPopular" styleClass="btn-secondary" />
+                                                                <Separator orientation="VERTICAL" maxHeight="20" opacity="0.1" />
+                                                                <Button fx:id="btnAZ" text="A-Z" onAction="#handleSortAZ" styleClass="btn-secondary" />
+                                                                <Button fx:id="btnZA" text="Z-A" onAction="#handleSortZA" styleClass="btn-secondary" />
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </HBox>
+
+                                                <StackPane>
+                                                    <children>
+                                                        <VBox fx:id="courseContainer" spacing="40" />
+                                                        <VBox fx:id="vboxNoResults" spacing="25" alignment="CENTER" visible="false" styleClass="no-results-view">
+                                                            <children>
+                                                                <Label text="🔍" style="-fx-font-size: 64;" />
+                                                                <VBox spacing="5" alignment="CENTER">
+                                                                    <children>
+                                                                        <Label text="Aucun résultat trouvé" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" />
+                                                                        <Label text="Essayez de modifier vos filtres ou votre recherche." style="-fx-text-fill: #94a3b8; -fx-font-size: 14;" />
+                                                                    </children>
+                                                                </VBox>
+                                                                <Button text="Réinitialiser tous les filtres" onAction="#resetFilters" 
+                                                                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 12 25; -fx-cursor: hand;" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Redesigned Sidebar -->
+                                        <VBox spacing="40" minWidth="360" maxWidth="360">
+                                            <children>
+                                                <!-- Search Widget -->
+                                                <VBox styleClass="glass-card-elite" spacing="22" style="-fx-padding: 35;">
+                                                    <children>
+                                                        <Label text="RECHERCHE" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #6366f1; -fx-letter-spacing: 2.5;" />
+                                                        <StackPane alignment="CENTER_RIGHT">
+                                                            <children>
+                                                                <TextField fx:id="txtSearch" promptText="Quelle compétence ?" styleClass="premium-search" />
+                                                                <Button text="×" onAction="#clearSearch" styleClass="btn-reset-light" visible="false" fx:id="btnClearSearch">
+                                                                    <StackPane.margin><Insets right="15"/></StackPane.margin>
+                                                                </Button>
+                                                            </children>
+                                                        </StackPane>
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Filter Groups -->
+                                                <VBox styleClass="glass-card-elite" spacing="30" style="-fx-padding: 35;">
+                                                    <children>
+                                                        <VBox spacing="20">
+                                                            <children>
+                                                                <Label text="DOMAINES D'EXPERTISE" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-letter-spacing: 2.5;" />
+                                                                <VBox fx:id="categoryFilterContainer" spacing="18" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Separator opacity="0.05" />
+                                                        <VBox spacing="20">
+                                                            <children>
+                                                                <Label text="NIVEAU DE DIFFICULTÉ" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-letter-spacing: 2.5;" />
+                                                                <VBox fx:id="levelFilterContainer" spacing="18" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+
+        <!-- Layer 2: Floating Overlays (Absolute Positioning) -->
+        <VBox fx:id="chatContainer" AnchorPane.bottomAnchor="40" AnchorPane.rightAnchor="40" spacing="20" alignment="BOTTOM_RIGHT" pickOnBounds="false">
+            <children>
+                <!-- Chat Window -->
+                <VBox fx:id="chatWindow" visible="false" prefHeight="600" prefWidth="420" 
+                      style="-fx-background-color: #0f172a; -fx-background-radius: 32; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 60, 0, 0, 30); -fx-border-color: rgba(255,255,255,0.12); -fx-border-radius: 32; -fx-overflow: hidden;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="18" prefHeight="100" style="-fx-background-color: linear-gradient(to right, #4f46e5, #9333ea);">
+                            <padding><Insets left="35" right="35"/></padding>
+                            <children>
+                                <Circle radius="24" fill="white" opacity="0.15" />
+                                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="SkillPath Intelligence" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 17;" />
+                                        <Label text="Online Advisor • Core System" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 11; -fx-font-weight: 800;" />
+                                    </children>
+                                </VBox>
+                                <Button onAction="#toggleChat" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28; -fx-cursor: hand; -fx-padding: 0;" text="×" />
+                            </children>
+                        </HBox>
+                        
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="chatMessages" spacing="28" style="-fx-padding: 35; -fx-background-color: #0f172a;" />
+                            </content>
+                        </ScrollPane>
+
+                        <VBox spacing="20" style="-fx-background-color: #1a2234; -fx-padding: 30; -fx-border-color: rgba(255,255,255,0.06); -fx-border-width: 1 0 0 0;">
+                            <children>
+                                <HBox spacing="15" alignment="CENTER">
+                                    <children>
+                                        <TextField fx:id="txtChatInput" promptText="Comment puis-je vous aider ?" HBox.hgrow="ALWAYS" onAction="#sendChatMessage"
+                                                   styleClass="premium-search" style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-padding: 16 30;" />
+                                        <Button onAction="#sendChatMessage" prefHeight="60" prefWidth="60" 
+                                                style="-fx-background-color: #6366f1; -fx-background-radius: 30; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.5), 25, 0, 0, 10);">
+                                            <graphic><Label text="➜" textFill="WHITE" style="-fx-font-size: 22; -fx-font-weight: bold;" /></graphic>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <!-- Toggle Button -->
+                <Button onAction="#toggleChat" prefHeight="85" prefWidth="85" 
+                        style="-fx-background-color: linear-gradient(to bottom right, #6366f1, #9333ea); -fx-background-radius: 45; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.6), 40, 0, 0, 20); -fx-cursor: hand;">
+                    <graphic><Label text="💬" textFill="WHITE" style="-fx-font-size: 38;" /></graphic>
+                </Button>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
