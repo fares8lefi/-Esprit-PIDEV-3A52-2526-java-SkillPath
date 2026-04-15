@@ -24,8 +24,8 @@
             
             <HBox alignment="CENTER" spacing="30">
                 <Label text="Événements" styleClass="nav-link"/>
-                <Label text="Catalogue" styleClass="nav-link"/>
-                <Label text="Mes Cours" styleClass="nav-link" style="-fx-text-fill: #8b5cf6;"/>
+                <Label text="Catalogue" onMouseClicked="#goToCourses" styleClass="nav-link" style="-fx-cursor: hand;"/>
+                <Label text="Mes Cours" onMouseClicked="#goToCourses" styleClass="nav-link" style="-fx-text-fill: #8b5cf6; -fx-cursor: hand;"/>
             </HBox>
             
             <Region HBox.hgrow="ALWAYS" />
@@ -57,7 +57,7 @@
                                        styleClass="hero-subtitle" wrapText="true" maxWidth="450"/>
                                 <HBox spacing="15">
                                     <Button fx:id="startAdventureBtn" text="🚀 Start Adventure" onAction="#goToSignup" styleClass="btn-primary" style="-fx-font-size: 16px; -fx-padding: 15 35;"/>
-                                    <Button text="Browse Courses" styleClass="btn-secondary" style="-fx-font-size: 16px; -fx-padding: 15 35;"/>
+                                    <Button text="Browse Courses" onAction="#goToCourses" styleClass="btn-secondary" style="-fx-font-size: 16px; -fx-padding: 15 35;"/>
                                 </HBox>
                             </VBox>
                             
