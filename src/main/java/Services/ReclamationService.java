@@ -114,7 +114,7 @@ public class ReclamationService implements Iservice<Reclamation> {
         StringBuilder sql = new StringBuilder(
                 "SELECT r.id, r.sujet, r.description, r.statut, r.piece_jointe, r.user_id, u.username " +
                 "FROM reclamation r " +
-                "JOIN user u ON u.id = r.user_id "
+                "JOIN users u ON u.id = r.user_id "
         );
 
         boolean hasSearch = usernameSearch != null && !usernameSearch.isBlank();
