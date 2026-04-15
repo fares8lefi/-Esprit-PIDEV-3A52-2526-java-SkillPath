@@ -61,9 +61,31 @@ public class CourseListController implements Initializable {
     private void setupFilters() {
         comboFilterLevel.setItems(FXCollections.observableArrayList("Tous les niveaux", "Débutant", "Intermédiaire", "Avancé"));
         comboFilterLevel.setValue("Tous les niveaux");
+        styleComboBox(comboFilterLevel);
 
         txtSearch.textProperty().addListener((obs, oldV, newV) -> applyFilters());
         comboFilterLevel.valueProperty().addListener((obs, oldV, newV) -> applyFilters());
+    }
+
+    private void styleComboBox(ComboBox<String> combo) {
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item);
+                setStyle("-fx-text-fill: #e2e8f0; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-color: transparent;");
+            }
+        });
+        combo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item);
+                setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 13px; -fx-padding: 8 12; -fx-background-color: transparent;");
+                setOnMouseEntered(e -> setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 8 12; -fx-background-color: rgba(59,130,246,0.15); -fx-background-radius: 6;"));
+                setOnMouseExited(e -> setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 13px; -fx-padding: 8 12; -fx-background-color: transparent;"));
+            }
+        });
     }
 
     private void loadData() {
@@ -98,66 +120,90 @@ public class CourseListController implements Initializable {
      * Programmatically creates a premium course card in Java code.
      * satisfying the "All-in-One" requirement.
      */
+    private void addHoverEffect(Node node) {
+        node.setOnMouseEntered(e -> {
+            node.setScaleX(1.02);
+            node.setScaleY(1.02);
+            node.setStyle(node.getStyle() + "-fx-border-color: rgba(139, 92, 246, 0.4);");
+        });
+        node.setOnMouseExited(e -> {
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+            node.setStyle(node.getStyle().replace("-fx-border-color: rgba(139, 92, 246, 0.4);", ""));
+        });
+    }
+
     private Node createCourseCard(Course course) {
-        VBox card = new VBox(15);
+        VBox card = new VBox(0); // Zero spacing for the header strip
         card.getStyleClass().add("glass-card");
-        card.setPrefWidth(320);
-        card.setPadding(new Insets(20));
+        card.setMaxWidth(320); card.setMinWidth(320);
+        card.setPadding(Insets.EMPTY); // Padding will be internal to secondary container
+        card.setStyle("-fx-overflow: hidden; -fx-cursor: hand;");
 
-        // 1. Level Badge Header
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_RIGHT);
-        Label lblLevel = new Label(course.getLevel() != null ? course.getLevel() : "Débutant");
-        
-        String color, glow;
-        switch (lblLevel.getText()) {
-            case "Débutant"      -> { color = "#4ade80"; glow = "rgba(74, 222, 128, 0.1)"; }
-            case "Intermédiaire" -> { color = "#fbbf24"; glow = "rgba(251, 191, 36, 0.1)"; }
-            case "Avancé"        -> { color = "#f87171"; glow = "rgba(248, 113, 113, 0.1)"; }
-            default              -> { color = "#94a3b8"; glow = "rgba(148, 163, 184, 0.1)"; }
+        // 1. Visual Accent Header (Strip)
+        String level = course.getLevel() != null ? course.getLevel() : "Débutant";
+        String color;
+        switch (level) {
+            case "Débutant"      -> color = "#4ade80"; 
+            case "Intermédiaire" -> color = "#fbbf24"; 
+            case "Avancé"        -> color = "#f87171"; 
+            default              -> color = "#94a3b8"; 
         }
-        lblLevel.setStyle("-fx-background-color: " + glow + "; -fx-text-fill: " + color + "; " +
-                          "-fx-background-radius: 20; -fx-padding: 4 12; -fx-font-weight: bold; " +
-                          "-fx-font-size: 11; -fx-border-color: " + color + "33; -fx-border-radius: 20;");
-        header.getChildren().add(lblLevel);
+        Pane accent = new Pane();
+        accent.setPrefHeight(6);
+        accent.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 20 20 0 0;");
 
-        // 2. Title & Category
-        VBox meta = new VBox(8);
+        // Internal Content Container
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+
+        // 2. Badge & Metadata Row
+        HBox topRow = new HBox();
+        topRow.setAlignment(Pos.CENTER_RIGHT);
+        Label lblLevelBadge = new Label(level.toUpperCase());
+        lblLevelBadge.setStyle("-fx-background-color: " + color + "22; -fx-text-fill: " + color + "; " +
+                               "-fx-background-radius: 6; -fx-padding: 4 10; -fx-font-weight: 900; " +
+                               "-fx-font-size: 10; -fx-border-color: " + color + "44; -fx-border-radius: 6;");
+        topRow.getChildren().add(lblLevelBadge);
+
+        // 3. Title Section
+        VBox titleArea = new VBox(5);
         Text txtTitle = new Text(course.getTitle());
         txtTitle.getStyleClass().add("gradient-text");
-        txtTitle.setStyle("-fx-font-size: 20; -fx-font-weight: 800;");
+        txtTitle.setStyle("-fx-font-size: 22; -fx-font-weight: 900;");
         
-        Label lblCat = new Label(course.getCategory() == null || course.getCategory().isEmpty() ? "Général" : course.getCategory());
-        lblCat.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13;");
-        meta.getChildren().addAll(txtTitle, lblCat);
+        String catName = course.getCategory() == null || course.getCategory().isEmpty() ? "Général" : course.getCategory();
+        Label lblCatMeta = new Label("📂 " + catName);
+        lblCatMeta.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13;");
+        titleArea.getChildren().addAll(txtTitle, lblCatMeta);
 
-        // 3. Description Label
-        Label lblDesc = new Label(course.getDescription() != null ? course.getDescription() : "Aucune description.");
+        // 4. Description Label
+        Label lblDesc = new Label(course.getDescription() != null ? course.getDescription() : "Aucune description de cours.");
         lblDesc.setWrapText(true);
         lblDesc.setMinHeight(60); lblDesc.setMaxHeight(60);
         lblDesc.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13; -fx-line-spacing: 2;");
 
         Separator sep = new Separator();
-        sep.setOpacity(0.1);
+        sep.setOpacity(0.05);
 
-        // 4. Footer
+        // 5. Footer
         HBox footer = new HBox(15);
         footer.setAlignment(Pos.CENTER_LEFT);
         
         int modCount = 0;
         try { modCount = moduleService.countByCourse(course.getId()); } catch (Exception ignored) {}
-        Label lblMods = new Label(modCount + " Chapitre(s)");
-        lblMods.setStyle("-fx-background-color: rgba(30, 136, 229, 0.1); -fx-text-fill: #3b82f6; " +
-                         "-fx-background-radius: 10; -fx-padding: 4 10; -fx-font-weight: bold; -fx-font-size: 11;");
+        Label lblModsBadge = new Label("📚 " + modCount + " Chapitre(s)");
+        lblModsBadge.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-text-fill: #cbd5e1; " +
+                              "-fx-background-radius: 8; -fx-padding: 6 12; -fx-font-weight: bold; -fx-font-size: 11; " +
+                              "-fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 8;");
         
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Actions Row
+        // Actions
         HBox actions = new HBox(8);
         
-        Button btnShow = new Button("👁");
-        btnShow.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #60a5fa; -fx-background-radius: 8; -fx-cursor: hand;");
+        Button btnShow = createIconButton("👁", "#60a5fa");
         btnShow.setOnAction(e -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/course/courseDetails.fxml"));
@@ -172,17 +218,13 @@ public class CourseListController implements Initializable {
             }
         });
 
-        Button btnEdit = new Button("✏");
-        btnEdit.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #4ade80; -fx-background-radius: 8; -fx-cursor: hand;");
+        Button btnEdit = createIconButton("✏", "#4ade80");
         btnEdit.setOnAction(e -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackOffice/course/editCourse.fxml"));
                 Parent root = loader.load();
-                
-                // Pass the course to the controller
                 EditCourseController controller = loader.getController();
                 controller.setCourse(course);
-                
                 Stage stage = (Stage) btnEdit.getScene().getWindow();
                 stage.setScene(new Scene(root));
                 stage.show();
@@ -191,15 +233,30 @@ public class CourseListController implements Initializable {
             }
         });
 
-        Button btnDelete = new Button("🗑");
-        btnDelete.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #f87171; -fx-background-radius: 8; -fx-cursor: hand;");
+        Button btnDelete = createIconButton("🗑", "#f87171");
         btnDelete.setOnAction(e -> confirmDelete(course));
         
         actions.getChildren().addAll(btnShow, btnEdit, btnDelete);
-        footer.getChildren().addAll(lblMods, spacer, actions);
+        footer.getChildren().addAll(lblModsBadge, spacer, actions);
 
-        card.getChildren().addAll(header, meta, lblDesc, sep, footer);
+        content.getChildren().addAll(topRow, titleArea, lblDesc, sep, footer);
+        card.getChildren().addAll(accent, content);
+        
+        addHoverEffect(card);
+        card.setOnMouseClicked(e -> {
+            if(e.getClickCount() == 2) btnShow.getOnAction().handle(new ActionEvent());
+        });
+        
         return card;
+    }
+
+    private Button createIconButton(String icon, String color) {
+        Button btn = new Button(icon);
+        btn.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-text-fill: " + color + "; " +
+                     "-fx-background-radius: 10; -fx-min-width: 36; -fx-min-height: 36; -fx-cursor: hand; -fx-font-size: 14;");
+        btn.setOnMouseEntered(e -> btn.setStyle(btn.getStyle().replace("rgba(255,255,255,0.03)", "rgba(255,255,255,0.08)")));
+        btn.setOnMouseExited(e -> btn.setStyle(btn.getStyle().replace("rgba(255,255,255,0.08)", "rgba(255,255,255,0.03)")));
+        return btn;
     }
 
     private void applyFilters() {
