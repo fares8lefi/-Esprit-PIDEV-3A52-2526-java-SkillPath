@@ -44,6 +44,9 @@ public class EditModuleController implements Initializable {
     @FXML private HBox flashBox;
     @FXML private Label flashLabel;
     @FXML private SideBarController sideBarController;
+    @FXML private Label lblErrorTitle;
+    @FXML private Label lblErrorCourse;
+    @FXML private Label lblErrorType;
 
     private final ModuleService moduleService = new ModuleService();
     private final CourseService courseService = new CourseService();
@@ -59,26 +62,48 @@ public class EditModuleController implements Initializable {
     }
 
     private void setupValidationListeners() {
-        txtTitle.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) validateField(txtTitle);
-        });
-        comboCourse.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) validateField(comboCourse);
-        });
-        comboType.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) validateField(comboType);
-        });
+        txtTitle.textProperty().addListener((obs, oldVal, newVal) -> validateField(txtTitle));
+        comboCourse.valueProperty().addListener((obs, oldVal, newVal) -> validateField(comboCourse));
+        comboType.valueProperty().addListener((obs, oldVal, newVal) -> validateField(comboType));
+        
+        txtTitle.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(txtTitle); });
+        comboCourse.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(comboCourse); });
+        comboType.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(comboType); });
     }
 
     private void validateField(Control field) {
         boolean isValid = true;
-        if (field instanceof TextField tf) isValid = !tf.getText().isEmpty();
-        else if (field instanceof ComboBox<?> cb) isValid = cb.getValue() != null;
+        String errorMsg = "";
+        Label targetLabel = null;
+
+        if (field instanceof TextField tf) {
+            String text = tf.getText().trim();
+            if (tf == txtTitle) {
+                targetLabel = lblErrorTitle;
+                if (text.isEmpty()) { isValid = false; errorMsg = "Le titre est obligatoire"; }
+                else if (text.length() < 3) { isValid = false; errorMsg = "Minimum 3 caractères requis (" + text.length() + "/3)"; }
+            }
+        } else if (field instanceof ComboBox<?> cb) {
+            if (cb == comboCourse) targetLabel = lblErrorCourse;
+            else if (cb == comboType) targetLabel = lblErrorType;
+            
+            isValid = cb.getValue() != null;
+            if (!isValid) errorMsg = "Sélection obligatoire";
+        }
 
         if (isValid) {
-            field.setStyle("-fx-border-color: rgba(255, 255, 255, 0.1);");
+            field.setStyle("-fx-border-color: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.03); -fx-text-fill: white;");
+            if (targetLabel != null) {
+                targetLabel.setVisible(false);
+                targetLabel.setManaged(false);
+            }
         } else {
-            field.setStyle("-fx-border-color: #f43f5e;");
+            field.setStyle("-fx-border-color: #f43f5e; -fx-background-color: rgba(244, 63, 94, 0.05); -fx-text-fill: white;");
+            if (targetLabel != null) {
+                targetLabel.setText(errorMsg);
+                targetLabel.setVisible(true);
+                targetLabel.setManaged(true);
+            }
         }
     }
 
@@ -164,6 +189,10 @@ public class EditModuleController implements Initializable {
             dateScheduled.setValue(module.getScheduledAt().toLocalDate());
         }
 
+        lblErrorTitle.setVisible(false); lblErrorTitle.setManaged(false);
+        lblErrorCourse.setVisible(false); lblErrorCourse.setManaged(false);
+        lblErrorType.setVisible(false); lblErrorType.setManaged(false);
+
         // Select the course
         comboCourse.getItems().stream()
                 .filter(c -> c.getId() == module.getCourseId())
@@ -225,14 +254,42 @@ public class EditModuleController implements Initializable {
 
     private boolean validateInputs() {
         boolean ok = true;
-        if (txtTitle.getText().isEmpty()) { validateField(txtTitle); ok = false; }
-        if (comboCourse.getValue() == null) { validateField(comboCourse); ok = false; }
-        if (comboType.getValue() == null) { validateField(comboType); ok = false; }
+        StringBuilder errors = new StringBuilder();
+
+        if (txtTitle.getText().trim().length() < 3) { 
+            validateField(txtTitle); 
+            ok = false; 
+            errors.append("- Titre : min 3 caractères\n");
+        }
+        if (txtDescription.getText().trim().length() < 10) { 
+            validateField(txtDescription); 
+            ok = false; 
+            errors.append("- Description : min 10 caractères\n");
+        }
+        if (comboCourse.getValue() == null) { 
+            validateField(comboCourse); 
+            ok = false; 
+            errors.append("- Cours : sélection obligatoire\n");
+        }
+        if (comboType.getValue() == null) { 
+            validateField(comboType); 
+            ok = false; 
+            errors.append("- Type : sélection obligatoire\n");
+        }
 
         if (!ok) {
-            showFlash("Veuillez remplir les champs obligatoires (*)", false);
+            showAlert("Données Invalides", "Veuillez corriger les erreurs suivantes :\n" + errors.toString());
+            showFlash("Erreur de saisie (Titre: min 3, Desc: min 10)", false);
         }
         return ok;
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void showFlash(String message, boolean success) {
