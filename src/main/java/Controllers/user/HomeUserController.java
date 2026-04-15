@@ -15,9 +15,16 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import Models.Course;
+import Services.CourseService;
+import Controllers.course.FrontCourseCardController;
+import javafx.application.Platform;
+import javafx.scene.layout.VBox;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class HomeUserController implements Initializable {
 
@@ -25,6 +32,9 @@ public class HomeUserController implements Initializable {
     @FXML private Label avatarInitial;
     @FXML private FlowPane courseContainer;
     @FXML private Button logoutBtn;
+    @FXML private Label navCatalogue;
+
+    private final CourseService courseService = new CourseService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -38,10 +48,39 @@ public class HomeUserController implements Initializable {
             if (currentUser.getUsername() != null && !currentUser.getUsername().isEmpty()) {
                 avatarInitial.setText(currentUser.getUsername().substring(0, 1).toUpperCase());
             }
+
+            // Chargement des cours en arrière-plan
+            Platform.runLater(this::loadFeaturedCourses);
         } else {
             // Si personne n'est connecté (accès direct sans login), on redirige vers le login
             System.out.println("Aucune session trouvée, redirection...");
         }
+    }
+
+    private void loadFeaturedCourses() {
+        try {
+            List<Course> allCourses = courseService.recuperer();
+            // On affiche seulement les 3 premiers cours pour l'accueil
+            List<Course> featured = allCourses.stream().limit(3).collect(Collectors.toList());
+            
+            courseContainer.getChildren().clear();
+            for (Course course : featured) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/courseCard.fxml"));
+                Node card = loader.load();
+                
+                FrontCourseCardController controller = loader.getController();
+                controller.setData(course);
+                
+                courseContainer.getChildren().add(card);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement cours accueil : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleCatalogue(MouseEvent event) {
+        navigateTo(event, "/FrontOffice/course/courseList.fxml", "Catalogue des Formations - SkillPath");
     }
 
     @FXML
@@ -67,7 +106,7 @@ public class HomeUserController implements Initializable {
         }
     }
 
-    private void navigateTo(ActionEvent event, String fxmlPath, String title) {
+    private void navigateTo(javafx.event.Event event, String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
