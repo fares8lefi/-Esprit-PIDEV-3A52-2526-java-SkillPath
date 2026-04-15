@@ -10,7 +10,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0f172a;" stylesheets="@../../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.HomeUserController">
+<AnchorPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0f172a;" stylesheets="@../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.HomeUserController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
