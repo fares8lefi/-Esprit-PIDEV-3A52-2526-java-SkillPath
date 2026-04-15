@@ -40,7 +40,7 @@ public class LoginController {
 
         if (user != null) {
             // Stockage dans la session
-            Session.login(user);
+            Session.getInstance().login(user);
             System.out.println("Connexion réussie : " + user.getUsername());
             
             // Redirection selon le rôle

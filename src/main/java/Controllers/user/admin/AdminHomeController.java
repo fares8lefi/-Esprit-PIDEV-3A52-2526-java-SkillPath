@@ -43,7 +43,7 @@ public class AdminHomeController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Affichage du nom de l'admin connecté via la Session Singleton
-        User admin = Session.getCurrentUser();
+        User admin = Session.getInstance().getCurrentUser();
         if (admin != null && welcomeLabel != null) {
             welcomeLabel.setText("Bon retour, " + admin.getUsername() + ". Voici l'aperçu analytique de SkillPath.");
         }
@@ -171,7 +171,7 @@ public class AdminHomeController implements Initializable {
     }
     @FXML
     private void handleLogout(ActionEvent event) {
-        Session.logout();
+        Session.getInstance().logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
     }
 

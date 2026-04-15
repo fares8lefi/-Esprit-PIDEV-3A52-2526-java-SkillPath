@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class HomeUserController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Récupération de l'utilisateur connecté via le Singleton Session
-        User currentUser = Session.getCurrentUser();
+        User currentUser = Session.getInstance().getCurrentUser();
 
         if (currentUser != null) {
             usernameLabel.setText(currentUser.getUsername());
@@ -46,10 +47,24 @@ public class HomeUserController implements Initializable {
     @FXML
     private void handleLogout(ActionEvent event) {
         // On vide la session (Singleton)
-        Session.logout();
+        Session.getInstance().logout();
         
         // Redirection vers la page de login
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
+    }
+
+    @FXML
+    private void handleProfile(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/profiluser.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setTitle("Mon Profil - SkillPath");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void navigateTo(ActionEvent event, String fxmlPath, String title) {

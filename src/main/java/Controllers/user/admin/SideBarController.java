@@ -74,7 +74,7 @@ public class SideBarController implements Initializable {
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        Session.logout();
+        Session.getInstance().logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
     }
 
