@@ -63,26 +63,31 @@
                         <!-- Notification Button -->
                         <Button mnemonicParsing="false" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12;" text="🔔" textFill="#94a3b8" />
                         
-                        <!-- User Profile Info -->
-                        <VBox alignment="CENTER_RIGHT">
+                        <!-- User Profile Info Wrapper (Clickable) -->
+                        <HBox fx:id="profileBox" alignment="CENTER" spacing="15.0" onMouseClicked="#handleProfile" style="-fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 12; -fx-background-color: rgba(255,255,255,0.02); -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12;">
                            <children>
-                              <Label fx:id="usernameLabel" text="John Doe" textFill="WHITE">
-                                 <font><Font name="System Bold" size="12.0" /></font>
-                              </Label>
-                              <Label text="ÉTUDIANT" textFill="#64748b">
-                                 <font><Font size="10.0" /></font>
-                              </Label>
+                              <!-- User Profile Info -->
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label fx:id="usernameLabel" text="John Doe" textFill="WHITE">
+                                       <font><Font name="System Bold" size="12.0" /></font>
+                                    </Label>
+                                    <Label text="ÉTUDIANT" textFill="#64748b">
+                                       <font><Font size="10.0" /></font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              
+                              <!-- Avatar -->
+                              <StackPane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;">
+                                 <children>
+                                    <Label fx:id="avatarInitial" text="J" textFill="WHITE">
+                                       <font><Font name="System Bold" size="14.0" /></font>
+                                    </Label>
+                                 </children>
+                              </StackPane>
                            </children>
-                        </VBox>
-                        
-                        <!-- Avatar -->
-                        <StackPane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;">
-                           <children>
-                              <Label fx:id="avatarInitial" text="J" textFill="WHITE">
-                                 <font><Font name="System Bold" size="14.0" /></font>
-                              </Label>
-                           </children>
-                        </StackPane>
+                        </HBox>
                         
                         <Button fx:id="logoutBtn" onAction="#handleLogout" mnemonicParsing="false" style="-fx-background-color: transparent;" text="🚪" textFill="#64748b" />
                      </children>
