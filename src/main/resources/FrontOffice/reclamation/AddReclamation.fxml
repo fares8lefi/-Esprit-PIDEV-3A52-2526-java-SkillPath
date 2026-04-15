@@ -9,62 +9,59 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="560.0" prefWidth="600.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.reclamation.AddReclamationController">
+<AnchorPane prefHeight="800.0" prefWidth="1200.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.reclamation.AddReclamationController">
    <children>
-      <VBox layoutX="30.0" layoutY="30.0" prefHeight="500.0" prefWidth="540.0" spacing="20.0" styleClass="card" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+      <VBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox spacing="5.0">
+            <VBox maxWidth="600.0" prefWidth="600.0" spacing="25.0" styleClass="card">
                <children>
-                  <Label styleClass="title-header" text="Soumettre une Reclamation" />
-                  <Label styleClass="subtitle" text="Veuillez detailler votre probleme ci-dessous." />
-               </children>
-            </VBox>
-
-            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
-               <children>
-                  <Label text="Sujet" textFill="#1e293b">
-                     <font>
-                        <javafx.scene.text.Font name="System Bold" size="14.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="txtSujet" promptText="Exemple: Probleme de connexion..." styleClass="text-field-modern" />
-
-                  <Label text="Description" textFill="#1e293b">
-                     <font>
-                        <javafx.scene.text.Font name="System Bold" size="14.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Label>
-                  <TextArea fx:id="txtDescription" prefHeight="150.0" promptText="Decrivez votre probleme en detail..." styleClass="text-area-modern" wrapText="true" VBox.vgrow="ALWAYS" />
-
-                  <Label text="Piece jointe (optionnel)" textFill="#1e293b">
-                     <font>
-                        <javafx.scene.text.Font name="System Bold" size="14.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Label>
-                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                  <VBox spacing="8.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#chooseAttachment" styleClass="btn-secondary" text="Choisir fichier" />
-                        <Label fx:id="selectedFileLabel" styleClass="subtitle" text="Aucun fichier choisi" />
+                        <Label styleClass="title-header" text="Soumettre une Réclamation" />
+                        <Label styleClass="subtitle" text="Notre équipe d'élite est à votre écoute pour résoudre tout incident." />
                      </children>
+                  </VBox>
+      
+                  <VBox spacing="12.0">
+                     <children>
+                        <Label styleClass="label-form" text="Sujet" />
+                        <TextField fx:id="txtSujet" promptText="Exemple: Bug technique sur un cours..." styleClass="text-field-modern" />
+      
+                        <Label styleClass="label-form" text="Description">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextArea fx:id="txtDescription" prefHeight="200.0" promptText="Détaillez votre problème ici..." styleClass="text-area-modern" wrapText="true" />
+      
+                        <Label styleClass="label-form" text="Pièce jointe (optionnel)">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#chooseAttachment" styleClass="btn-secondary" text="📎 Parcourir" />
+                              <Label fx:id="selectedFileLabel" styleClass="subtitle" text="Aucun fichier choisi" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+      
+                  <HBox alignment="CENTER_RIGHT" spacing="20.0">
+                     <children>
+                        <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="Annuler" />
+                        <Button fx:id="btnSubmit" mnemonicParsing="false" onAction="#submitReclamation" styleClass="btn-primary" text="🚀 Envoyer la demande" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="15.0" />
+                     </VBox.margin>
                   </HBox>
                </children>
+               <padding>
+                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+               </padding>
             </VBox>
-
-            <HBox alignment="CENTER_RIGHT" spacing="15.0">
-               <children>
-                  <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="Annuler" />
-                  <Button fx:id="btnSubmit" mnemonicParsing="false" onAction="#submitReclamation" styleClass="btn-primary" text="Soumettre" />
-               </children>
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </HBox>
          </children>
       </VBox>
    </children>
