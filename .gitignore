@@ -46,3 +46,5 @@ build/
 # Java crash files
 hs_err_pid*
 replay_pid*
+
+ uploads/
