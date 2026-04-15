@@ -32,8 +32,8 @@ public class SideBarController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Appliquer le style actif sur le bouton Dashboard par défaut
-        setActive(btnDashboard);
+        // Le style par défaut est géré par l'injection dans le contrôleur parent
+        // ou via setSelected() après le chargement.
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -49,15 +49,13 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleCourses(ActionEvent event) {
         setActive(btnCourses);
-        // navigateTo(event, "/BackOffice/course/courseList.fxml", "Système de Cours");
-        System.out.println("[Navigation] → Système de Cours (à implémenter)");
+        navigateTo(event, "/BackOffice/course/courseList.fxml", "Système de Cours");
     }
 
     @FXML
     private void handleModules(ActionEvent event) {
         setActive(btnModules);
-        // navigateTo(event, "/BackOffice/module/moduleList.fxml", "Unités d'Apprentissage");
-        System.out.println("[Navigation] → Unités d'Apprentissage (à implémenter)");
+        navigateTo(event, "/BackOffice/module/moduleList.fxml", "Unités d'Apprentissage");
     }
 
     @FXML
@@ -83,6 +81,23 @@ public class SideBarController implements Initializable {
     private void handleLogout(ActionEvent event) {
         Session.getInstance().logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Public API
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Permet aux contrôleurs parents de définir quel bouton est actif.
+     */
+    public void setSelected(String pageName) {
+        switch (pageName.toLowerCase()) {
+            case "dashboard"    -> setActive(btnDashboard);
+            case "courses"      -> setActive(btnCourses);
+            case "modules"      -> setActive(btnModules);
+            case "reclamations" -> setActive(btnReclamations);
+            case "users"        -> setActive(btnUsers);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

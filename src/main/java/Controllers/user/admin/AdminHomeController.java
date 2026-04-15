@@ -37,11 +37,15 @@ public class AdminHomeController implements Initializable {
     @FXML private PieChart rolesChart;
     @FXML private BarChart<String, Number> categoryChart;
     @FXML private VBox recentUsersContainer;
+    @FXML private SideBarController sideBarController;
 
     private final UserService userService = new UserService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (sideBarController != null) {
+            sideBarController.setSelected("dashboard");
+        }
         // Affichage du nom de l'admin connecté via la Session Singleton
         User admin = Session.getInstance().getCurrentUser();
         if (admin != null && welcomeLabel != null) {

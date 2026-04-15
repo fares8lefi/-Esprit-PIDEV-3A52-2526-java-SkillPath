@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.course.AddCourseController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="60" right="60" top="40"/></padding>
+            <children>
+                
+                <!-- Breadcrumb -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Hyperlink onAction="#handleBack" text="Tableau de bord" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Hyperlink onAction="#handleBack" text="Gestion des cours" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Label text="Nouveau" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox alignment="TOP_CENTER">
+                            <children>
+                                
+                                <!-- Form Card -->
+                                <VBox styleClass="glass-card" spacing="30" maxWidth="800">
+                                    <padding><Insets bottom="40" left="40" right="40" top="40"/></padding>
+                                    <children>
+                                        
+                                        <!-- Header -->
+                                        <VBox spacing="8">
+                                            <children>
+                                                <Text text="Ajouter un contenu" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-fill: white;" />
+                                                <Text text="Créez un nouveau contenu de cours pour SkillPath" style="-fx-fill: #64748b; -fx-font-size: 14;" />
+                                            </children>
+                                        </VBox>
+
+                                        <Separator opacity="0.1" />
+
+                                        <!-- Form Fields -->
+                                        <VBox spacing="20">
+                                            <children>
+                                                <!-- Title -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Label text="TITRE DU COURS" styleClass="form-label" />
+                                                        <TextField fx:id="txtTitle" promptText="Ex: Introduction au Développement FullStack" styleClass="form-input" />
+                                                        <Label fx:id="lblErrorTitle" styleClass="error-message-small" managed="false" visible="false" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Level & Category Row -->
+                                                <HBox spacing="20">
+                                                    <children>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="NIVEAU PÉDAGOGIQUE" styleClass="form-label" />
+                                                                <ComboBox fx:id="comboLevel" promptText="Choisir un niveau" maxWidth="Infinity" styleClass="form-input" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="CATÉGORIE" styleClass="form-label" />
+                                                                <ComboBox fx:id="comboCategory" promptText="Choisir une catégorie" maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorCategory" styleClass="error-message-small" managed="false" visible="false" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </HBox>
+
+                                                <!-- Description -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Label text="DESCRIPTION DÉTAILLÉE" styleClass="form-label" />
+                                                        <TextArea fx:id="txtDescription" promptText="Expliquez ce que les étudiants vont apprendre..." styleClass="form-input" prefHeight="150" wrapText="true" />
+                                                        <Label fx:id="lblErrorDescription" styleClass="error-message-small" managed="false" visible="false" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Image Upload -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Label text="IMAGE DE COUVERTURE" styleClass="form-label" />
+                                                        <HBox spacing="15" alignment="CENTER_LEFT">
+                                                            <children>
+                                                                <Button fx:id="btnChooseImage" onAction="#handleChooseImage" text="📁 Choisir un fichier" styleClass="btn-secondary" />
+                                                                <Label fx:id="lblImageName" text="Aucun fichier sélectionné" textFill="#64748b" />
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <Separator opacity="0.1" />
+
+                                        <!-- FOOTER ACTIONS -->
+                                        <HBox spacing="20" alignment="CENTER">
+                                            <children>
+                                                <Button onAction="#handleBack" text="Annuler" style="-fx-background-color: transparent; -fx-border-color: #64748b; -fx-border-radius: 12; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-padding: 12 40; -fx-cursor: hand;" />
+                                                <Button fx:id="btnSubmit" onAction="#handleSubmit" text="Ajouter le cours" styleClass="btn-primary-elite" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                            </children>
+                                        </HBox>
+
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <!-- FLASH MESSAGE -->
+                <HBox fx:id="flashBox" alignment="CENTER_LEFT" spacing="12" managed="false" visible="false">
+                    <VBox.margin><Insets top="20"/></VBox.margin>
+                    <padding><Insets bottom="16" left="20" right="20" top="16"/></padding>
+                    <Label fx:id="flashLabel" />
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>

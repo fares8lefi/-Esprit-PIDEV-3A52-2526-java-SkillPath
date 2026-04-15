@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.course.CourseListController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="40" right="40" top="40"/></padding>
+            <children>
+                
+                <!-- Header Section -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <children>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox spacing="10" alignment="BOTTOM_LEFT">
+                                    <children>
+                                        <Text text="Gestion des" style="-fx-font-size: 32; -fx-font-weight: 800; -fx-fill: white;" />
+                                        <Text text="Formations" styleClass="gradient-text" style="-fx-font-size: 32; -fx-font-weight: 800;" />
+                                    </children>
+                                </HBox>
+                                <Label text="Découvrez et gérez les cours disponibles sur SkillPath." textFill="#64748b" style="-fx-font-size: 14;" />
+                            </children>
+                        </VBox>
+                        <Button fx:id="btnAdd" onAction="#handleAdd" text="+ Nouveau Cours" styleClass="btn-primary-elite" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- ELITE POWER BAR -->
+                <HBox spacing="15" alignment="CENTER_LEFT" styleClass="glass-card" style="-fx-padding: 15 25; -fx-background-radius: 15; -fx-border-radius: 15;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 10; -fx-padding: 0 15; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 10;">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: #3b82f6; -fx-font-size: 16; -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 10, 0, 0, 0);" />
+                                <TextField fx:id="txtSearch" promptText="Rechercher une formation..." 
+                                           style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 0; -fx-font-size: 14;" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <ComboBox fx:id="comboFilterLevel" promptText="Niveau" prefWidth="180" styleClass="form-input" />
+                        <Button fx:id="btnReset" onAction="#handleReset" text="🔄" styleClass="btn-secondary" style="-fx-min-width: 50; -fx-font-size: 16;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- CARDS CONTAINER -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" 
+                            style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox spacing="20">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 10 0;">
+                                    <children>
+                                        <Label fx:id="lblCount" text="0 cours trouvé" style="-fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="btnRefresh" onAction="#handleRefresh" text="↻" styleClass="btn-secondary" />
+                                    </children>
+                                </HBox>
+                                
+                                <FlowPane fx:id="cardsContainer" hgap="25" vgap="25">
+                                    <padding><Insets bottom="40"/></padding>
+                                    <!-- Cards will be injected here via Controller -->
+                                </FlowPane>
+
+                                <!-- Empty State -->
+                                <VBox fx:id="emptyState" alignment="CENTER" spacing="20" managed="false" visible="false">
+                                    <padding><Insets top="100"/></padding>
+                                    <children>
+                                        <Text text="∅" style="-fx-fill: #1e293b; -fx-font-size: 80;" />
+                                        <Label text="Aucun cours ne correspond à votre recherche" style="-fx-text-fill: #64748b; -fx-font-size: 18; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <!-- FLASH MESSAGE -->
+                <HBox fx:id="flashBox" alignment="CENTER_LEFT" spacing="12" managed="false" visible="false">
+                    <VBox.margin><Insets top="20"/></VBox.margin>
+                    <padding><Insets bottom="16" left="20" right="20" top="16"/></padding>
+                    <Label fx:id="flashLabel" />
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>

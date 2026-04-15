@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.module.ModuleListController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="60" right="60" top="40"/></padding>
+            <children>
+                
+                <!-- Header Section -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <children>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Text text="Gestion des" style="-fx-font-size: 32; -fx-font-weight: 800; -fx-fill: white;" />
+                                        <Text text="Unités de Module" styleClass="gradient-text" style="-fx-font-size: 32; -fx-font-weight: 800;" />
+                                    </children>
+                                </HBox>
+                                <Label text="Optimisez vos parcours pédagogiques en structurant chaque chapitre avec précision." style="-fx-text-fill: #64748b; -fx-font-size: 14;" />
+                            </children>
+                        </VBox>
+                        <Button onAction="#handleAdd" text="+ Nouveau Module" styleClass="btn-primary-elite" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- ELITE POWER BAR -->
+                <HBox spacing="15" alignment="CENTER_LEFT" styleClass="glass-card" style="-fx-padding: 12 20; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: rgba(255,255,255,0.05);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 10; -fx-padding: 0 15; -fx-border-color: rgba(255,255,255,0.03); -fx-border-radius: 10;">
+                            <children>
+                                <Label text="🔍" style="-fx-text-fill: #3b82f6; -fx-font-size: 16; -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 10, 0, 0, 0);" />
+                                <TextField fx:id="txtSearch" promptText="Rechercher un module..." 
+                                           style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 0; -fx-font-size: 14;" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+                        <ComboBox fx:id="comboFilterCourse" promptText="Tous les cours" prefWidth="180" styleClass="glass-combo"
+                                  style="-fx-prompt-text-fill: #cbd5e1; -fx-background-color: rgba(255,255,255,0.1); -fx-border-color: rgba(255,255,255,0.25); -fx-border-radius: 10; -fx-background-radius: 10;" />
+                        <ComboBox fx:id="comboFilterType" promptText="Tous les types" prefWidth="140" styleClass="glass-combo"
+                                  style="-fx-prompt-text-fill: #cbd5e1; -fx-background-color: rgba(255,255,255,0.1); -fx-border-color: rgba(255,255,255,0.25); -fx-border-radius: 10; -fx-background-radius: 10;" />
+                        <Button fx:id="btnReset" onAction="#handleReset" text="🔄" styleClass="glass-btn-icon" style="-fx-min-width: 45; -fx-min-height: 45; -fx-font-size: 16; -fx-background-color: rgba(255,255,255,0.1); -fx-border-color: rgba(255,255,255,0.25); -fx-border-radius: 10; -fx-background-radius: 10;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <!-- Card Grid -->
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                    <content>
+                        <FlowPane fx:id="cardsContainer" hgap="40" vgap="40">
+                            <padding><Insets bottom="40"/></padding>
+                            <!-- Cards will be injected by controller -->
+                        </FlowPane>
+                    </content>
+                </ScrollPane>
+
+                <!-- Flash Message Container -->
+                <VBox fx:id="flashBox" managed="false" visible="false" style="-fx-background-radius: 12; -fx-padding: 15;">
+                    <children>
+                        <Label fx:id="flashLabel" />
+                    </children>
+                    <VBox.margin><Insets top="20"/></VBox.margin>
+                </VBox>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>

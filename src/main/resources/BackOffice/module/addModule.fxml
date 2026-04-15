@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.module.AddModuleController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="60" right="60" top="40"/></padding>
+            <children>
+                
+                <!-- Breadcrumb -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Hyperlink onAction="#handleBack" text="Tableau de bord" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Hyperlink onAction="#handleBack" text="Gestion des modules" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Label text="Nouveau" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox alignment="TOP_CENTER">
+                            <children>
+                                
+                                <!-- Form Card -->
+                                <VBox styleClass="glass-card" spacing="30" maxWidth="800" style="-fx-padding: 0;">
+                                    <children>
+
+                                        <!-- Accent Strip -->
+                                        <Pane prefHeight="8" style="-fx-background-color: linear-gradient(to right, #1E88E5, #43A047); -fx-background-radius: 20 20 0 0;" />
+
+                                        <!-- Inner content -->
+                                        <VBox spacing="30" style="-fx-padding: 35 40 40 40;">
+                                          <children>
+
+                                        <!-- Header -->
+                                        <HBox spacing="18" alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label text="+" style="-fx-background-color: rgba(30,136,229,0.15); -fx-text-fill: #1E88E5; -fx-font-size: 28; -fx-font-weight: 900; -fx-background-radius: 14; -fx-min-width: 56; -fx-min-height: 56; -fx-alignment: center; -fx-border-color: rgba(30,136,229,0.3); -fx-border-radius: 14;" />
+                                                <VBox spacing="4">
+                                                    <children>
+                                                        <Text text="Nouveau Module" styleClass="gradient-text" style="-fx-font-size: 26; -fx-font-weight: 900;" />
+                                                        <Text text="Créez une nouvelle unité d'apprentissage pour votre catalogue SkillPath" style="-fx-fill: #64748b; -fx-font-size: 13;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <Separator opacity="0.1" />
+
+                                        <!-- Form Fields -->
+                                        <VBox spacing="20">
+                                            <children>
+                                                <!-- Title -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <HBox spacing="5" alignment="CENTER_LEFT">
+                                                            <Label text="📝 TITRE DU MODULE" styleClass="form-label" />
+                                                            <Text text="*" fill="#06B6D4" translateY="-2" />
+                                                        </HBox>
+                                                        <TextField fx:id="txtTitle" promptText="Ex: Les bases de React.js" styleClass="form-input" />
+                                                        <Label fx:id="lblErrorTitle" styleClass="error-message-small" managed="false" visible="false" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Course & Type Row -->
+                                                <HBox spacing="20">
+                                                    <children>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <HBox spacing="5" alignment="CENTER_LEFT">
+                                                                    <Label text="📚 COURS PARENT" styleClass="form-label" />
+                                                                    <Text text="*" fill="#06B6D4" translateY="-2" />
+                                                                </HBox>
+                                                                <ComboBox fx:id="comboCourse" promptText="Choisir un cours" maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorCourse" styleClass="error-message-small" managed="false" visible="false" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <HBox spacing="5" alignment="CENTER_LEFT">
+                                                                    <Label text="🛠 TYPE DE MODULE" styleClass="form-label" />
+                                                                    <Text text="*" fill="#06B6D4" translateY="-2" />
+                                                                </HBox>
+                                                                <ComboBox fx:id="comboType" promptText="Leçon, Quiz..." maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorType" styleClass="error-message-small" managed="false" visible="false" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </HBox>
+
+                                                <!-- Description -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Label text="📄 DESCRIPTION COURTE" styleClass="form-label" />
+                                                        <TextArea fx:id="txtDescription" promptText="Résumé du module en quelques lignes..." styleClass="form-input" prefHeight="80" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Content -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Label text="⌨ CONTENU DÉTAILLÉ (TEXTE / HTML)" styleClass="form-label" />
+                                                        <TextArea fx:id="txtContent" promptText="Contenu principal du chapitre..." styleClass="form-input" prefHeight="150" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Document & Planning Row -->
+                                                <HBox spacing="20">
+                                                    <children>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="📎 DOCUMENT (URL / DRIVE)" styleClass="form-label" />
+                                                                <HBox spacing="10">
+                                                                    <TextField fx:id="txtDocument" promptText="Lien ou fichier..." styleClass="form-input" HBox.hgrow="ALWAYS" />
+                                                                    <Button onAction="#handleBrowseDocument" text="Parcourir" style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 10 20;" />
+                                                                </HBox>
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="🗓 PLANIFICATION" styleClass="form-label" />
+                                                                <DatePicker fx:id="dateScheduled" promptText="Date de publication" maxWidth="Infinity" styleClass="form-input" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+
+                                        <Separator opacity="0.1" />
+
+                                        <!-- Actions -->
+                                        <HBox spacing="20" alignment="CENTER">
+                                            <children>
+                                                <Button onAction="#handleBack" text="← Annuler" styleClass="btn-secondary" style="-fx-padding: 13 35;" />
+                                                <Button onAction="#handleSave" text="✚ Finaliser la Création" styleClass="btn-primary-elite" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                            </children>
+                                        </HBox>
+
+                                          </children>
+                                        </VBox>
+
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <!-- FLASH MESSAGE -->
+                <HBox fx:id="flashBox" alignment="CENTER_LEFT" spacing="12" managed="false" visible="false">
+                    <VBox.margin><Insets top="20"/></VBox.margin>
+                    <padding><Insets bottom="16" left="20" right="20" top="16"/></padding>
+                    <Label fx:id="flashLabel" />
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>

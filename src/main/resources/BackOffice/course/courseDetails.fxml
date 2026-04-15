@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.image.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.course.CourseDetailsController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="60" right="60" top="40"/></padding>
+            <children>
+                
+                <!-- Breadcrumb -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Hyperlink onAction="#handleBack" text="Tableau de bord" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Hyperlink onAction="#handleBack" text="Gestion des cours" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Label text="Détails" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox spacing="30">
+                            <children>
+                                
+                                <!-- Header Banner -->
+                                <VBox spacing="15" style="-fx-background-color: linear-gradient(to right, #1E88E5, #1565C0); -fx-background-radius: 24; -fx-padding: 40;">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="20">
+                                            <children>
+                                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label fx:id="lblTitle" text="Formation Titre" textFill="WHITE" style="-fx-font-size: 32; -fx-font-weight: 900;" />
+                                                        <Label fx:id="lblCategoryHeader" text="Catégorie" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </VBox>
+                                                <Label fx:id="lblIdBadge" text="ID: #--" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-padding: 10 20; -fx-background-radius: 12; -fx-font-weight: bold; -fx-font-size: 14;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <GridPane hgap="30" vgap="30">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="65" />
+                                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="35" />
+                                    </columnConstraints>
+                                    <children>
+                                        
+                                        <!-- Left Column: Details & Modules -->
+                                        <VBox spacing="30" GridPane.columnIndex="0">
+                                            <children>
+                                                <!-- Description Card -->
+                                                <VBox styleClass="glass-card" spacing="20">
+                                                    <children>
+                                                        <Label text="DESCRIPTION DU COURS" style="-fx-text-fill: #8b5cf6; -fx-font-weight: 900; -fx-letter-spacing: 1.5; -fx-font-size: 12;" />
+                                                        <Label fx:id="lblDescription" text="Description détaillée ici..." textFill="WHITE" wrapText="true" style="-fx-font-size: 15; -fx-line-spacing: 5;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Modules List -->
+                                                <VBox styleClass="glass-card" spacing="20">
+                                                    <children>
+                                                        <HBox alignment="CENTER_LEFT" spacing="15">
+                                                            <children>
+                                                                <Label text="CHAPITRES &amp; MODULES" style="-fx-text-fill: #4ade80; -fx-font-weight: 900; -fx-letter-spacing: 1.5; -fx-font-size: 12;" HBox.hgrow="ALWAYS" />
+                                                                <Label fx:id="lblModuleCount" text="0 modules" textFill="#64748b" style="-fx-font-size: 12; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </HBox>
+                                                        
+                                                        <VBox fx:id="modulesContainer" spacing="12">
+                                                            <!-- Dynamic Items via Controller -->
+                                                        </VBox>
+
+                                                        <Button onAction="#handleAddModule" text="+ Ajouter un module" style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Right Column: Specs & Image -->
+                                        <VBox spacing="30" GridPane.columnIndex="1">
+                                            <children>
+                                                <!-- Specs Info -->
+                                                <VBox styleClass="glass-card" spacing="20">
+                                                    <children>
+                                                        <VBox spacing="5">
+                                                            <children>
+                                                                <Label text="NIVEAU" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Label fx:id="lblLevel" text="Intermédiaire" textFill="#60a5fa" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Separator opacity="0.05" />
+                                                        <VBox spacing="5">
+                                                            <children>
+                                                                <Label text="CATÉGORIE" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Label fx:id="lblCategory" text="Développement" textFill="#e879f9" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Separator opacity="0.05" />
+                                                        <VBox spacing="5">
+                                                            <children>
+                                                                <Label text="CRÉÉ LE" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Label fx:id="lblCreatedAt" text="12 Avril 2024" textFill="WHITE" style="-fx-font-size: 14;" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Image View -->
+                                                <VBox styleClass="glass-card" spacing="15" alignment="CENTER">
+                                                    <children>
+                                                        <Label text="IMAGE DE COUVERTURE" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" maxWidth="Infinity" />
+                                                        <StackPane style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12; -fx-min-height: 200;">
+                                                            <children>
+                                                                <ImageView fx:id="imgCourse" fitWidth="220.0" preserveRatio="true" />
+                                                                <Label fx:id="lblNoImage" text="Aucune image" textFill="#475569" visible="false" />
+                                                            </children>
+                                                        </StackPane>
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Actions -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Button onAction="#handleEdit" text="✏ Modifier la Formation"
+                                                                maxWidth="Infinity"
+                                                                style="-fx-background-color: linear-gradient(to right, #1E88E5, #43A047); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 15; -fx-background-radius: 14; -fx-padding: 16; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(30,136,229,0.55), 20, 0, 0, 6);" />
+                                                        <Button onAction="#handleBack" text="← Retour à la liste"
+                                                                maxWidth="Infinity"
+                                                                style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13; -fx-background-radius: 12; -fx-padding: 12; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </GridPane>
+
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>
