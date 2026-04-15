@@ -75,7 +75,7 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérifie si un email existe déjà ───
     public boolean emailExists(String email) {
-        String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -146,7 +146,7 @@ public class UserService implements Iservice<User> {
         if (!emailExists(email)) return false;
 
         String code = generateVerificationCode();
-        String sql = "UPDATE user SET verification_code = ? WHERE email = ?";
+        String sql = "UPDATE users SET verification_code = ? WHERE email = ?";
         
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, code);
@@ -155,7 +155,7 @@ public class UserService implements Iservice<User> {
             
             // On peut chercher le nom d'utilisateur pour personnaliser l'email
             String username = "Collaborateur";
-            String findUser = "SELECT username FROM user WHERE email = ?";
+            String findUser = "SELECT username FROM users WHERE email = ?";
             try (PreparedStatement ps2 = connection.prepareStatement(findUser)) {
                 ps2.setString(1, email);
                 ResultSet rs = ps2.executeQuery();
@@ -174,7 +174,7 @@ public class UserService implements Iservice<User> {
      * Vérifie le code, hache le nouveau mot de passe et l'enregistre.
      */
     public boolean finalizePasswordReset(String email, String code, String newPassword) {
-        String sql = "SELECT verification_code FROM user WHERE email = ?";
+        String sql = "SELECT verification_code FROM users WHERE email = ?";
         
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -187,7 +187,7 @@ public class UserService implements Iservice<User> {
                     String hashed = hashPassword(newPassword);
                     
                     // On met à jour le mot de passe et on invalide le code utilisé
-                    String updateSql = "UPDATE user SET password = ?, verification_code = NULL WHERE email = ?";
+                    String updateSql = "UPDATE users SET password = ?, verification_code = NULL WHERE email = ?";
                     try (PreparedStatement ups = connection.prepareStatement(updateSql)) {
                         ups.setString(1, hashed);
                         ups.setString(2, email);
@@ -205,7 +205,7 @@ public class UserService implements Iservice<User> {
     // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
-        String sql = "INSERT INTO user (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
+        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             // Génération de l'UUID v7 (Time-ordered)
@@ -238,7 +238,7 @@ public class UserService implements Iservice<User> {
     }
     
     public void ajouterUserParAdmin(User user) throws SQLDataException {
-        String sql = "INSERT INTO user (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
+        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             UUID uuid = UuidCreator.getTimeOrderedEpoch();
@@ -271,7 +271,7 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérification du code ───
     public boolean verifyCode(String email, String code) {
-        String sql = "SELECT verification_code FROM user WHERE email = ?";
+        String sql = "SELECT verification_code FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -279,7 +279,7 @@ public class UserService implements Iservice<User> {
                 String storedCode = rs.getString("verification_code");
                 if (storedCode != null && code.equals(storedCode)) {
                     // Activer le compte
-                    String updateSql = "UPDATE user SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
+                    String updateSql = "UPDATE users SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
                     try (PreparedStatement ps2 = connection.prepareStatement(updateSql)) {
                         ps2.setString(1, email);
                         ps2.executeUpdate();
@@ -295,7 +295,7 @@ public class UserService implements Iservice<User> {
 
     // ─── Connexion ───
     public User login(String email, String password) {
-        String sql = "SELECT * FROM user WHERE email = ? AND is_verified = true";
+        String sql = "SELECT * FROM users WHERE email = ? AND is_verified = true";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -336,7 +336,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void supprimer(User user) throws SQLDataException {
-        String sql = "DELETE FROM user WHERE email = ?";
+        String sql = "DELETE FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
             ps.executeUpdate();
@@ -347,7 +347,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void modifier(User user) throws SQLDataException {
-        String sql = "UPDATE user SET username = ?, status = ?, role = ?, domaine = ?, niveau = ?, style_dapprentissage = ? WHERE email = ?";
+        String sql = "UPDATE users SET username = ?, status = ?, role = ?, domaine = ?, niveau = ?, style_dapprentissage = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getStatus());
@@ -364,7 +364,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public List<User> recuperer() throws SQLDataException {
-        String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM users";
         List<User> list = new ArrayList<>();
         if (connection == null) return list;
         try (Statement st = connection.createStatement();
@@ -392,7 +392,7 @@ public class UserService implements Iservice<User> {
         return list;
     }
    public List<User> serchByName(User user) throws SQLDataException {
-    String sql = "SELECT * FROM user WHERE username LIKE ?";
+    String sql = "SELECT * FROM users WHERE username LIKE ?";
     List<User> list = new ArrayList<>();
     if (connection == null) return list;
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -421,7 +421,7 @@ public class UserService implements Iservice<User> {
     return list;
 }
 public List<User> getClientList() throws SQLDataException {
-    String sql = "SELECT * FROM user WHERE role LIKE ?";
+    String sql = "SELECT * FROM users WHERE role LIKE ?";
     List<User> list = new ArrayList<>();
     
     if (connection == null) return list;
@@ -449,7 +449,7 @@ public List<User> getClientList() throws SQLDataException {
 
 
     public void updatePassword(String email, String newPassword) throws SQLDataException {
-        String sql = "UPDATE user SET password = ? WHERE email = ?";
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, hashPassword(newPassword));
             ps.setString(2, email);
@@ -460,7 +460,7 @@ public List<User> getClientList() throws SQLDataException {
     }
 
     public boolean checkCurrentPassword(String email, String plainPassword) {
-        String sql = "SELECT password FROM user WHERE email = ?";
+        String sql = "SELECT password FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
