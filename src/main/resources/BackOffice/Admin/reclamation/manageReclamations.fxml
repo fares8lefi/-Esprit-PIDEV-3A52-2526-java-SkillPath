@@ -13,7 +13,7 @@
 
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="Controllers.user.admin.AdminReclamationsController"
+      fx:controller="Controllers.reclamation.AdminReclamationsController"
       prefHeight="900.0"
       prefWidth="1440.0"
       styleClass="admin-reclamation-root"

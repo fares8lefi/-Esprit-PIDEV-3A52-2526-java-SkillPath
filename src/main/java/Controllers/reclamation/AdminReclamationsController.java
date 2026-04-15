@@ -1,4 +1,4 @@
-package Controllers.user.admin;
+package Controllers.reclamation;
 
 import Models.Reclamation;
 import Models.Reponse;
