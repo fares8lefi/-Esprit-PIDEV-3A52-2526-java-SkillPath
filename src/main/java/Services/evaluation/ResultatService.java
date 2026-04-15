@@ -15,7 +15,7 @@ public class ResultatService {
     }
 
     public void ajouter(Resultat resultat) throws SQLDataException {
-        String query = "INSERT INTO resultat (score, note_max, date_passage, id_quiz, id_etudiant) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO resultat (score, note_max, date_passage, quiz_id, id_etudiant) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, resultat.getScore());
             ps.setInt(2, resultat.getNote_max());
@@ -47,7 +47,7 @@ public class ResultatService {
                         rs.getInt("score"),
                         rs.getInt("note_max"),
                         rs.getTimestamp("date_passage"),
-                        rs.getInt("id_quiz"),
+                        rs.getInt("quiz_id"),
                         rs.getInt("id_etudiant")));
             }
         } catch (SQLException e) {

@@ -17,7 +17,7 @@ public class QuestionService implements Iservice<Question> {
 
     @Override
     public void ajouter(Question q) throws SQLDataException {
-        String sql = "INSERT INTO question (enonce, choix_a, choix_b, choix_c, choix_d, bonne_reponse, points, id_quiz) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO question (enonce, choix_a, choix_b, choix_c, choix_d, bonne_reponse, points, quiz_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, q.getEnonce());
             ps.setString(2, q.getChoix_a());
@@ -42,7 +42,7 @@ public class QuestionService implements Iservice<Question> {
 
     @Override
     public void modifier(Question q) throws SQLDataException {
-        String sql = "UPDATE question SET enonce=?, choix_a=?, choix_b=?, choix_c=?, choix_d=?, bonne_reponse=?, points=?, id_quiz=? WHERE id_question=?";
+        String sql = "UPDATE question SET enonce=?, choix_a=?, choix_b=?, choix_c=?, choix_d=?, bonne_reponse=?, points=?, quiz_id=? WHERE id_question=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, q.getEnonce());
             ps.setString(2, q.getChoix_a());
@@ -77,7 +77,7 @@ public class QuestionService implements Iservice<Question> {
 
     public List<Question> recupererParQuiz(int id_quiz) throws SQLDataException {
         List<Question> list = new ArrayList<>();
-        String sql = "SELECT * FROM question WHERE id_quiz = ?";
+        String sql = "SELECT * FROM question WHERE quiz_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id_quiz);
             ResultSet rs = ps.executeQuery();
@@ -91,7 +91,7 @@ public class QuestionService implements Iservice<Question> {
                 q.setChoix_d(rs.getString("choix_d"));
                 q.setBonne_reponse(rs.getString("bonne_reponse"));
                 q.setPoints(rs.getInt("points"));
-                q.setId_quiz(rs.getInt("id_quiz"));
+                q.setId_quiz(rs.getInt("quiz_id"));
                 list.add(q);
             }
         } catch (SQLException e) {
