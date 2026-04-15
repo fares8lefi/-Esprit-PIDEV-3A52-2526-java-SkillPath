@@ -15,11 +15,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-/**
- * Contrôleur de la barre latérale admin.
- * Gère la navigation entre les modules et la déconnexion.
- * Chargé via fx:include dans homeAdmin.fxml.
- */
 public class SideBarController implements Initializable {
 
     @FXML private Button btnDashboard;
@@ -35,10 +30,6 @@ public class SideBarController implements Initializable {
         // Le style par défaut est géré par l'injection dans le contrôleur parent
         // ou via setSelected() après le chargement.
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Handlers navigation
-    // ─────────────────────────────────────────────────────────────
 
     @FXML
     private void handleDashboard(ActionEvent event) {
@@ -61,8 +52,7 @@ public class SideBarController implements Initializable {
     @FXML
     private void handleReclamations(ActionEvent event) {
         setActive(btnReclamations);
-        // navigateTo(event, "/BackOffice/reclamation/reclamationList.fxml", "Demandes des Membres");
-        System.out.println("[Navigation] → Demandes des Membres (à implémenter)");
+        navigateTo(event, "/BackOffice/Admin/reclamation/manageReclamations.fxml", "Demandes des Membres");
     }
 
     @FXML
@@ -96,6 +86,7 @@ public class SideBarController implements Initializable {
             case "courses"      -> setActive(btnCourses);
             case "modules"      -> setActive(btnModules);
             case "reclamations" -> setActive(btnReclamations);
+            case "evaluation"  -> setActive(btnEvaluation);
             case "users"        -> setActive(btnUsers);
         }
     }
@@ -104,13 +95,12 @@ public class SideBarController implements Initializable {
     // Helpers
     // ─────────────────────────────────────────────────────────────
 
-    /**
-     * Met en surbrillance le bouton actif et retire le style actif des autres.
-     */
     private void setActive(Button active) {
         Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnEvaluation, btnUsers};
         for (Button btn : all) {
-            if (btn == null) continue;
+            if (btn == null) {
+                continue;
+            }
             btn.getStyleClass().remove("nav-item-active");
             if (!btn.getStyleClass().contains("nav-item")) {
                 btn.getStyleClass().add("nav-item");
@@ -121,9 +111,6 @@ public class SideBarController implements Initializable {
         }
     }
 
-    /**
-     * Charge un FXML et remplace la scène courante.
-     */
     private void navigateTo(ActionEvent event, String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -134,7 +121,7 @@ public class SideBarController implements Initializable {
             stage.setMaximized(stage.isMaximized());
             stage.show();
         } catch (IOException e) {
-            System.err.println("[SideBarController] Erreur navigation → " + fxmlPath + " : " + e.getMessage());
+            System.err.println("[SideBarController] Erreur navigation vers " + fxmlPath + " : " + e.getMessage());
             e.printStackTrace();
         }
     }

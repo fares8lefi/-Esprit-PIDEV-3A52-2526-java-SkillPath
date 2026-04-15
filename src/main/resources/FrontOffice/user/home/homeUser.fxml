@@ -10,7 +10,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0f172a;" stylesheets="@../../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.HomeUserController">
+<AnchorPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0f172a;" stylesheets="@../auth/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.HomeUserController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -194,8 +194,8 @@
                                           <Label opacity="0.8" text="Our elite team is here for you. Initiate a request and receive a swift response." textFill="WHITE" />
                                        </children>
                                     </VBox>
-                                    <Button prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10;" text="New Request" />
-                                    <Button prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 10; -fx-background-radius: 10;" text="My Requests" />
+                                    <Button onAction="#openAddReclamation" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10;" text="New Request" />
+                                    <Button onAction="#openMyReclamations" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 10; -fx-background-radius: 10;" text="My Requests" />
                                  </children>
                               </HBox>
                            </children>

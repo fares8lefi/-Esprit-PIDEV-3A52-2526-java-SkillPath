@@ -118,4 +118,13 @@ public class HomeUserController implements Initializable {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void openAddReclamation(ActionEvent event) {
+        navigateTo(event, "/FrontOffice/reclamation/AddReclamation.fxml", "Nouvelle Réclamation");
+    }
+
+    @FXML
+    private void openMyReclamations(ActionEvent event) {
+        navigateTo(event, "/FrontOffice/reclamation/UserReclamations.fxml", "Mes Réclamations");
+    }
 }
