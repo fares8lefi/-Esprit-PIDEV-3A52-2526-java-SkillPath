@@ -26,7 +26,7 @@ public class EditCourseController implements Initializable {
 
     @FXML private TextField txtTitle;
     @FXML private ComboBox<String> comboLevel;
-    @FXML private TextField txtCategory;
+    @FXML private ComboBox<String> comboCategory;
     @FXML private TextArea txtDescription;
     @FXML private Label lblCourseTitleHeader;
     @FXML private Label lblIdBadge;
@@ -38,6 +38,9 @@ public class EditCourseController implements Initializable {
     @FXML private HBox flashBox;
     @FXML private Label flashLabel;
     @FXML private SideBarController sideBarController;
+    @FXML private Label lblErrorTitle;
+    @FXML private Label lblErrorCategory;
+    @FXML private Label lblErrorDescription;
 
     private final CourseService courseService = new CourseService();
     private Course currentCourse;
@@ -49,11 +52,69 @@ public class EditCourseController implements Initializable {
             sideBarController.setSelected("courses");
         }
         setupLevels();
+        setupCategories();
+        setupValidationListeners();
+    }
+
+    private void setupValidationListeners() {
+        txtTitle.textProperty().addListener((obs, oldVal, newVal) -> validateField(txtTitle));
+        comboCategory.valueProperty().addListener((obs, oldVal, newVal) -> validateField(comboCategory));
+        txtDescription.textProperty().addListener((obs, oldVal, newVal) -> validateField(txtDescription));
+        
+        txtTitle.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(txtTitle); });
+        comboCategory.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(comboCategory); });
+        txtDescription.focusedProperty().addListener((obs, oldVal, newVal) -> { if (!newVal) validateField(txtDescription); });
+    }
+
+    private void validateField(Control field) {
+        boolean isValid = true;
+        String errorMsg = "";
+        Label targetLabel = null;
+
+        if (field instanceof TextField tf) {
+            String text = tf.getText().trim();
+            if (tf == txtTitle) {
+                targetLabel = lblErrorTitle;
+                if (text.isEmpty()) { isValid = false; errorMsg = "Le titre est obligatoire"; }
+                else if (text.length() < 3) { isValid = false; errorMsg = "Minimum 3 caractères requis (" + text.length() + "/3)"; }
+            }
+        } else if (field instanceof ComboBox<?> cb) {
+            String val = (String) cb.getValue();
+            if (cb == comboCategory) {
+                targetLabel = lblErrorCategory;
+                if (val == null || val.isEmpty()) { isValid = false; errorMsg = "La catégorie est obligatoire"; }
+            }
+        } else if (field instanceof TextArea ta) {
+            String text = ta.getText().trim();
+            targetLabel = lblErrorDescription;
+            if (text.isEmpty()) { isValid = false; errorMsg = "La description est obligatoire"; }
+            else if (text.length() < 10) { isValid = false; errorMsg = "Minimum 10 caractères requis (" + text.length() + "/10)"; }
+        }
+
+        if (isValid) {
+            field.setStyle("-fx-border-color: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.03); -fx-text-fill: white;");
+            if (targetLabel != null) {
+                targetLabel.setVisible(false);
+                targetLabel.setManaged(false);
+            }
+        } else {
+            field.setStyle("-fx-border-color: #f43f5e; -fx-background-color: rgba(244, 63, 94, 0.05); -fx-text-fill: white;");
+            if (targetLabel != null) {
+                targetLabel.setText(errorMsg);
+                targetLabel.setVisible(true);
+                targetLabel.setManaged(true);
+            }
+        }
     }
 
     private void setupLevels() {
         comboLevel.setItems(FXCollections.observableArrayList("Débutant", "Intermédiaire", "Avancé"));
         styleComboBox(comboLevel);
+    }
+
+    private void setupCategories() {
+        comboCategory.setItems(FXCollections.observableArrayList("Développement", "Design", "Marketing", "Devops", "Businesses"));
+        styleComboBox(comboCategory);
     }
 
     private void styleComboBox(ComboBox<String> combo) {
@@ -84,9 +145,12 @@ public class EditCourseController implements Initializable {
         lblIdBadge.setText("ID: #" + course.getId());
         lblCourseTitleHeader.setText(course.getTitle());
         txtTitle.setText(course.getTitle());
+        lblErrorTitle.setVisible(false); lblErrorTitle.setManaged(false);
         comboLevel.setValue(course.getLevel());
-        txtCategory.setText(course.getCategory());
+        comboCategory.setValue(course.getCategory());
+        lblErrorCategory.setVisible(false); lblErrorCategory.setManaged(false);
         txtDescription.setText(course.getDescription());
+        lblErrorDescription.setVisible(false); lblErrorDescription.setManaged(false);
         
         // Simuler l'image actuelle
         lblCurrentImage.setText("Image actuelle : " + (course.getImage() != null ? course.getImage() : "Aucune"));
@@ -121,14 +185,26 @@ public class EditCourseController implements Initializable {
         if (isInputValid()) {
             currentCourse.setTitle(txtTitle.getText());
             currentCourse.setLevel(comboLevel.getValue());
-            currentCourse.setCategory(txtCategory.getText());
+            currentCourse.setCategory(comboCategory.getValue());
             currentCourse.setDescription(txtDescription.getText());
+
+            // Handle Image Update (Bulletproof Path)
+            if (selectedImageFile != null) {
+                String fileName = System.currentTimeMillis() + "_" + selectedImageFile.getName();
+                File destinationDir = Utils.AssetLoader.getModulesUploadsDir();
+                File destinationFile = new File(destinationDir, fileName);
+                try {
+                    java.nio.file.Files.copy(selectedImageFile.toPath(), destinationFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    currentCourse.setImage(fileName);
+                } catch (IOException e) {
+                    System.err.println("Erreur mise à jour image : " + e.getMessage());
+                }
+            }
 
             try {
                 courseService.modifier(currentCourse);
                 showFlash("Modifications enregistrées !", true);
                 
-                // Navigate back after a short delay
                 new Thread(() -> {
                     try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
                     javafx.application.Platform.runLater(() -> navigateToList(event));
@@ -146,11 +222,35 @@ public class EditCourseController implements Initializable {
     }
 
     private boolean isInputValid() {
-        if (txtTitle.getText().isBlank()) {
-            showFlash("Le titre est obligatoire", false);
-            return false;
+        boolean valid = true;
+        
+        if (txtTitle.getText().trim().length() < 3) {
+            validateField(txtTitle);
+            valid = false;
         }
-        return true;
+        if (comboCategory.getValue() == null || comboCategory.getValue().isEmpty()) {
+            validateField(comboCategory);
+            valid = false;
+        }
+        if (txtDescription.getText().trim().length() < 10) {
+            validateField(txtDescription);
+            valid = false;
+        }
+
+        if (!valid) {
+            showAlert("Données Invalides", "Veuillez corriger les erreurs suivantes :\n- Titre : min 3 caractères\n- Description : min 10 caractères\n- Catégorie : obligatoire");
+            showFlash("Veuillez corriger les erreurs (Titre: min 3, Desc: min 10)", false);
+        }
+        
+        return valid;
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void navigateToList(ActionEvent event) {
