@@ -15,15 +15,16 @@ public class CourseService implements Iservice<Course> {
 
     @Override
     public void ajouter(Course course) throws SQLDataException {
-        String sql = "INSERT INTO course (title, description, level, image, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO course (title, description, level, image, category, price, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, course.getTitle());
             ps.setString(2, course.getDescription());
             ps.setString(3, course.getLevel());
             ps.setString(4, course.getImage());
             ps.setString(5, course.getCategory());
-            ps.setTimestamp(6, Timestamp.valueOf(course.getCreatedAt() != null ? course.getCreatedAt() : java.time.LocalDateTime.now()));
-            ps.setTimestamp(7, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            ps.setDouble(6, course.getPrice());
+            ps.setTimestamp(7, Timestamp.valueOf(course.getCreatedAt() != null ? course.getCreatedAt() : java.time.LocalDateTime.now()));
+            ps.setTimestamp(8, Timestamp.valueOf(java.time.LocalDateTime.now()));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -43,15 +44,16 @@ public class CourseService implements Iservice<Course> {
 
     @Override
     public void modifier(Course course) throws SQLDataException {
-        String sql = "UPDATE course SET title = ?, description = ?, level = ?, image = ?, category = ?, updated_at = ? WHERE id = ?";
+        String sql = "UPDATE course SET title = ?, description = ?, level = ?, image = ?, category = ?, price = ?, updated_at = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, course.getTitle());
             ps.setString(2, course.getDescription());
             ps.setString(3, course.getLevel());
             ps.setString(4, course.getImage());
             ps.setString(5, course.getCategory());
-            ps.setTimestamp(6, Timestamp.valueOf(java.time.LocalDateTime.now()));
-            ps.setInt(7, course.getId());
+            ps.setDouble(6, course.getPrice());
+            ps.setTimestamp(7, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            ps.setInt(8, course.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -71,6 +73,7 @@ public class CourseService implements Iservice<Course> {
                 c.setLevel(rs.getString("level"));
                 c.setImage(rs.getString("image"));
                 c.setCategory(rs.getString("category"));
+                c.setPrice(rs.getDouble("price"));
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setUpdatedAt(rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
                 courses.add(c);
