@@ -96,7 +96,7 @@ public class AdminReclamationsController {
             return;
         }
 
-        User admin = Session.getCurrentUser();
+        User admin = Session.getInstance().getCurrentUser();
         if (admin == null || admin.getId() == null) {
             showAlert(Alert.AlertType.ERROR, "Session", "Session admin invalide.");
             return;
