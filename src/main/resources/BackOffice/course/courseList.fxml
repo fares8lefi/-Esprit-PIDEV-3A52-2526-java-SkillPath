@@ -41,17 +41,18 @@
                     <VBox.margin><Insets bottom="30"/></VBox.margin>
                 </HBox>
 
-                <!-- FILTERS BAR -->
-                <HBox spacing="20" alignment="CENTER_LEFT" styleClass="glass-card" style="-fx-padding: 20;">
+                <!-- ELITE POWER BAR -->
+                <HBox spacing="15" alignment="CENTER_LEFT" styleClass="glass-card" style="-fx-padding: 15 25; -fx-background-radius: 15; -fx-border-radius: 15;">
                     <children>
-                        <HBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 10; -fx-padding: 0 15; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 10;">
                             <children>
-                                <Label text="🔍" style="-fx-text-fill: #94a3b8; -fx-font-size: 16;" />
-                                <TextField fx:id="txtSearch" promptText="Rechercher un cours..." styleClass="form-input" HBox.hgrow="ALWAYS" />
+                                <Label text="🔍" style="-fx-text-fill: #3b82f6; -fx-font-size: 16; -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 10, 0, 0, 0);" />
+                                <TextField fx:id="txtSearch" promptText="Rechercher une formation..." 
+                                           style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 0; -fx-font-size: 14;" HBox.hgrow="ALWAYS" />
                             </children>
                         </HBox>
-                        <ComboBox fx:id="comboFilterLevel" promptText="Tous les niveaux" prefWidth="200" styleClass="form-input" />
-                        <Button fx:id="btnReset" onAction="#handleReset" text="Réinitialiser" styleClass="btn-secondary" />
+                        <ComboBox fx:id="comboFilterLevel" promptText="Niveau" prefWidth="180" styleClass="form-input" />
+                        <Button fx:id="btnReset" onAction="#handleReset" text="🔄" styleClass="btn-secondary" style="-fx-min-width: 50; -fx-font-size: 16;" />
                     </children>
                     <VBox.margin><Insets bottom="30"/></VBox.margin>
                 </HBox>
