@@ -9,19 +9,21 @@ public class Course {
     private String level;
     private String image;
     private String category;
+    private double price;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Course() {
     }
 
-    public Course(int id, String title, String description, String level, String image, String category, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Course(int id, String title, String description, String level, String image, String category, double price, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.level = level;
         this.image = image;
         this.category = category;
+        this.price = price;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -45,6 +47,9 @@ public class Course {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -58,6 +63,7 @@ public class Course {
                 ", title='" + title + '\'' +
                 ", level='" + level + '\'' +
                 ", category='" + category + '\'' +
+                ", price=" + price +
                 '}';
     }
 }
