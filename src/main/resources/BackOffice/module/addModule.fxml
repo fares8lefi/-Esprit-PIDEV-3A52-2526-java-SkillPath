@@ -76,6 +76,7 @@
                                                             <Text text="*" fill="#06B6D4" translateY="-2" />
                                                         </HBox>
                                                         <TextField fx:id="txtTitle" promptText="Ex: Les bases de React.js" styleClass="form-input" />
+                                                        <Label fx:id="lblErrorTitle" styleClass="error-message-small" managed="false" visible="false" />
                                                     </children>
                                                 </VBox>
 
@@ -89,6 +90,7 @@
                                                                     <Text text="*" fill="#06B6D4" translateY="-2" />
                                                                 </HBox>
                                                                 <ComboBox fx:id="comboCourse" promptText="Choisir un cours" maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorCourse" styleClass="error-message-small" managed="false" visible="false" />
                                                             </children>
                                                         </VBox>
                                                         <VBox spacing="10" HBox.hgrow="ALWAYS">
@@ -98,6 +100,7 @@
                                                                     <Text text="*" fill="#06B6D4" translateY="-2" />
                                                                 </HBox>
                                                                 <ComboBox fx:id="comboType" promptText="Leçon, Quiz..." maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorType" styleClass="error-message-small" managed="false" visible="false" />
                                                             </children>
                                                         </VBox>
                                                     </children>
