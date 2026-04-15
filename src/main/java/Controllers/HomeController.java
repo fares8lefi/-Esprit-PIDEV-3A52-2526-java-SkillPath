@@ -39,7 +39,23 @@ public class HomeController {
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            System.out.println("Erreur redirection login : " + e.getMessage());
+            System.err.println("Erreur redirection login : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void goToCourses() {
+        try {
+            Parent root = FXMLLoader.load(
+                getClass().getResource("/FrontOffice/course/courseList.fxml")
+            );
+            // Using startAdventureBtn as a reference to get the window
+            Stage stage = (Stage) startAdventureBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur redirection cours : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
