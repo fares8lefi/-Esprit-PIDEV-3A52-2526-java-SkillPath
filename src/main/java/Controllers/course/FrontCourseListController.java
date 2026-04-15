@@ -304,7 +304,7 @@ public class FrontCourseListController implements Initializable {
     @FXML
     private void goToHome() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/home/home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
             javafx.scene.Parent root = loader.load();
             javafx.stage.Stage stage = (javafx.stage.Stage) lblResultCount.getScene().getWindow();
             stage.setScene(new javafx.scene.Scene(root));
