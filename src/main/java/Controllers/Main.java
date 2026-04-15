@@ -13,9 +13,9 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            Parent root = FXMLLoader.load(
-                getClass().getResource("/FrontOffice/home/home.fxml")
-            );
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    Main.class.getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             stage.setTitle("SkillPath");
             stage.setScene(scene);

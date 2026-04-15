@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuizFrontOfficeController">
+   <stylesheets>
+      <URL value="@QuizFrontOffice.css" />
+   </stylesheets>
+   <content>
+      <VBox spacing="30.0" alignment="TOP_CENTER" style="-fx-background-color: #0f172a;">
+         
+         <!-- Navigation Bar -->
+         <HBox alignment="CENTER_LEFT" styleClass="glass-nav" prefHeight="65.0">
+            <HBox alignment="CENTER_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
+               <Label style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: white;" text="Skill" />
+               <Label style="-fx-font-size: 20px; -fx-font-weight: 900;" styleClass="gradient-text" text="Path" />
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" spacing="20.0">
+               <Label styleClass="text-slate-400, font-bold" text="Accueil" />
+               <Label text="|" styleClass="text-slate-500" />
+               <Label style="-fx-text-fill: #3b82f6;" styleClass="font-bold" text="Quiz" />
+               <Label text="|" styleClass="text-slate-500" />
+               <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToHistory" text="Mes Résultats" />
+            </HBox>
+         </HBox>
+
+         <VBox maxWidth="1200.0" spacing="30.0" alignment="TOP_CENTER" VBox.vgrow="ALWAYS">
+            <padding>
+               <Insets bottom="40.0" left="40.0" right="40.0" top="10.0" />
+            </padding>
+
+            <!-- Header -->
+            <VBox alignment="CENTER" spacing="10.0">
+               <Label styleClass="badge-purple" text="🎯 Évaluation" />
+               <HBox alignment="CENTER">
+                   <Label styleClass="text-4xl" text="Quiz " />
+                   <Label styleClass="text-4xl, gradient-text" text="Disponibles" />
+               </HBox>
+               <Label styleClass="text-slate-400, text-lg" text="Testez vos connaissances et évaluez votre progression" />
+            </VBox>
+
+            <!-- Search & Sort Box -->
+            <HBox styleClass="glass-card" alignment="CENTER_LEFT" spacing="20.0">
+               <VBox HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtSearch" promptText="Rechercher un quiz..." styleClass="search-input" />
+               </VBox>
+               <ComboBox fx:id="comboSort" prefWidth="200.0" promptText="Trier par..." styleClass="combo-box" />
+            </HBox>
+
+            <!-- Quiz Grid (Populated Dynamically) -->
+            <FlowPane fx:id="quizGrid" hgap="25.0" vgap="25.0" alignment="CENTER_LEFT" />
+
+         </VBox>
+      </VBox>
+   </content>
+</ScrollPane>
