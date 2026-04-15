@@ -85,6 +85,7 @@
                                                     <children>
                                                         <Label text="TITRE DU COURS" styleClass="form-label" />
                                                         <TextField fx:id="txtTitle" promptText="Ex: Introduction au Développement FullStack" styleClass="form-input" />
+                                                        <Label fx:id="lblErrorTitle" styleClass="error-message-small" managed="false" visible="false" />
                                                     </children>
                                                 </VBox>
 
@@ -100,7 +101,8 @@
                                                         <VBox spacing="10" HBox.hgrow="ALWAYS">
                                                             <children>
                                                                 <Label text="CATÉGORIE" styleClass="form-label" />
-                                                                <TextField fx:id="txtCategory" promptText="Ex: Développement" styleClass="form-input" />
+                                                                <ComboBox fx:id="comboCategory" promptText="Choisir une catégorie" maxWidth="Infinity" styleClass="form-input" />
+                                                                <Label fx:id="lblErrorCategory" styleClass="error-message-small" managed="false" visible="false" />
                                                             </children>
                                                         </VBox>
                                                     </children>
@@ -111,6 +113,7 @@
                                                     <children>
                                                         <Label text="DESCRIPTION DÉTAILLÉE" styleClass="form-label" />
                                                         <TextArea fx:id="txtDescription" promptText="Expliquez ce que les étudiants vont apprendre..." styleClass="form-input" prefHeight="150" wrapText="true" />
+                                                        <Label fx:id="lblErrorDescription" styleClass="error-message-small" managed="false" visible="false" />
                                                     </children>
                                                 </VBox>
 
