@@ -84,6 +84,15 @@
             </graphic>
         </Button>
 
+        <Button fx:id="btnEvaluation" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleEvaluation" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="🎯" style="-fx-font-size: 18;"/>
+                    <Label text="Centre d'Évaluation"/>
+                </HBox>
+            </graphic>
+        </Button>
+
         <Button fx:id="btnUsers" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleUsers" styleClass="nav-item">
             <graphic>
                 <HBox spacing="15" alignment="CENTER_LEFT">

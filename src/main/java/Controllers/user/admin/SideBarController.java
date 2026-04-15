@@ -26,6 +26,7 @@ public class SideBarController implements Initializable {
     @FXML private Button btnCourses;
     @FXML private Button btnModules;
     @FXML private Button btnReclamations;
+    @FXML private Button btnEvaluation;
     @FXML private Button btnUsers;
     @FXML private Button btnLogout;
 
@@ -67,6 +68,12 @@ public class SideBarController implements Initializable {
     }
 
     @FXML
+    private void handleEvaluation(ActionEvent event) {
+        setActive(btnEvaluation);
+        navigateTo(event, "/BackOffice/evaluation/QuizManagement.fxml", "Centre d'Évaluation - SkillPath");
+    }
+
+    @FXML
     private void handleUsers(ActionEvent event) {
         setActive(btnUsers);
         navigateTo(event, "/BackOffice/Admin/user/gererUser.fxml", "Annuaire des Membres - Administrateur");
@@ -86,7 +93,7 @@ public class SideBarController implements Initializable {
      * Met en surbrillance le bouton actif et retire le style actif des autres.
      */
     private void setActive(Button active) {
-        Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnUsers};
+        Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnEvaluation, btnUsers};
         for (Button btn : all) {
             if (btn == null) continue;
             btn.getStyleClass().remove("nav-item-active");

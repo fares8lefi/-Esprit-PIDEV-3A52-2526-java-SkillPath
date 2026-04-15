@@ -135,6 +135,16 @@
     -fx-text-fill: #fbbf24;
 }
 
+.badge-purple {
+    -fx-background-color: rgba(139, 92, 246, 0.2);
+    -fx-text-fill: #a78bfa;
+}
+
+.badge-blue {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #60a5fa;
+}
+
 .badge-id {
     -fx-font-size: 11px;
     -fx-font-weight: bold;

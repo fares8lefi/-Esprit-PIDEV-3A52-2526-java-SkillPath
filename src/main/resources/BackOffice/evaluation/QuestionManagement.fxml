@@ -4,86 +4,102 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="700.0" prefWidth="1000.0" spacing="20.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuestionController">
+<HBox prefHeight="900.0" prefWidth="1440.0" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuestionController">
    <stylesheets>
       <URL value="@QuizManagement.css" />
    </stylesheets>
-   <padding>
-      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-   </padding>
+   
+   <children>
+       <!-- SIDEBAR -->
+       <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
 
-   <!-- Header -->
-   <HBox alignment="CENTER_LEFT" spacing="20.0">
-      <VBox HBox.hgrow="ALWAYS">
-         <HBox alignment="BOTTOM_LEFT">
-             <Label styleClass="title-main" text="Questions du " />
-             <Label styleClass="title-main, gradient-text" text="Quiz" />
-         </HBox>
-         <Label fx:id="lblSubtitle" styleClass="subtitle" text="0 questions configurées" />
-      </VBox>
-      <Button styleClass="btn-secondary" mnemonicParsing="false" onAction="#handleBack" text="Retour aux Quiz" />
-   </HBox>
-
-   <!-- Cards Grid Container -->
-   <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-       <content>
-          <FlowPane fx:id="questionGrid" hgap="20.0" vgap="20.0" prefWrapLength="900" alignment="CENTER" style="-fx-padding: 10;">
-              <!-- Cards will be injected here -->
-          </FlowPane>
-       </content>
-   </ScrollPane>
-
-   <!-- Form -->
-   <VBox styleClass="glass-card" spacing="15.0">
-       <Label style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" text="Éditeur de Question" />
-      
-      <VBox spacing="5.0">
-         <Label styleClass="label-form" text="ÉNONCÉ" />
-         <TextArea fx:id="txtEnonce" prefHeight="50.0" />
-      </VBox>
-
-      <HBox spacing="15.0">
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="CHOIX A" />
-            <TextField fx:id="txtChoixA" />
-         </VBox>
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="CHOIX B" />
-            <TextField fx:id="txtChoixB" />
-         </VBox>
-      </HBox>
-
-      <HBox spacing="15.0">
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="CHOIX C" />
-            <TextField fx:id="txtChoixC" />
-         </VBox>
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="CHOIX D" />
-            <TextField fx:id="txtChoixD" />
-         </VBox>
-      </HBox>
-
-      <HBox spacing="15.0" alignment="CENTER_LEFT">
-         <VBox spacing="5.0">
-             <Label styleClass="label-form" text="BONNE RÉPONSE" />
-             <ComboBox fx:id="comboBonneReponse" prefWidth="120.0" styleClass="text-input" />
-         </VBox>
-         <VBox spacing="5.0">
-             <Label styleClass="label-form" text="POINTS" />
-             <TextField fx:id="txtPoints" prefWidth="80.0" />
-         </VBox>
-         
-         <VBox alignment="CENTER_RIGHT">
-             <Label fx:id="lblError" styleClass="error-label" visible="false" />
-         </VBox>
-         
-         <HBox spacing="15.0" alignment="BOTTOM_RIGHT" HBox.hgrow="ALWAYS">
-            <Button mnemonicParsing="false" onAction="#handleAdd" styleClass="btn-primary" text="Ajouter" />
-            <Button mnemonicParsing="false" onAction="#handleUpdate" styleClass="btn-primary" text="Modifier" />
-            <Button mnemonicParsing="false" onAction="#handleDelete" styleClass="btn-delete" text="Supprimer" />
-            <Button mnemonicParsing="false" onAction="#handleClear" styleClass="btn-secondary" text="Vider" />
-         </HBox>
-      </HBox>
-   </VBox>
-</VBox>
+       <!-- MAIN CONTENT -->
+       <VBox HBox.hgrow="ALWAYS" spacing="20.0" style="-fx-background-color: transparent;">
+           <padding>
+              <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+           </padding>
+           <children>
+               <!-- Header -->
+               <HBox alignment="CENTER_LEFT" spacing="20.0">
+                  <VBox HBox.hgrow="ALWAYS">
+                     <HBox alignment="BOTTOM_LEFT">
+                         <Label styleClass="title-main" text="Questions du " />
+                         <Label styleClass="title-main, gradient-text" text="Quiz" />
+                     </HBox>
+                     <Label fx:id="lblSubtitle" styleClass="subtitle" text="Chargement..." />
+                  </VBox>
+                  <Button styleClass="btn-secondary" mnemonicParsing="false" onAction="#handleBack" text="← Retour aux Quiz" />
+               </HBox>
+            
+               <!-- Cards Grid Container -->
+               <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                   <content>
+                      <FlowPane fx:id="questionGrid" hgap="20.0" vgap="20.0" prefWrapLength="1100" alignment="TOP_LEFT" style="-fx-padding: 10;">
+                          <!-- Cards will be injected here -->
+                      </FlowPane>
+                   </content>
+               </ScrollPane>
+            
+               <!-- Form -->
+               <VBox styleClass="glass-card" spacing="15.0">
+                   <Label style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" text="Éditeur de Question" />
+                  
+                  <VBox spacing="10.0">
+                      <VBox spacing="5.0">
+                         <Label styleClass="label-form" text="ÉNONCÉ DE LA QUESTION" />
+                         <TextArea fx:id="txtEnonce" prefHeight="60.0" styleClass="text-area" />
+                      </VBox>
+            
+                      <GridPane hgap="15.0" vgap="15.0">
+                         <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                         </columnConstraints>
+                         <children>
+                            <VBox spacing="5.0">
+                               <Label styleClass="label-form" text="CHOIX A" />
+                               <TextField fx:id="txtChoixA" styleClass="text-input" />
+                            </VBox>
+                            <VBox spacing="5.0" GridPane.columnIndex="1">
+                               <Label styleClass="label-form" text="CHOIX B" />
+                               <TextField fx:id="txtChoixB" styleClass="text-input" />
+                            </VBox>
+                            <VBox spacing="5.0" GridPane.rowIndex="1">
+                               <Label styleClass="label-form" text="CHOIX C" />
+                               <TextField fx:id="txtChoixC" styleClass="text-input" />
+                            </VBox>
+                            <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                               <Label styleClass="label-form" text="CHOIX D" />
+                               <TextField fx:id="txtChoixD" styleClass="text-input" />
+                            </VBox>
+                         </children>
+                      </GridPane>
+            
+                      <HBox spacing="15.0" alignment="BOTTOM_LEFT">
+                         <VBox spacing="5.0">
+                             <Label styleClass="label-form" text="BONNE RÉPONSE" />
+                             <ComboBox fx:id="comboBonneReponse" prefWidth="150.0" styleClass="combo-box" />
+                         </VBox>
+                         <VBox spacing="5.0">
+                             <Label styleClass="label-form" text="POINTS" />
+                             <TextField fx:id="txtPoints" prefWidth="80.0" styleClass="text-input" />
+                         </VBox>
+                         
+                         <Region HBox.hgrow="ALWAYS" />
+            
+                         <VBox alignment="CENTER_RIGHT" spacing="10.0">
+                             <Label fx:id="lblError" styleClass="error-label" visible="false" />
+                             <HBox spacing="15.0">
+                                <Button mnemonicParsing="false" onAction="#handleAdd" styleClass="btn-primary" text="Ajouter" />
+                                <Button mnemonicParsing="false" onAction="#handleUpdate" styleClass="btn-primary" text="Modifier" />
+                                <Button mnemonicParsing="false" onAction="#handleDelete" styleClass="btn-delete" text="Supprimer" />
+                                <Button mnemonicParsing="false" onAction="#handleClear" styleClass="btn-secondary" text="Vider" />
+                             </HBox>
+                         </VBox>
+                      </HBox>
+                  </VBox>
+               </VBox>
+           </children>
+       </VBox>
+   </children>
+</HBox>

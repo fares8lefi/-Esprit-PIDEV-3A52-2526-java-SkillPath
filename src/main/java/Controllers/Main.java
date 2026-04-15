@@ -14,7 +14,7 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(
-                    Main.class.getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
+                    Main.class.getResource("/FrontOffice/user/auth/login.fxml"));
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             stage.setTitle("SkillPath");

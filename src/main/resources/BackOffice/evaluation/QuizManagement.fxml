@@ -5,80 +5,87 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 
-<VBox prefHeight="700.0" prefWidth="1000.0" spacing="20.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuizController">
+<HBox prefHeight="900.0" prefWidth="1440.0" style="-fx-background-color: #0f172a;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.evaluation.QuizController">
    <stylesheets>
       <URL value="@QuizManagement.css" />
    </stylesheets>
+   
+   <children>
+       <!-- SIDEBAR -->
+       <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
 
-   <padding>
-      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-   </padding>
-
-   <!-- Header -->
-   <HBox alignment="CENTER_LEFT" spacing="20.0">
-      <VBox HBox.hgrow="ALWAYS">
-         <HBox alignment="BOTTOM_LEFT">
-             <Label styleClass="title-main" text="Centre d'" />
-             <Label styleClass="title-main, gradient-text" text="Évaluation" />
-         </HBox>
-         <Label fx:id="lblSubtitle" styleClass="subtitle" text="1 évaluation orchestrée" />
-      </VBox>
-      <Button styleClass="btn-primary" mnemonicParsing="false" onAction="#handleClear" text="+ Créer une Évaluation" />
-   </HBox>
-
-   <!-- Cards Grid Container -->
-   <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-       <content>
-          <FlowPane fx:id="quizGrid" hgap="20.0" vgap="20.0" prefWrapLength="900" alignment="CENTER" style="-fx-padding: 10;">
-              <!-- Cards will be injected here -->
-          </FlowPane>
-       </content>
-   </ScrollPane>
-
-   <!-- Form Glass Card (Hide/Show or Keep at Bottom) -->
-   <VBox styleClass="glass-card" spacing="15.0">
-       <Label style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" text="Gestionnaire (Formulaire)" />
-      
-      <HBox spacing="15.0">
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="TITRE" />
-            <TextField fx:id="txtTitre" prefWidth="250.0" />
-         </VBox>
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="COURSE ID" />
-            <ComboBox fx:id="comboCourse" prefWidth="200.0" promptText="Sélectionner..." styleClass="text-input" />
-         </VBox>
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="DURÉE (MIN)" />
-            <TextField fx:id="txtDuree" prefWidth="100.0" />
-         </VBox>
-         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="label-form" text="NOTE MAX" />
-            <TextField fx:id="txtNoteMax" prefWidth="100.0" />
-         </VBox>
-      </HBox>
-
-      <VBox spacing="5.0">
-         <Label styleClass="label-form" text="DESCRIPTION" />
-         <TextArea fx:id="txtDescription" prefHeight="60.0" />
-      </VBox>
-
-      <VBox alignment="CENTER_RIGHT">
-          <Label fx:id="lblError" styleClass="error-label" visible="false" />
-      </VBox>
-
-      <HBox spacing="15.0" alignment="CENTER_RIGHT">
-         <Button mnemonicParsing="false" onAction="#handleManageQuestions" styleClass="btn-secondary" text="Gérer les questions" />
-         <Button mnemonicParsing="false" onAction="#handleAdd" styleClass="btn-primary" text="Ajouter" />
-         <Button mnemonicParsing="false" onAction="#handleUpdate" styleClass="btn-primary" text="Modifier" />
-         <Button mnemonicParsing="false" onAction="#handleDelete" styleClass="btn-delete" text="supprimer" />
-      </HBox>
-   </VBox>
-</VBox>
+       <!-- MAIN CONTENT -->
+       <VBox HBox.hgrow="ALWAYS" spacing="20.0" style="-fx-background-color: transparent;">
+           <padding>
+              <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+           </padding>
+           <children>
+               <!-- Header -->
+               <HBox alignment="CENTER_LEFT" spacing="20.0">
+                  <VBox HBox.hgrow="ALWAYS">
+                     <HBox alignment="BOTTOM_LEFT">
+                         <Label styleClass="title-main" text="Centre d'" />
+                         <Label styleClass="title-main, gradient-text" text="Évaluation" />
+                     </HBox>
+                     <Label fx:id="lblSubtitle" styleClass="subtitle" text="Chargement..." />
+                  </VBox>
+                  <Button styleClass="btn-primary" mnemonicParsing="false" onAction="#handleClear" text="+ Créer une Évaluation" />
+               </HBox>
+            
+               <!-- Cards Grid Container -->
+               <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                   <content>
+                      <FlowPane fx:id="quizGrid" hgap="25.0" vgap="25.0" prefWrapLength="1100" alignment="TOP_LEFT" style="-fx-padding: 10;">
+                          <!-- Cards will be injected here -->
+                      </FlowPane>
+                   </content>
+               </ScrollPane>
+            
+               <!-- Form Glass Card -->
+               <VBox styleClass="glass-card" spacing="15.0">
+                   <Label style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" text="Gestionnaire (Formulaire)" />
+                  
+                  <HBox spacing="15.0">
+                     <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label styleClass="label-form" text="TITRE" />
+                        <TextField fx:id="txtTitre" prefHeight="40.0" styleClass="text-input" />
+                     </VBox>
+                     <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <Label styleClass="label-form" text="COURSE" />
+                        <ComboBox fx:id="comboCourse" prefHeight="40.0" prefWidth="250.0" promptText="Sélectionner le cours..." styleClass="combo-box" />
+                     </VBox>
+                     <VBox spacing="5.0">
+                        <Label styleClass="label-form" text="DURÉE (MIN)" />
+                        <TextField fx:id="txtDuree" prefHeight="40.0" prefWidth="100.0" styleClass="text-input" />
+                     </VBox>
+                     <VBox spacing="5.0">
+                        <Label styleClass="label-form" text="NOTE MAX" />
+                        <TextField fx:id="txtNoteMax" prefHeight="40.0" prefWidth="100.0" styleClass="text-input" />
+                     </VBox>
+                  </HBox>
+            
+                  <VBox spacing="5.0">
+                     <Label styleClass="label-form" text="DESCRIPTION DE L'ÉVALUATION" />
+                     <TextArea fx:id="txtDescription" prefHeight="80.0" styleClass="text-area" />
+                  </VBox>
+            
+                  <HBox spacing="15.0" alignment="CENTER_RIGHT">
+                     <children>
+                        <Label fx:id="lblError" styleClass="error-label" visible="false" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#handleManageQuestions" styleClass="btn-secondary" text="Gérer les questions" />
+                        <Button mnemonicParsing="false" onAction="#handleAdd" styleClass="btn-primary" text="Ajouter" />
+                        <Button mnemonicParsing="false" onAction="#handleUpdate" styleClass="btn-primary" text="Modifier" />
+                        <Button mnemonicParsing="false" onAction="#handleDelete" styleClass="btn-delete" text="Supprimer" />
+                     </children>
+                  </HBox>
+               </VBox>
+           </children>
+       </VBox>
+   </children>
+</HBox>
