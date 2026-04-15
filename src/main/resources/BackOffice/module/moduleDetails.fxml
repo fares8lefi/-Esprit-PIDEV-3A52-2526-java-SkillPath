@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="Controllers.module.ModuleDetailsController"
+      prefHeight="900.0" prefWidth="1440.0" 
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content Area -->
+        <VBox HBox.hgrow="ALWAYS">
+            <padding><Insets bottom="40" left="60" right="60" top="40"/></padding>
+            <children>
+                
+                <!-- Breadcrumb -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Hyperlink onAction="#handleBack" text="Tableau de bord" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Hyperlink onAction="#handleBack" text="Gestion des modules" style="-fx-text-fill: #64748b; -fx-underline: false; -fx-padding: 0;" />
+                        <Label text="/" textFill="#475569" />
+                        <Label text="Détails" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    </children>
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                    <content>
+                        <VBox spacing="30">
+                            <children>
+                                
+                                <!-- Header Banner -->
+                                <VBox fx:id="bannerContainer" style="-fx-background-color: linear-gradient(to bottom right, #0f2744, #0a1f38); -fx-background-radius: 24; -fx-padding: 40; -fx-border-color: rgba(30,136,229,0.2); -fx-border-radius: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 8);">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="20">
+                                            <children>
+                                                <Label fx:id="lblTypeIcon" text="📘" style="-fx-font-size: 48;" />
+                                                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label fx:id="lblTitle" text="Module Titre" textFill="WHITE" style="-fx-font-size: 30; -fx-font-weight: 900; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 2);" />
+                                                        <Label fx:id="lblTypeTag" text="TYPE DE MODULE" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 12; -fx-font-weight: bold; -fx-letter-spacing: 3;" />
+                                                    </children>
+                                                </VBox>
+                                                <Label fx:id="lblIdBadge" text="ID: #--" style="-fx-background-color: rgba(30,136,229,0.2); -fx-text-fill: #60a5fa; -fx-padding: 10 20; -fx-background-radius: 12; -fx-font-weight: bold; -fx-border-color: rgba(30,136,229,0.3); -fx-border-radius: 12;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <GridPane hgap="30" vgap="30">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="60" />
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="40" />
+                                    </columnConstraints>
+                                    <children>
+                                        
+                                        <!-- Left Side: Content -->
+                                        <VBox spacing="20" GridPane.columnIndex="0">
+                                            <children>
+                                                <!-- Description -->
+                                                <VBox styleClass="glass-card" spacing="12">
+                                                    <children>
+                                                        <HBox spacing="8" alignment="CENTER_LEFT">
+                                                            <Label text="📝" style="-fx-font-size: 14;" />
+                                                            <Label text="RÉSUMÉ" style="-fx-text-fill: #06B6D4; -fx-font-weight: 900; -fx-font-size: 11;" />
+                                                        </HBox>
+                                                        <Separator opacity="0.06" />
+                                                        <Label fx:id="lblDescription" text="Chargement..." textFill="#94a3b8" wrapText="true" style="-fx-font-size: 14; -fx-line-spacing: 6;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Content area -->
+                                                <VBox styleClass="glass-card" spacing="12">
+                                                    <children>
+                                                        <HBox spacing="8" alignment="CENTER_LEFT">
+                                                            <Label text="📖" style="-fx-font-size: 14;" />
+                                                            <Label text="CONTENU PÉDAGOGIQUE" style="-fx-text-fill: #4ade80; -fx-font-weight: 900; -fx-font-size: 11;" />
+                                                        </HBox>
+                                                        <Separator opacity="0.06" />
+                                                        <Label fx:id="lblContent" text="Aucun contenu textuel." textFill="WHITE" wrapText="true" style="-fx-font-size: 14; -fx-line-spacing: 8;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Right Side: Specs & Resources -->
+                                        <VBox spacing="20" GridPane.columnIndex="1">
+                                            <children>
+                                                <!-- Module metadata -->
+                                                <VBox styleClass="glass-card" spacing="18">
+                                                    <children>
+                                                        <Label text="ℹ INFORMATIONS" style="-fx-text-fill: #3b82f6; -fx-font-weight: 900; -fx-font-size: 11;" />
+                                                        <Separator opacity="0.06" />
+                                                        <VBox spacing="6">
+                                                            <children>
+                                                                <Label text="COURS ASSOCIÉ" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Label fx:id="lblCourseName" text="Chargement..." textFill="#60a5fa" style="-fx-font-size: 15; -fx-font-weight: bold;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Separator opacity="0.05" />
+                                                        <VBox spacing="6">
+                                                            <children>
+                                                                <Label text="🗓 DATE DE PLANIFICATION" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Label fx:id="lblScheduledAt" text="Non planifié" textFill="WHITE" style="-fx-font-size: 14;" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Separator opacity="0.05" />
+                                                        <VBox spacing="8">
+                                                            <children>
+                                                                <Label text="📎 DOCUMENTS &amp; RESSOURCES" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: 900;" />
+                                                                <Hyperlink fx:id="linkDocument" text="Accéder au document" style="-fx-text-fill: #4ade80; -fx-font-weight: bold; -fx-padding: 0; -fx-underline: false;" onAction="#handleOpenDocument" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </VBox>
+
+                                                <!-- Actions -->
+                                                <VBox spacing="10">
+                                                    <children>
+                                                        <Button onAction="#handleEdit" text="✏ Modifier le Module"
+                                                                maxWidth="Infinity"
+                                                                style="-fx-background-color: linear-gradient(to right, #1E88E5, #43A047); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 15; -fx-background-radius: 14; -fx-padding: 16; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(30,136,229,0.55), 20, 0, 0, 6);" />
+                                                        <Button onAction="#handleBack" text="← Retour à la liste"
+                                                                maxWidth="Infinity"
+                                                                style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13; -fx-background-radius: 12; -fx-padding: 12; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </GridPane>
+
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+            </children>
+        </VBox>
+    </children>
+</HBox>
