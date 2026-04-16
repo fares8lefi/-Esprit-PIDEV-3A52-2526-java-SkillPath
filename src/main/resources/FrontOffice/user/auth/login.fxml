@@ -86,7 +86,7 @@
                     <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                         <Label text="MOT DE PASSE" styleClass="form-label"/>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Hyperlink text="Oublié ?" style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 0;"/>
+                        <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" text="Oublié ?" style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 0;"/>
                     </HBox>
                     <PasswordField fx:id="passwordField" promptText="8 caractères minimum" styleClass="form-input"/>
                 </VBox>
