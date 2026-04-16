@@ -15,6 +15,7 @@
          <children>
             <VBox maxWidth="600.0" prefWidth="600.0" spacing="25.0" styleClass="card">
                <children>
+                  <Button mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="⬅ Retour" />
                   <VBox spacing="8.0">
                      <children>
                         <Label styleClass="title-header" text="Soumettre une Réclamation" />
