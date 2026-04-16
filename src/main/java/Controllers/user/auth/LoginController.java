@@ -55,6 +55,11 @@ public class LoginController {
     }
 
     @FXML
+    private void handleForgotPassword(ActionEvent event) {
+        navigateTo(event, "/FrontOffice/user/auth/forgot_password.fxml", "Mot de passe oublié - SkillPath");
+    }
+
+    @FXML
     private void handleShowSignup(ActionEvent event) {
         navigateTo(event, "/FrontOffice/user/auth/signup.fxml", "Inscription - SkillPath");
     }
