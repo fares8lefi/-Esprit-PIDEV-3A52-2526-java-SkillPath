@@ -70,9 +70,15 @@
 }
 
 .text-field-modern:focused,
-.text-area-modern:focused {
+.text-area-modern:focused,
+.text-area-modern:focused .content {
     -fx-border-color: #8b5cf6;
     -fx-background-color: rgba(139, 92, 246, 0.05);
+}
+
+.text-area-modern .content {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
 }
 
 .status-pill-client {
