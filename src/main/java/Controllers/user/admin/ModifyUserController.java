@@ -71,7 +71,7 @@ public class ModifyUserController implements Initializable {
 
     @FXML
     private void handleSave(ActionEvent event) {
-        String newUsername = tfUsername.getText().trim();
+        String newUsername = safeTrim(tfUsername.getText());
         String newRole = comboRole.getValue();
         String newStatus = comboStatus.getValue();
 
@@ -87,9 +87,9 @@ public class ModifyUserController implements Initializable {
         currentUser.setRole(newRole);
         
         currentUser.setStatus(newStatus);
-        currentUser.setDomaine(tfDomaine.getText().trim());
-        currentUser.setNiveau(tfNiveau.getText().trim());
-        currentUser.setStyleDapprentissage(tfStyle.getText().trim());
+        currentUser.setDomaine(safeTrim(tfDomaine.getText()));
+        currentUser.setNiveau(safeTrim(tfNiveau.getText()));
+        currentUser.setStyleDapprentissage(safeTrim(tfStyle.getText()));
 
         try {
             userService.modifier(currentUser);
@@ -114,6 +114,10 @@ public class ModifyUserController implements Initializable {
     private void closeWindow(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
+    }
+
+    private String safeTrim(String str) {
+        return (str != null) ? str.trim() : "";
     }
 
     private void showAlert(String title, String content) {
