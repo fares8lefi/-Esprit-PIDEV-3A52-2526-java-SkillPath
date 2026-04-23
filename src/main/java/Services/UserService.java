@@ -75,7 +75,11 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérifie si un email existe déjà ───
     public boolean emailExists(String email) {
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        if (connection == null) {
+            System.err.println("Database connection is null in emailExists!");
+            return false;
+        }
+        String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -99,6 +103,7 @@ public class UserService implements Iservice<User> {
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.ssl.trust", host);
 
         try {
             jakarta.mail.Session session = jakarta.mail.Session.getInstance(props,
@@ -135,29 +140,23 @@ public class UserService implements Iservice<User> {
     // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
-        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        if (connection == null) {
+            System.err.println("Database connection is null in ajouter!");
+            return;
+        }
+        String sql = "INSERT INTO user (email, username, password, status, role, is_verified, verification_code, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            // Génération de l'UUID v7 (Time-ordered)
-            UUID uuid = UuidCreator.getTimeOrderedEpoch();
-            
-            // Conversion de l'UUID en byte[] (16 octets) pour le format BINARY(16) de Symfony
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(uuid.getMostSignificantBits());
-            bb.putLong(uuid.getLeastSignificantBits());
-            byte[] uuidBytes = bb.array();
-
             String hashedPassword = hashPassword(user.getPassword());
             
-            ps.setBytes(1, uuidBytes);
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getUsername());
-            ps.setString(4, hashedPassword);
-            ps.setString(5, user.getStatus());
-            ps.setString(6, user.getRole());
-            ps.setBoolean(7, false);
-            ps.setString(8, user.getVerificationCode());
-            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, hashedPassword);
+            ps.setString(4, user.getStatus());
+            ps.setString(5, user.getRole());
+            ps.setBoolean(6, user.isVerified());
+            ps.setString(7, user.getVerificationCode());
+            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
             
             ps.executeUpdate();
             System.out.println("Utilisateur ajouté avec succès !");
@@ -168,27 +167,23 @@ public class UserService implements Iservice<User> {
     }
     
     public void ajouterUserParAdmin(User user) throws SQLDataException {
-        String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        if (connection == null) {
+            System.err.println("Database connection is null in ajouterUserParAdmin!");
+            return;
+        }
+        String sql = "INSERT INTO user (email, username, password, status, role, is_verified, verification_code, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            UUID uuid = UuidCreator.getTimeOrderedEpoch();
-            
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(uuid.getMostSignificantBits());
-            bb.putLong(uuid.getLeastSignificantBits());
-            byte[] uuidBytes = bb.array();
-            
             String hashedPassword = hashPassword(user.getPassword());
             
-            ps.setBytes(1, uuidBytes);
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getUsername());
-            ps.setString(4, hashedPassword);
-            ps.setString(5, "active");
-            ps.setString(6, user.getRole());
-            ps.setBoolean(7, true);
-            ps.setNull(8, Types.VARCHAR);
-            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, hashedPassword);
+            ps.setString(4, "active");
+            ps.setString(5, user.getRole());
+            ps.setBoolean(6, true);
+            ps.setNull(7, Types.VARCHAR);
+            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
 
             ps.executeUpdate();
             System.out.println("Compte Admin ajouté avec succès !");
@@ -201,7 +196,11 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérification du code ───
     public boolean verifyCode(String email, String code) {
-        String sql = "SELECT verification_code FROM users WHERE email = ?";
+        if (connection == null) {
+            System.err.println("Database connection is null in verifyCode!");
+            return false;
+        }
+        String sql = "SELECT verification_code FROM user WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -209,7 +208,7 @@ public class UserService implements Iservice<User> {
                 String storedCode = rs.getString("verification_code");
                 if (storedCode != null && code.equals(storedCode)) {
                     // Activer le compte
-                    String updateSql = "UPDATE users SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
+                    String updateSql = "UPDATE user SET is_verified = true, status = 'active', verification_code = NULL WHERE email = ?";
                     try (PreparedStatement ps2 = connection.prepareStatement(updateSql)) {
                         ps2.setString(1, email);
                         ps2.executeUpdate();
@@ -225,7 +224,11 @@ public class UserService implements Iservice<User> {
 
     // ─── Connexion ───
     public User login(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND is_verified = true";
+        if (connection == null) {
+            System.err.println("Database connection is null in login!");
+            return null;
+        }
+        String sql = "SELECT * FROM user WHERE email = ? AND is_verified = true";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -256,7 +259,11 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void supprimer(User user) throws SQLDataException {
-        String sql = "DELETE FROM users WHERE email = ?";
+        if (connection == null) {
+            System.err.println("Database connection is null in supprimer!");
+            return;
+        }
+        String sql = "DELETE FROM user WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
             ps.executeUpdate();
@@ -267,7 +274,11 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void modifier(User user) throws SQLDataException {
-        String sql = "UPDATE users SET username = ?, status = ?, role = ? WHERE email = ?";
+        if (connection == null) {
+            System.err.println("Database connection is null in modifier!");
+            return;
+        }
+        String sql = "UPDATE user SET username = ?, status = ?, role = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getStatus());
@@ -281,7 +292,7 @@ public class UserService implements Iservice<User> {
 
     @Override
     public List<User> recuperer() throws SQLDataException {
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM user";
         List<User> list = new ArrayList<>();
         if (connection == null) return list;
         try (Statement st = connection.createStatement();
@@ -300,7 +311,7 @@ public class UserService implements Iservice<User> {
         return list;
     }
    public List<User> serchByName(User user) throws SQLDataException {
-    String sql = "SELECT * FROM users WHERE username LIKE ?";
+    String sql = "SELECT * FROM user WHERE username LIKE ?";
     List<User> list = new ArrayList<>();
     if (connection == null) return list;
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -320,7 +331,7 @@ public class UserService implements Iservice<User> {
     return list;
 }
 public List<User> getClientList() throws SQLDataException {
-    String sql = "SELECT * FROM users WHERE role LIKE ?";
+    String sql = "SELECT * FROM user WHERE role LIKE ?";
     List<User> list = new ArrayList<>();
     
     if (connection == null) return list;

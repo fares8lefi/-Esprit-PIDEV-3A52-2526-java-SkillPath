@@ -47,7 +47,7 @@ public class LoginController {
             if ("admin".equalsIgnoreCase(user.getRole())) {
                 navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
             } else {
-                navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                navigateTo(event, "/FrontOffice/evaluation/QuizFrontOffice.fxml", "Quiz Disponibles - SkillPath");
             }
         } else {
             showError("Email ou mot de passe incorrect, ou compte non vérifié.");

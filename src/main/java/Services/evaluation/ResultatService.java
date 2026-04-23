@@ -15,6 +15,10 @@ public class ResultatService {
     }
 
     public void ajouter(Resultat resultat) throws SQLDataException {
+        if (cnx == null) {
+            System.err.println("Database connection is null in ResultatService.ajouter!");
+            return;
+        }
         String query = "INSERT INTO resultat (score, note_max, date_passage, id_quiz, id_etudiant) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, resultat.getScore());

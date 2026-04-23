@@ -33,6 +33,7 @@ public class SignupController {
 
     @FXML
     public void handleSignup() {
+        System.out.println("Tentative d'inscription pour : " + emailField.getText());
         hideAlert();
 
         String username = usernameField.getText().trim();
@@ -61,16 +62,15 @@ public class SignupController {
             return;
         }
 
-        // Création de l'utilisateur 
+        // Création de l'utilisateur (Auto-vérifié)
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
-        user.setStatus("pending");
+        user.setStatus("active");
         user.setRole("student");
-
-        String verificationCode = userService.generateVerificationCode();
-        user.setVerificationCode(verificationCode);
+        user.setVerified(true);
+        user.setVerificationCode(null);
 
         try {
             userService.ajouter(user);
@@ -79,30 +79,20 @@ public class SignupController {
             return;
         }
 
-        // Envoi de l'email de vérification 
-        boolean emailSent = userService.sendVerificationEmail(email, username, verificationCode);
-        if (!emailSent) {
-            showError("Compte créé, mais l'email de vérification n'a pas pu être envoyé.");
-        }
-
-        //  Rediriger vers la page de vérification
+        // Auto-Login et Redirection
         try {
+            Utils.Session.login(user);
+            System.out.println("Inscription et connexion auto réussie : " + user.getUsername());
+
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/FrontOffice/user/auth/verify.fxml")
+                getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml")
             );
             Parent root = loader.load();
-
-            // Passer l'email au controller de vérification
-            VerifyController verifyController = loader.getController();
-            verifyController.setEmail(email);
-
             Stage stage = (Stage) submitButton.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            // Si la page de vérification n'existe pas encore, afficher un message
-            showSuccess("Compte créé ! Code envoyé à " + email);
-            System.out.println("Redirection verify.fxml : " + e.getMessage());
+            showError("Erreur lors de la redirection : " + e.getMessage());
         }
     }
 
@@ -124,6 +114,7 @@ public class SignupController {
     private void showError(String message) {
         if (alertBox != null) {
             alertBox.setVisible(true);
+            alertBox.setManaged(true);
             alertBox.setStyle(
                 "-fx-background-color: rgba(244,63,94,0.12);" +
                 "-fx-border-color: rgba(244,63,94,0.25);" +
@@ -139,6 +130,7 @@ public class SignupController {
     private void showSuccess(String message) {
         if (alertBox != null) {
             alertBox.setVisible(true);
+            alertBox.setManaged(true);
             alertBox.setStyle(
                 "-fx-background-color: rgba(16,185,129,0.12);" +
                 "-fx-border-color: rgba(16,185,129,0.25);" +
@@ -152,7 +144,10 @@ public class SignupController {
     }
 
     private void hideAlert() {
-        if (alertBox != null) alertBox.setVisible(false);
+        if (alertBox != null) {
+            alertBox.setVisible(false);
+            alertBox.setManaged(false);
+        }
     }
 
     private void showAlert(Alert.AlertType type, String message) {
