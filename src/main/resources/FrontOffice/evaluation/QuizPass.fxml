@@ -64,6 +64,13 @@
          <Label fx:id="lblScore" style="-fx-font-size: 64px; -fx-font-weight: 900; -fx-text-fill: #4ade80;" text="0 / 0" />
          <Label fx:id="lblFeedback" styleClass="text-slate-400, text-lg" text="Excellent travail." />
          
+         <VBox fx:id="recommendationBox" spacing="10" alignment="CENTER" visible="false" managed="false" 
+               style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 15; -fx-background-radius: 10;">
+             <Label text="💡 Recommandation pour vous :" style="-fx-text-fill: #fbbf24; -fx-font-weight: bold;" />
+             <Label fx:id="lblRecommendation" wrapText="true" textAlignment="CENTER" style="-fx-text-fill: #e2e8f0; -fx-font-size: 13px;" />
+             <Hyperlink fx:id="linkRecommendation" style="-fx-text-fill: #38bdf8;" text="Voir la ressource" onAction="#openRecommendation" />
+         </VBox>
+
          <Region prefHeight="20.0" />
          <Button mnemonicParsing="false" onAction="#goBack" styleClass="btn-secondary" style="-fx-font-size: 16px;" text="Retour à l'accueil" />
       </VBox>

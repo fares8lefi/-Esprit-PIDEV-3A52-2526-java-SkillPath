@@ -6,13 +6,16 @@ import Models.evaluation.Quiz;
 import Services.evaluation.QuestionService;
 import Services.evaluation.ResultatService;
 import Services.evaluation.MailService;
+import Services.evaluation.ScrapingService;
 import Utils.Session;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
@@ -22,7 +25,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QuizPassController {
 
@@ -53,6 +62,14 @@ public class QuizPassController {
     private VBox viewResult;
     @FXML
     private Label lblScore, lblFeedback;
+    @FXML
+    private VBox recommendationBox;
+    @FXML
+    private Label lblRecommendation;
+    @FXML
+    private Hyperlink linkRecommendation;
+
+    private String recommendationUrl;
 
     private Quiz quiz;
     private List<Question> questions;
@@ -168,10 +185,12 @@ public class QuizPassController {
         // Evaluate answer
         RadioButton selected = (RadioButton) toggleGroup.getSelectedToggle();
         if (selected != null) {
-            String selectedText = selected.getText().substring(3); // Remove "A) "
+            // Extraction de la lettre (A, B, C ou D) depuis le texte du bouton "A) Option..."
+            String selectedLetter = selected.getText().substring(0, 1); 
             Question q = questions.get(currentIndex);
-            // Verify if answer is correct
-            if (selectedText.equalsIgnoreCase(q.getBonne_reponse())) {
+            
+            // Vérifier si la lettre correspond à la bonne réponse stockée
+            if (selectedLetter.equalsIgnoreCase(q.getBonne_reponse())) {
                 currentScore += q.getPoints();
             }
         }
@@ -230,13 +249,49 @@ public class QuizPassController {
             String studentName = currentUser.getUsername() != null ? currentUser.getUsername() : "Étudiant";
             String feedback = lblFeedback.getText();
             
-            // Send email in a separate thread to avoid blocking the UI
             new Thread(() -> {
                 MailService mailService = new MailService();
                 mailService.sendQuizResultEmail(studentEmail, studentName, quiz.getTitre(), currentScore, totalPoints, feedback);
             }).start();
         } else {
             System.out.println("No user logged in or email missing, skipping email notification.");
+        }
+
+        // Web Scraping Recommendation if score <= 50%
+        if (currentScore <= totalPoints / 2) {
+            new Thread(() -> {
+                ScrapingService scrapingService = new ScrapingService();
+                String rawRecommendation = scrapingService.getRecommendation(quiz.getTitre());
+                
+                // Extraire le lien
+                String url = "";
+                Pattern pattern = Pattern.compile("https?://\\S+");
+                Matcher matcher = pattern.matcher(rawRecommendation);
+                if (matcher.find()) {
+                    url = matcher.group();
+                }
+                
+                final String finalUrl = url;
+                final String finalText = rawRecommendation.split("\nLien")[0];
+                
+                Platform.runLater(() -> {
+                    recommendationUrl = finalUrl;
+                    lblRecommendation.setText(finalText);
+                    recommendationBox.setVisible(true);
+                    recommendationBox.setManaged(true);
+                });
+            }).start();
+        }
+    }
+
+    @FXML
+    void openRecommendation(ActionEvent event) {
+        if (recommendationUrl != null && !recommendationUrl.isEmpty()) {
+            try {
+                Desktop.getDesktop().browse(new URI(recommendationUrl));
+            } catch (IOException | URISyntaxException e) {
+                System.err.println("Erreur ouverture lien : " + e.getMessage());
+            }
         }
     }
 
