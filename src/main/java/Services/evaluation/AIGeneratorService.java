@@ -1,0 +1,169 @@
+package Services.evaluation;
+
+import Models.evaluation.Question;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AIGeneratorService {
+
+    private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String GROQ_MODEL = "llama-3.1-8b-instant";
+
+    /**
+     * Génère automatiquement une courte phrase de motivation.
+     */
+    public String generateMotivationalQuote() {
+        try {
+            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+            String apiKey = dotenv.get("GROQ_API_KEY");
+            if (apiKey == null || apiKey.isEmpty()) {
+                return "Testez vos connaissances et évaluez votre progression";
+            }
+            
+            String prompt = "Génère une très courte phrase motivante et inspirante en français (maximum 10 mots) pour encourager un étudiant à passer un quiz. Sois original et ne mets pas de guillemets. Aléa : " + System.currentTimeMillis();
+
+            JSONObject jsonBody = new JSONObject()
+                    .put("model", GROQ_MODEL)
+                    .put("messages", new JSONArray()
+                            .put(new JSONObject()
+                                    .put("role", "user")
+                                    .put("content", prompt)
+                            )
+                    );
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JSONObject jsonResponse = new JSONObject(response.body());
+                String quote = jsonResponse.getJSONArray("choices")
+                        .getJSONObject(0)
+                        .getJSONObject("message")
+                        .getString("content").trim();
+                return quote.replace("\"", "").replace("\n", " ");
+            } else {
+                System.err.println("Groq API (Citation) a retourné l'erreur HTTP " + response.statusCode() + " : " + response.body());
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur API Groq (Citation) : " + e.getMessage());
+        }
+        return "Testez vos connaissances et évaluez votre progression";
+    }
+
+    /**
+     * Génère automatiquement 5 questions pour un quiz en fonction du nom du cours.
+     * @param courseName Le domaine ou nom du cours (ex: "Java Avancé", "DevOps")
+     * @param idQuiz L'ID du quiz auquel attacher les questions
+     * @return Une liste de 5 questions prêtes à être sauvegardées.
+     */
+    public List<Question> generateQuestions(String courseName, int idQuiz) {
+        List<Question> questionsList = new ArrayList<>();
+        
+        try {
+            // Chargement de l'API key depuis le fichier .env
+            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+            String apiKey = dotenv.get("GROQ_API_KEY");
+            
+            if (apiKey == null || apiKey.isEmpty()) {
+                throw new RuntimeException("Erreur : GROQ_API_KEY introuvable ou vide dans le fichier .env !");
+            }
+
+            // Construction du prompt avec une composante aléatoire pour garantir des questions différentes
+            long randomSeed = System.currentTimeMillis();
+            String prompt = "Tu es un expert technique et professeur. Génère 5 questions QCM de niveau avancé pour le domaine : " + courseName + ". " +
+                    "Génère des questions TOTALEMENT NOUVELLES et différentes de tes réponses précédentes. " +
+                    "Voici une graine aléatoire pour forcer la diversité : " + randomSeed + ". " +
+                    "Renvoie UNIQUEMENT un tableau JSON valide. Pas de bloc de code markdown (pas de ```json), " +
+                    "juste du texte brut commençant par [ et finissant par ]. " +
+                    "Chaque objet doit avoir ces clés exactes : " +
+                    "'enonce', 'choix_a', 'choix_b', 'choix_c', 'choix_d', " +
+                    "'bonne_reponse' (doit contenir UNIQUEMENT la lettre majuscule 'A', 'B', 'C' ou 'D' correspondant au bon choix), " +
+                    "'points' (un entier entre 1 et 5). Assure-toi d'échapper correctement tous les guillemets internes.";
+
+            // Création du corps de la requête JSON
+            JSONObject requestBody = new JSONObject()
+                    .put("model", GROQ_MODEL)
+                    .put("messages", new JSONArray()
+                            .put(new JSONObject()
+                                    .put("role", "user")
+                                    .put("content", prompt)
+                            )
+                    );
+
+            // Création du client HTTP
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(API_URL))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                    .build();
+
+            // Envoi de la requête
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Parsing de la réponse JSON de Groq
+                JSONObject responseJson = new JSONObject(response.body());
+                String aiTextContent = responseJson.getJSONArray("choices")
+                        .getJSONObject(0)
+                        .getJSONObject("message")
+                        .getString("content");
+                
+                // Au cas où l'IA inclut des balises markdown malgré la consigne
+                aiTextContent = aiTextContent.replace("```json", "").replace("```", "").trim();
+
+                // Extraction robuste : on ne garde que ce qui est entre les crochets [ ]
+                int startIndex = aiTextContent.indexOf('[');
+                int endIndex = aiTextContent.lastIndexOf(']');
+                if (startIndex != -1 && endIndex != -1 && endIndex >= startIndex) {
+                    aiTextContent = aiTextContent.substring(startIndex, endIndex + 1);
+                }
+
+                // Parsing des questions en JSONArray
+                JSONArray questionsJsonArray = new JSONArray(aiTextContent);
+                
+                for (int i = 0; i < questionsJsonArray.length(); i++) {
+                    JSONObject qObj = questionsJsonArray.getJSONObject(i);
+                    
+                    Question question = new Question(
+                            qObj.getString("enonce"),
+                            qObj.getString("choix_a"),
+                            qObj.getString("choix_b"),
+                            qObj.getString("choix_c"),
+                            qObj.getString("choix_d"),
+                            qObj.getString("bonne_reponse"),
+                            qObj.getInt("points"),
+                            idQuiz
+                    );
+                    questionsList.add(question);
+                }
+            } else {
+                System.err.println("Erreur de l'API Groq : HTTP " + response.statusCode());
+                System.err.println(response.body());
+            }
+
+        } catch (Exception e) {
+            System.err.println("Exception lors de l'appel à l'API Groq : " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return questionsList;
+    }
+
+}

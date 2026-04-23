@@ -31,6 +31,7 @@
          <Label fx:id="lblSubtitle" styleClass="subtitle" text="1 évaluation orchestrée" />
       </VBox>
       <Button styleClass="btn-primary" mnemonicParsing="false" onAction="#handleClear" text="+ Créer une Évaluation" />
+      <Label onMouseClicked="#switchToFront" style="-fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-font-size: 11px; -fx-underline: true;" text="Interface Utilisateur" />
    </HBox>
 
    <!-- Cards Grid Container -->

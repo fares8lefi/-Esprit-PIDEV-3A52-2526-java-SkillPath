@@ -21,6 +21,7 @@
          </HBox>
          <Label fx:id="lblSubtitle" styleClass="subtitle" text="0 questions configurées" />
       </VBox>
+      <Button styleClass="btn-secondary" mnemonicParsing="false" onAction="#handleGenerateAI" text="Générer des questions" style="-fx-border-color: #8b5cf6; -fx-text-fill: #8b5cf6;" />
       <Button styleClass="btn-secondary" mnemonicParsing="false" onAction="#handleBack" text="Retour aux Quiz" />
    </HBox>
 

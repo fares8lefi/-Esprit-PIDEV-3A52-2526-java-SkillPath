@@ -1,9 +1,12 @@
 package Controllers.evaluation;
 
+import Models.User;
 import Models.evaluation.Question;
 import Models.evaluation.Quiz;
 import Services.evaluation.QuestionService;
 import Services.evaluation.ResultatService;
+import Services.evaluation.MailService;
+import Utils.Session;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +18,9 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -33,7 +39,10 @@ public class QuizPassController {
     @FXML
     private VBox viewQuestion;
     @FXML
-    private Label lblQuestionProgress, lblQuestionPoints, lblEnonce;
+    private Label lblQuestionProgress, lblQuestionPoints, lblEnonce, lblTimer;
+    
+    private Timeline timeline;
+    private int timeSeconds;
     @FXML
     private VBox optionsContainer;
     @FXML
@@ -93,7 +102,34 @@ public class QuizPassController {
         viewQuestion.setVisible(true);
         currentIndex = 0;
         currentScore = 0;
+
+        // Setup timer
+        timeSeconds = quiz.getDuree() * 60;
+        updateTimerLabel();
+        if (timeline != null) timeline.stop();
+        timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            timeSeconds--;
+            updateTimerLabel();
+            if (timeSeconds <= 0) {
+                timeline.stop();
+                showResult();
+            }
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+
         showCurrentQuestion();
+    }
+
+    private void updateTimerLabel() {
+        int minutes = timeSeconds / 60;
+        int seconds = timeSeconds % 60;
+        lblTimer.setText(String.format("⏳ %02d:%02d", minutes, seconds));
+        if (timeSeconds <= 60) {
+            lblTimer.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"); // Red
+        } else {
+            lblTimer.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #fbbf24;"); // Yellow
+        }
     }
 
     private void showCurrentQuestion() {
@@ -150,6 +186,9 @@ public class QuizPassController {
     }
 
     private void showResult() {
+        if (timeline != null) {
+            timeline.stop();
+        }
         viewQuestion.setVisible(false);
         viewResult.setVisible(true);
 
@@ -183,10 +222,29 @@ public class QuizPassController {
             lblFeedback.setText("Il va falloir réviser un peu. 📚");
             lblScore.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 64px; -fx-font-weight: 900;");
         }
+
+        // Send Email
+        User currentUser = Session.getCurrentUser();
+        if (currentUser != null && currentUser.getEmail() != null) {
+            String studentEmail = currentUser.getEmail();
+            String studentName = currentUser.getUsername() != null ? currentUser.getUsername() : "Étudiant";
+            String feedback = lblFeedback.getText();
+            
+            // Send email in a separate thread to avoid blocking the UI
+            new Thread(() -> {
+                MailService mailService = new MailService();
+                mailService.sendQuizResultEmail(studentEmail, studentName, quiz.getTitre(), currentScore, totalPoints, feedback);
+            }).start();
+        } else {
+            System.out.println("No user logged in or email missing, skipping email notification.");
+        }
     }
 
     @FXML
     void goBack(ActionEvent event) {
+        if (timeline != null) {
+            timeline.stop();
+        }
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
             Stage stage = (Stage) viewIntro.getScene().getWindow();

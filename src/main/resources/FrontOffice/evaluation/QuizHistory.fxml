@@ -42,7 +42,7 @@
             </VBox>
 
             <!-- Results Grid -->
-            <FlowPane fx:id="resultsGrid" hgap="25.0" vgap="25.0" alignment="CENTER_LEFT" />
+            <FlowPane fx:id="resultsGrid" hgap="25.0" vgap="25.0" alignment="TOP_LEFT" prefWidth="1100.0" prefWrapLength="1100.0" />
 
          </VBox>
       </VBox>

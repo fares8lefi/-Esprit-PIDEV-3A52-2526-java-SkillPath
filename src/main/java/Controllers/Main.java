@@ -20,6 +20,7 @@ public class Main extends Application {
             stage.setTitle("SkillPath");
             stage.setScene(scene);
             stage.setResizable(true);
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             System.out.println("Erreur chargement FXML : " + e.getMessage());

@@ -337,4 +337,15 @@ public class QuizController {
 
         return true;
     }
+
+    @FXML
+    void switchToFront(javafx.scene.input.MouseEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
+            Stage stage = (Stage) quizGrid.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

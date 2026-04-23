@@ -45,13 +45,46 @@ public class QuizService implements Iservice<Quiz> {
 
     @Override
     public void supprimer(Quiz quiz) throws SQLDataException {
-        String sql = "DELETE FROM quiz WHERE id_quiz = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, quiz.getId_quiz());
-            ps.executeUpdate();
-            System.out.println("Quiz supprimé !");
+        // First delete questions and results associated with this quiz to satisfy
+        // foreign key constraints
+        String sqlQuestions = "DELETE FROM question WHERE id_quiz = ?";
+        String sqlResults = "DELETE FROM resultat WHERE id_quiz = ?";
+        String sqlQuiz = "DELETE FROM quiz WHERE id_quiz = ?";
+
+        try {
+            // It's better to use a transaction for multiple deletes
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement psQ = connection.prepareStatement(sqlQuestions)) {
+                psQ.setInt(1, quiz.getId_quiz());
+                psQ.executeUpdate();
+            }
+
+            try (PreparedStatement psR = connection.prepareStatement(sqlResults)) {
+                psR.setInt(1, quiz.getId_quiz());
+                psR.executeUpdate();
+            }
+
+            try (PreparedStatement psQuiz = connection.prepareStatement(sqlQuiz)) {
+                psQuiz.setInt(1, quiz.getId_quiz());
+                psQuiz.executeUpdate();
+            }
+
+            connection.commit();
+            System.out.println("Quiz et ses données associées supprimés avec succès !");
         } catch (SQLException e) {
-            throw new SQLDataException(e.getMessage());
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            throw new SQLDataException("Erreur de suppression : " + e.getMessage());
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
