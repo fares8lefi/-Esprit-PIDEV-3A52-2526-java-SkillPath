@@ -37,13 +37,15 @@ public class LoginController {
     @FXML private WebView captchaWebView;
 
     private final UserService userService = new UserService();
-    private Dotenv dotenv;
     private String siteKey;
     private String secretKey;
+    
+    // Rate Limiter: 3 tentatives max, blocage de 30 secondes
+    private final Utils.RateLimiter rateLimiter = new Utils.RateLimiter(3, 30000);
 
     @FXML
     public void initialize() {
-        dotenv = Dotenv.configure().ignoreIfMissing().load();
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         siteKey = dotenv.get("key");
         secretKey = dotenv.get("secret");
 
@@ -97,6 +99,12 @@ public class LoginController {
             return;
         }
 
+        // Vérification du Rate Limiter
+        if (rateLimiter.isLockedOut()) {
+            showError("Trop de tentatives. Veuillez patienter " + rateLimiter.getSecondsLeft() + " secondes.");
+            return;
+        }
+
         // Vérification du reCAPTCHA
         if (captchaWebView != null && secretKey != null && !secretKey.isEmpty()) {
             try {
@@ -117,6 +125,9 @@ public class LoginController {
         User user = userService.login(email, password);
 
         if (user != null) {
+            // Réinitialiser les tentatives après un succès
+            rateLimiter.recordSuccess();
+            
             // Stockage dans la session
             Session.getInstance().login(user);
             System.out.println("Connexion réussie : " + user.getUsername());
@@ -128,7 +139,12 @@ public class LoginController {
                 navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
             }
         } else {
-            showError("Email ou mot de passe incorrect, ou compte non vérifié.");
+            rateLimiter.recordFailure();
+            if (rateLimiter.isLockedOut()) {
+                showError("Compte bloqué temporairement (30s) suite à plusieurs échecs.");
+            } else {
+                showError("Email ou mot de passe incorrect. Il vous reste " + rateLimiter.getAttemptsLeft() + " tentative(s).");
+            }
         }
     }
 
