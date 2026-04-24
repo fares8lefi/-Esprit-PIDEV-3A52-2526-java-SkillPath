@@ -101,7 +101,7 @@ public class AddReclamationController {
     }
 
     private String saveFile(File file) throws IOException {
-        Path uploadDir = Paths.get("uploads/reclamations");
+        Path uploadDir = Paths.get("C:\\pi\\images");
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
