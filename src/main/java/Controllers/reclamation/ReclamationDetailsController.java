@@ -15,7 +15,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.collections.FXCollections;
+import Utils.VoiceRecognitionService;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -47,6 +50,8 @@ public class ReclamationDetailsController {
     @FXML
     private TextField txtReponse;
     @FXML
+    private ComboBox<String> comboVoiceLang;
+    @FXML
     private ScrollPane chatScrollPane;
 
     private Reclamation currentReclamation;
@@ -56,6 +61,10 @@ public class ReclamationDetailsController {
     public void initialize() {
         reponseService = new ReponseService();
         reclamationService = new ReclamationService();
+        if (comboVoiceLang != null) {
+            comboVoiceLang.setItems(FXCollections.observableArrayList("Français", "English", "Tounsi"));
+            comboVoiceLang.getSelectionModel().select("Français");
+        }
     }
 
     public void initData(Reclamation reclamation) {
@@ -118,6 +127,24 @@ public class ReclamationDetailsController {
 
         messageBox.getChildren().add(messageLabel);
         chatContainer.getChildren().add(messageBox);
+    }
+
+    @FXML
+    void startVoiceRecognition(ActionEvent event) {
+        String selected = comboVoiceLang.getValue();
+        String langCode = "fr-FR";
+        if ("English".equals(selected)) {
+            langCode = "en-US";
+        } else if ("Tounsi".equals(selected)) {
+            langCode = "ar-TN"; 
+        }
+
+        VoiceRecognitionService.startRecognition(langCode, text -> {
+            if (text != null && !text.isBlank()) {
+                String currentText = txtReponse.getText();
+                txtReponse.setText(currentText.isEmpty() ? text : currentText + " " + text);
+            }
+        });
     }
 
     @FXML

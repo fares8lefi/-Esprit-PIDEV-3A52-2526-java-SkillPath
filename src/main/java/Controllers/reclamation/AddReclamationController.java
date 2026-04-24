@@ -11,7 +11,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.collections.FXCollections;
+import Utils.VoiceRecognitionService;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
@@ -29,6 +32,9 @@ public class AddReclamationController {
 
     @FXML
     private TextField txtSujet;
+
+    @FXML
+    private ComboBox<String> comboVoiceLang;
 
     @FXML
     private TextArea txtDescription;
@@ -49,6 +55,10 @@ public class AddReclamationController {
         reclamationService = new ReclamationService();
         if (selectedFileLabel != null) {
             selectedFileLabel.setText("Aucun fichier choisi");
+        }
+        if (comboVoiceLang != null) {
+            comboVoiceLang.setItems(FXCollections.observableArrayList("Français", "English", "Tounsi"));
+            comboVoiceLang.getSelectionModel().select("Français");
         }
     }
 
@@ -88,6 +98,24 @@ public class AddReclamationController {
                 selectedFileLabel.setText(chosen.getName());
             }
         }
+    }
+
+    @FXML
+    void startVoiceRecognition(ActionEvent event) {
+        String selected = comboVoiceLang.getValue();
+        String langCode = "fr-FR";
+        if ("English".equals(selected)) {
+            langCode = "en-US";
+        } else if ("Tounsi".equals(selected)) {
+            langCode = "ar-TN"; 
+        }
+
+        VoiceRecognitionService.startRecognition(langCode, text -> {
+            if (text != null && !text.isBlank()) {
+                String currentText = txtDescription.getText();
+                txtDescription.setText(currentText.isEmpty() ? text : currentText + " " + text);
+            }
+        });
     }
 
     @FXML

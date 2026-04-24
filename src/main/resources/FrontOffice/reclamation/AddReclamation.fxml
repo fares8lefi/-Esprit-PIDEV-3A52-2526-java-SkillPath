@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -29,14 +30,24 @@
                   </Label>
                   <TextField fx:id="txtSujet" promptText="Exemple: Probleme de connexion..." styleClass="text-field-modern" />
 
-                  <Label text="Description" textFill="#1e293b">
-                     <font>
-                        <javafx.scene.text.Font name="System Bold" size="14.0" />
-                     </font>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Description" textFill="#1e293b">
+                           <font>
+                              <javafx.scene.text.Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" spacing="5.0">
+                           <children>
+                              <ComboBox fx:id="comboVoiceLang" prefWidth="120.0" promptText="Langue" />
+                              <Button mnemonicParsing="false" onAction="#startVoiceRecognition" styleClass="btn-secondary" text="🎤 Dicter" />
+                           </children>
+                        </HBox>
+                     </children>
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
-                  </Label>
+                  </HBox>
                   <TextArea fx:id="txtDescription" prefHeight="150.0" promptText="Decrivez votre probleme en detail..." styleClass="text-area-modern" wrapText="true" VBox.vgrow="ALWAYS" />
 
                   <Label text="Piece jointe (optionnel)" textFill="#1e293b">
