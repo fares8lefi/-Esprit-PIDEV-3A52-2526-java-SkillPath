@@ -16,6 +16,14 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.util.Scanner;
+import javafx.scene.web.WebView;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class LoginController {
 
@@ -23,8 +31,35 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
     @FXML private Button loginBtn;
+    @FXML private WebView captchaWebView;
 
     private final UserService userService = new UserService();
+    private Dotenv dotenv;
+    private String siteKey;
+    private String secretKey;
+
+    @FXML
+    public void initialize() {
+        dotenv = Dotenv.configure().ignoreIfMissing().load();
+        siteKey = dotenv.get("key");
+        secretKey = dotenv.get("secret");
+
+        if (siteKey != null && captchaWebView != null) {
+            try {
+                InputStream is = getClass().getResourceAsStream("/recaptcha.html");
+                if (is != null) {
+                    Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
+                    String html = scanner.hasNext() ? scanner.next() : "";
+                    html = html.replace("__SITE_KEY__", siteKey);
+                    captchaWebView.getEngine().loadContent(html);
+                } else {
+                    System.err.println("recaptcha.html introuvable !");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @FXML
     private void handleLogin(ActionEvent event) {
@@ -34,6 +69,23 @@ public class LoginController {
         if (email.isEmpty() || password.isEmpty()) {
             showError("Veuillez remplir tous les champs.");
             return;
+        }
+
+        // Vérification du reCAPTCHA
+        if (captchaWebView != null && secretKey != null && !secretKey.isEmpty()) {
+            try {
+                String token = (String) captchaWebView.getEngine().executeScript("getCaptchaResponse()");
+                if (token == null || token.isEmpty()) {
+                    showError("Veuillez valider le Captcha.");
+                    return;
+                }
+                if (!verifierCaptcha(token)) {
+                    showError("Validation Captcha échouée.");
+                    return;
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur exécution script reCAPTCHA: " + e.getMessage());
+            }
         }
 
         User user = userService.login(email, password);
@@ -80,6 +132,36 @@ public class LoginController {
         } catch (IOException e) {
             System.err.println("Erreur de navigation vers " + fxmlPath + " : " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private boolean verifierCaptcha(String token) {
+        if (secretKey == null) return true;
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+        String parametres = "secret=" + secretKey + "&response=" + token;
+
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new java.net.URL(url).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+
+            OutputStream os = connection.getOutputStream();
+            os.write(parametres.getBytes());
+            os.flush();
+            os.close();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuilder reponse = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                reponse.append(inputLine);
+            }
+            in.close();
+
+            return reponse.toString().contains("\"success\": true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
