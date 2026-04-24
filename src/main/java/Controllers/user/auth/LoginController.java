@@ -22,8 +22,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Scanner;
-import javafx.scene.web.WebView;
 import io.github.cdimascio.dotenv.Dotenv;
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
+import java.io.OutputStream;
+import javafx.scene.web.WebView;
 
 public class LoginController {
 
@@ -49,9 +52,32 @@ public class LoginController {
                 InputStream is = getClass().getResourceAsStream("/recaptcha.html");
                 if (is != null) {
                     Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
-                    String html = scanner.hasNext() ? scanner.next() : "";
-                    html = html.replace("__SITE_KEY__", siteKey);
-                    captchaWebView.getEngine().loadContent(html);
+                    String rawHtml = scanner.hasNext() ? scanner.next() : "";
+                    final String html = rawHtml.replace("__SITE_KEY__", siteKey);
+                    // Démarrer un mini-serveur HTTP local pour contourner la restriction de domaine
+                    try {
+                        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+                        server.createContext("/", exchange -> {
+                            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+                            byte[] bytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                            exchange.sendResponseHeaders(200, bytes.length);
+                            OutputStream os = exchange.getResponseBody();
+                            os.write(bytes);
+                            os.close();
+                        });
+                        server.setExecutor(null);
+                        server.start();
+                        
+                        int port = server.getAddress().getPort();
+                        captchaWebView.getEngine().load("http://127.0.0.1:" + port + "/");
+                        
+                        // Assurez-vous d'arrêter le serveur quand la fenêtre se ferme si nécessaire
+                        // mais pour le login, un port éphémère est généralement ok
+                    } catch (Exception ex) {
+                        System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
+                        // Fallback
+                        captchaWebView.getEngine().loadContent(html);
+                    }
                 } else {
                     System.err.println("recaptcha.html introuvable !");
                 }
