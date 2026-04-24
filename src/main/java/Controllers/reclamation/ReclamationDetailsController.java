@@ -2,6 +2,7 @@ package Controllers.reclamation;
 
 import Models.Reclamation;
 import Models.Reponse;
+import Services.ReclamationService;
 import Services.ReponseService;
 import Utils.Session;
 import javafx.application.Platform;
@@ -50,9 +51,11 @@ public class ReclamationDetailsController {
 
     private Reclamation currentReclamation;
     private ReponseService reponseService;
+    private ReclamationService reclamationService;
 
     public void initialize() {
         reponseService = new ReponseService();
+        reclamationService = new ReclamationService();
     }
 
     public void initData(Reclamation reclamation) {
@@ -135,6 +138,13 @@ public class ReclamationDetailsController {
 
             Reponse reponse = new Reponse(msg, currentReclamation.getId(), userIdBytes);
             reponseService.ajouter(reponse);
+
+            // Change status to "En attente" since user replied
+            if (!"En attente".equalsIgnoreCase(currentReclamation.getStatut())) {
+                reclamationService.updateStatut(currentReclamation.getId(), "En attente");
+                currentReclamation.setStatut("En attente");
+                Platform.runLater(() -> lblStatut.setText("En attente"));
+            }
 
             txtReponse.clear();
             addResponseToChat(reponse);
