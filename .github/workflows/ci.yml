@@ -1,0 +1,7 @@
+name: ci pipeline
+
+on:
+  push:
+    branches:
+      - main
+  
