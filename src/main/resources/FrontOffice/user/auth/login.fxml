@@ -97,6 +97,9 @@
                     <Label text="Rester connecté" styleClass="checkbox"/>
                 </HBox>
 
+                <!-- reCAPTCHA WebView -->
+                <javafx.scene.web.WebView fx:id="captchaWebView" prefHeight="80" prefWidth="320" />
+
                 <Button fx:id="loginBtn" onAction="#handleLogin" text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
                     <VBox.margin>
                         <Insets top="5"/>
