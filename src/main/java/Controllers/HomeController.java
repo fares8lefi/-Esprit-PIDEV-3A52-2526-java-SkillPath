@@ -58,4 +58,19 @@ public class HomeController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    public void goToEvents() {
+        try {
+            Parent root = FXMLLoader.load(
+                getClass().getResource("/FrontOffice/event/EventList.fxml")
+            );
+            Stage stage = (Stage) startAdventureBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur redirection events : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
