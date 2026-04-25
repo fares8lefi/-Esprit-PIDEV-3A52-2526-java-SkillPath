@@ -6,12 +6,17 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.auth.LoginController" prefWidth="1000" prefHeight="700">
+<AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.auth.LoginController" prefWidth="1200" prefHeight="700">
     <children>
-        <HBox alignment="CENTER" spacing="60" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-padding: 50px;">
+        <HBox alignment="CENTER" spacing="30" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-padding: 40px;">
             
-            <!-- Branding Side (Left) -->
-            <VBox alignment="CENTER_LEFT" spacing="30" maxWidth="450" HBox.hgrow="ALWAYS">
+            <!-- reCAPTCHA Left Panel -->
+            <VBox alignment="CENTER" spacing="20" minWidth="140" maxWidth="160" HBox.hgrow="NEVER" style="-fx-padding: 30px 20px;">
+                <javafx.scene.web.WebView fx:id="captchaWebView" prefHeight="160" prefWidth="140" style="-fx-font-scale: 1.0;"/>
+            </VBox>
+
+            <!-- Center: Branding -->
+            <VBox alignment="CENTER_LEFT" spacing="30" maxWidth="380" HBox.hgrow="ALWAYS">
                 
                 <!-- Logo & Title -->
                 <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 40 0;">
@@ -33,7 +38,7 @@
                     <Label text="prochaine étape ?" styleClass="title-text" style="-fx-text-fill: #8b5cf6;"/>
                 </VBox>
                 
-                <Label text="Accédez à votre espace personnel pour continuer votre apprentissage et suivre vos progrès." styleClass="subtitle-text" wrapText="true" maxWidth="380" style="-fx-padding: 0 0 20 0;"/>
+                <Label text="Accédez à votre espace personnel pour continuer votre apprentissage et suivre vos progrès." styleClass="subtitle-text" wrapText="true" maxWidth="340" style="-fx-padding: 0 0 20 0;"/>
 
                 <!-- Features cards -->
                 <HBox spacing="15">
@@ -52,8 +57,8 @@
                 </HBox>
             </VBox>
 
-            <!-- Login Card (Right) -->
-            <VBox styleClass="glass-card" spacing="18" maxWidth="400" minWidth="380">
+            <!-- Right: Login Card -->
+            <VBox styleClass="glass-card" spacing="18" maxWidth="380" minWidth="360">
                 <VBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 0 0 5 0;">
                     <Label text="Bon retour !" styleClass="card-title"/>
                     <Label text="Content de vous revoir parmi nous." styleClass="card-subtitle"/>
@@ -64,7 +69,6 @@
                 <!-- Google Auth Button -->
                 <Button text="Continuer avec Google" styleClass="btn-google" maxWidth="Infinity">
                     <graphic>
-                        <!-- G character mocking the Google Logo -> you can link a google.png ImageView here -->
                         <Label text="G" style="-fx-text-fill: #4285F4; -fx-font-weight: 900; -fx-font-size: 16px; -fx-padding: 0 8 0 0;"/>
                     </graphic>
                 </Button>
@@ -96,9 +100,6 @@
                     <CheckBox styleClass="checkbox"/>
                     <Label text="Rester connecté" styleClass="checkbox"/>
                 </HBox>
-
-                <!-- reCAPTCHA WebView -->
-                <javafx.scene.web.WebView fx:id="captchaWebView" prefHeight="80" prefWidth="320" />
 
                 <Button fx:id="loginBtn" onAction="#handleLogin" text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
                     <VBox.margin>
