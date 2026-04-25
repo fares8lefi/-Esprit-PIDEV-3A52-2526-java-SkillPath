@@ -108,17 +108,27 @@ public class LoginController {
         // Vérification du reCAPTCHA
         if (captchaWebView != null && secretKey != null && !secretKey.isEmpty()) {
             try {
+                // Vérifier d'abord si le captcha a été coché
+                Object verifiedObj = captchaWebView.getEngine().executeScript("isCaptchaVerified()");
+                boolean isVerified = verifiedObj instanceof Boolean ? (Boolean) verifiedObj : false;
+                
+                if (!isVerified) {
+                    showError("Veuillez cocher la case 'Je ne suis pas un robot' pour continuer.");
+                    return;
+                }
+                
                 String token = (String) captchaWebView.getEngine().executeScript("getCaptchaResponse()");
                 if (token == null || token.isEmpty()) {
-                    showError("Veuillez valider le Captcha.");
+                    showError("Erreur de communication avec reCAPTCHA. Veuillez réessayer.");
                     return;
                 }
                 if (!verifierCaptcha(token)) {
-                    showError("Validation Captcha échouée.");
+                    showError("La vérification reCAPTCHA a échoué. Veuillez réessayer.");
                     return;
                 }
             } catch (Exception e) {
                 System.err.println("Erreur exécution script reCAPTCHA: " + e.getMessage());
+                showError("Erreur lors de la vérification. Veuillez réessayer.");
             }
         }
 
