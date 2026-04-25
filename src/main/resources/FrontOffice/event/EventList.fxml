@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+
+<!-- Matching the main FrontOffice App flow wrapper with root styleClass -->
+<AnchorPane styleClass="root" stylesheets="@../../FrontOffice/home/home_style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.UserEventListController" prefWidth="1200" prefHeight="800">
+    <children>
+        <!-- Reusing standard Home App Navigation Bar visually -->
+        <HBox styleClass="nav-bar" alignment="CENTER" spacing="40" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #d946ef); -fx-background-radius: 12;" minWidth="40" minHeight="40">
+                    <Label text="S" style="-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 20px;"/>
+                </StackPane>
+                <HBox alignment="BASELINE_LEFT">
+                    <Label text="Skill" styleClass="logo-text"/>
+                    <Label text="Path" styleClass="logo-text" style="-fx-text-fill: #8b5cf6;"/>
+                </HBox>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER" spacing="30">
+                <Label text="Accueil" onMouseClicked="#goToHome" styleClass="nav-link" style="-fx-cursor: hand;"/>
+                <Label text="Catalogue" onMouseClicked="#goToCourses" styleClass="nav-link" style="-fx-cursor: hand;"/>
+                <Label text="Événements" styleClass="nav-link" style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold;"/>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnFavourites" text="❤️ Mes favoris" onAction="#handleShowFavourites" styleClass="btn-primary" style="-fx-background-color: rgba(239, 68, 68, 0.2); -fx-text-fill: #ef4444; -fx-border-color: rgba(239, 68, 68, 0.4); -fx-cursor: hand; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 8 20;" />
+        </HBox>
+
+        <ScrollPane fitToWidth="true" styleClass="main-scroll-pane" AnchorPane.topAnchor="70.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <content>
+                <VBox spacing="40">
+                    <padding><Insets top="50" right="80" bottom="80" left="80" /></padding>
+                    
+                    <VBox alignment="CENTER" spacing="15">
+                        <Label text="AGENDA" style="-fx-background-color: rgba(139, 92, 246, 0.1); -fx-text-fill: #a78bfa; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: 900; -fx-font-size: 10px;"/>
+                        <Label text="The Premier Event Collection" styleClass="section-title" style="-fx-font-size: 42px;"/>
+                        <Label text="Discover live events, connect with mentors, and engage directly with the SkillPath community." styleClass="hero-subtitle"/>
+                    </VBox>
+                    
+                    <HBox alignment="CENTER" spacing="20">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS" maxWidth="400">
+                            <Label text="SEARCH" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                            <TextField fx:id="tfSearchName" promptText="What event are you looking for?" styleClass="form-input" prefHeight="55"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="220">
+                            <Label text="RATING REQUIREMENT" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                            <ComboBox fx:id="cbMinRating" styleClass="form-input" maxWidth="Infinity" prefHeight="55"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- We use FlowPane internally mapped in controller, but applying general CSS to it via code -->
+                    <FlowPane fx:id="flowPaneEvents" hgap="30" vgap="40" alignment="CENTER" />
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</AnchorPane>

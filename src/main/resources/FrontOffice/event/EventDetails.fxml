@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane style="-fx-background-color: #0f172a;" stylesheets="@../../FrontOffice/home/home_style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.UserEventDetailsController" prefWidth="600" prefHeight="550">
+    <children>
+        <VBox spacing="25.0" AnchorPane.leftAnchor="40" AnchorPane.rightAnchor="40" AnchorPane.topAnchor="40" AnchorPane.bottomAnchor="30">
+            
+            <HBox alignment="CENTER_LEFT">
+                <Label text="PREMIER EVENT" style="-fx-background-color: rgba(139, 92, 246, 0.1); -fx-text-fill: #a78bfa; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: 900; -fx-font-size: 10px;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblAverageRating" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #fcd34d; -fx-background-color: rgba(252, 211, 77, 0.1); -fx-padding: 5 10; -fx-background-radius: 5;"/>
+            </HBox>
+
+            <Label fx:id="lblTitle" styleClass="hero-title" style="-fx-font-size: 32px;" text="Event Title" wrapText="true" />
+            
+            <Label fx:id="lblDescription" styleClass="card-desc" style="-fx-font-size: 15px;" text="Description goes here..." wrapText="true" VBox.vgrow="ALWAYS" />
+            
+            <!-- Bento style Details Box -->
+            <VBox spacing="15" styleClass="glass-card" style="-fx-padding: 20; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12;">
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="📅" style="-fx-font-size: 20; -fx-text-fill: #3b82f6;" />
+                    <VBox>
+                        <Label text="DATE" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="lblDate" styleClass="card-title" style="-fx-font-size: 15px;"/>
+                    </VBox>
+                </HBox>
+                <Separator style="-fx-opacity: 0.1;"/>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="⏰" style="-fx-font-size: 20; -fx-text-fill: #3b82f6;" />
+                    <VBox>
+                        <Label text="TIME" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="lblTime" styleClass="card-title" style="-fx-font-size: 15px;"/>
+                    </VBox>
+                </HBox>
+                <Separator style="-fx-opacity: 0.1;"/>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="📍" style="-fx-font-size: 20; -fx-text-fill: #10b981;" />
+                    <VBox>
+                        <Label text="LOCATION" styleClass="badge-ia-text" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="lblLocation" styleClass="card-title" style="-fx-font-size: 15px;" wrapText="true" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: rgba(255,255,255,0.02); -fx-padding: 15; -fx-background-radius: 10;">
+                <Label text="Leave Rating" style="-fx-text-fill: #cbd5e1; -fx-font-weight: bold;" />
+                <ComboBox fx:id="cbMyRating" prefWidth="80" styleClass="form-input" />
+                <Button text="Submit" onAction="#handleRate" styleClass="btn-secondary" style="-fx-background-color: #f59e0b; -fx-text-fill: white;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnFavourite" text="🤍 Save" onAction="#handleToggleFavourite" styleClass="btn-secondary" />
+            </HBox>
+
+            <Button fx:id="btnClose" text="Fermer" onAction="#handleClose" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" maxWidth="Infinity" />
+        </VBox>
+    </children>
+</AnchorPane>

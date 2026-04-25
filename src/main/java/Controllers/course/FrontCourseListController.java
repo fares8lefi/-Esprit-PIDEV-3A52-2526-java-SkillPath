@@ -318,4 +318,17 @@ public class FrontCourseListController implements Initializable {
     private void goToCourses() {
         loadData(); // Just refresh the data
     }
+
+    @FXML
+    private void goToEvents() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/event/EventList.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) lblResultCount.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur redirection events : " + e.getMessage());
+        }
+    }
 }

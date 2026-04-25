@@ -101,6 +101,24 @@
                 </HBox>
             </graphic>
         </Button>
+
+        <Button fx:id="btnEvents" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleEvents" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="📅" style="-fx-font-size: 18;"/>
+                    <Label text="Gestion Événements"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnLocations" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleLocations" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="📍" style="-fx-font-size: 18;"/>
+                    <Label text="Lieux des Événements"/>
+                </HBox>
+            </graphic>
+        </Button>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS"/>
