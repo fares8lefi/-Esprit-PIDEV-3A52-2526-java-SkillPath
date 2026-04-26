@@ -7,37 +7,36 @@
     <script>
       var captchaResponse = "";
       var captchaVerified = false;
-      
+
       function captchaCallback(response) {
           captchaResponse = response;
           captchaVerified = true;
           updateCaptchaStatus(true);
       }
-      
+
       function getCaptchaResponse() {
           return captchaResponse;
       }
-      
+
       function isCaptchaVerified() {
           return captchaVerified;
       }
-      
+
       function updateCaptchaStatus(verified) {
-          const statusElement = document.getElementById('captcha-status');
-          const checkmark = document.getElementById('checkmark');
-          if (verified) {
-              statusElement.style.display = 'flex';
-              checkmark.innerHTML = '✓';
-              checkmark.style.color = '#10b981';
+          var statusEl = document.getElementById('captcha-status');
+          var checkEl = document.getElementById('checkmark');
+          if (verified && statusEl && checkEl) {
+              statusEl.style.display = 'flex';
+              checkEl.innerHTML = '&#10003;';
+              checkEl.style.color = '#10b981';
           }
       }
-      
+
       window.addEventListener('load', function() {
-          // Amélioration de l'accessibilité
-          const captchaContainer = document.querySelector('.captcha-wrapper');
-          if (captchaContainer) {
-              captchaContainer.setAttribute('role', 'region');
-              captchaContainer.setAttribute('aria-label', 'Vérification de sécurité reCAPTCHA');
+          var wrapper = document.getElementById('captcha-wrapper');
+          if (wrapper) {
+              wrapper.setAttribute('role', 'region');
+              wrapper.setAttribute('aria-label', 'Vérification de sécurité reCAPTCHA');
           }
       });
     </script>
@@ -47,172 +46,121 @@
         padding: 0;
         box-sizing: border-box;
       }
-      
-      body {
-        background-color: transparent;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 2px;
-      }
-      
-      .captcha-container {
+
+      html, body {
         width: 100%;
-        max-width: 280px;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      body {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 2px 4px;
       }
-      
+
+      /* Étiquette SÉCURITÉ */
       .captcha-label {
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: 700;
-        color: #a1a1a1;
+        color: #a1a1aa;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        display: block;
-        transition: color 0.3s ease;
+        letter-spacing: 0.9px;
+        margin-bottom: 4px;
+        padding-left: 2px;
       }
-      
+
+      /* Boîte contenant le widget reCAPTCHA */
       .captcha-wrapper {
-        position: relative;
-        padding: 10px;
-        border: 1.5px solid rgba(139, 92, 246, 0.25);
-        border-radius: 12px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(217, 70, 239, 0.08) 100%);
-        backdrop-filter: blur(12px);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        min-height: 78px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        align-items: flex-start;
+        padding: 3px 5px 3px 5px;
+        border: 1.5px solid rgba(139, 92, 246, 0.30);
+        border-radius: 10px;
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.07) 0%,
+          rgba(217, 70, 239, 0.07) 100%
+        );
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
       }
-      
+
       .captcha-wrapper:hover {
-        border-color: rgba(139, 92, 246, 0.4);
-        box-shadow: 0 12px 24px rgba(139, 92, 246, 0.15);
+        border-color: rgba(139, 92, 246, 0.50);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.18);
       }
-      
+
+      /* Le div Google reCAPTCHA — on ne le scale PAS */
       .g-recaptcha {
-        display: flex !important;
-        justify-content: center;
-        transform: scale(0.85);
-        transform-origin: center;
+        display: block;
       }
-      
-      /* Style pour le widget reCAPTCHA */
+
+      /* iframe injecté par Google */
       .g-recaptcha iframe {
         border-radius: 4px;
+        display: block;
       }
-      
+
+      /* Bandeau de confirmation après validation */
       .captcha-status-container {
-        margin-top: 8px;
         display: none;
         align-items: center;
-        gap: 8px;
-        font-size: 12px;
+        gap: 6px;
+        margin-top: 5px;
+        font-size: 11px;
         color: #10b981;
-        animation: slideIn 0.3s ease;
+        animation: fadeIn 0.3s ease;
       }
-      
+
       .captcha-checkmark {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
-        background-color: rgba(16, 185, 129, 0.1);
+        background: rgba(16, 185, 129, 0.12);
         font-weight: bold;
-        font-size: 12px;
-      }
-      
-      .captcha-success-text {
-        font-weight: 500;
-      }
-      
-      .error-message {
-        color: #ef4444;
         font-size: 11px;
-        margin-top: 6px;
-        display: none;
-        animation: slideIn 0.3s ease;
       }
-      
-      .security-info {
-        margin-top: 8px;
-        font-size: 10px;
-        color: #6b7280;
-        text-align: center;
+
+      .captcha-success-text {
+        font-weight: 600;
       }
-      
-      .security-badge {
-        display: inline-block;
-        margin: 0 3px;
+
+      /* Animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-3px); }
+        to   { opacity: 1; transform: translateY(0); }
       }
-      
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(-5px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
+
       @keyframes pulse {
-        0%, 100% {
-          box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 6px rgba(139, 92, 246, 0);
-        }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
+        70%       { box-shadow: 0 0 0 5px rgba(139, 92, 246, 0); }
       }
-      
+
       .captcha-wrapper.loading {
         animation: pulse 2s infinite;
-      }
-      
-      /* Responsive */
-      @media (max-width: 420px) {
-        .captcha-container {
-          max-width: 100%;
-        }
-        
-        .captcha-wrapper {
-          padding: 10px;
-        }
-      }
-      
-      /* Mode sombre - compatible avec le thème existant */
-      @media (prefers-color-scheme: dark) {
-        .captcha-label {
-          color: #d1d5db;
-        }
-        
-        .security-info {
-          color: #9ca3af;
-        }
       }
     </style>
   </head>
   <body>
-    <div class="captcha-container">
-      <label class="captcha-label">Sécurité</label>
-      <div class="captcha-wrapper" id="captcha-wrapper">
-        <div class="g-recaptcha" data-sitekey="__SITE_KEY__" data-theme="dark" data-callback="captchaCallback"></div>
-        <div class="captcha-status-container" id="captcha-status">
-          <div class="captcha-checkmark" id="checkmark"></div>
-          <span class="captcha-success-text">Vérifié</span>
-        </div>
+    <div class="captcha-label">Sécurité</div>
+    <div class="captcha-wrapper" id="captcha-wrapper">
+      <div class="g-recaptcha"
+           data-sitekey="__SITE_KEY__"
+           data-theme="dark"
+           data-callback="captchaCallback">
       </div>
-      <div class="security-info">
-        <span class="security-badge">🔒</span> reCAPTCHA
+      <div class="captcha-status-container" id="captcha-status">
+        <div class="captcha-checkmark" id="checkmark"></div>
+        <span class="captcha-success-text">Vérifié ✓</span>
       </div>
     </div>
   </body>
