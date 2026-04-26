@@ -5,15 +5,13 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.web.WebView?>
 
 <AnchorPane styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.auth.LoginController" prefWidth="1200" prefHeight="700">
     <children>
         <HBox alignment="CENTER" spacing="30" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-padding: 40px;">
             
-            <!-- reCAPTCHA Left Panel -->
-            <VBox alignment="CENTER" spacing="20" minWidth="140" maxWidth="160" HBox.hgrow="NEVER" style="-fx-padding: 30px 20px;">
-                <javafx.scene.web.WebView fx:id="captchaWebView" prefHeight="160" prefWidth="140" style="-fx-font-scale: 1.0;"/>
-            </VBox>
+
 
             <!-- Center: Branding -->
             <VBox alignment="CENTER_LEFT" spacing="30" maxWidth="380" HBox.hgrow="ALWAYS">
@@ -100,6 +98,16 @@
                     <CheckBox styleClass="checkbox"/>
                     <Label text="Rester connecté" styleClass="checkbox"/>
                 </HBox>
+
+                <!-- reCAPTCHA Container -->
+                <javafx.scene.web.WebView fx:id="captchaWebView" 
+                                          prefHeight="130" minHeight="130" 
+                                          prefWidth="300" maxWidth="340"
+                                          style="-fx-padding: 0; -fx-background-color: transparent;">
+                    <VBox.margin>
+                        <Insets top="2" bottom="2"/>
+                    </VBox.margin>
+                </javafx.scene.web.WebView> 
 
                 <Button fx:id="loginBtn" onAction="#handleLogin" text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
                     <VBox.margin>
