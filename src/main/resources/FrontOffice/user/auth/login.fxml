@@ -65,7 +65,7 @@
                 <Label fx:id="errorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;" wrapText="true" visible="false"/>
 
                 <!-- Google Auth Button -->
-                <Button text="Continuer avec Google" styleClass="btn-google" maxWidth="Infinity">
+                <Button fx:id="googleBtn" onAction="#handleGoogleLogin" text="Continuer avec Google" styleClass="btn-google" maxWidth="Infinity">
                     <graphic>
                         <Label text="G" style="-fx-text-fill: #4285F4; -fx-font-weight: 900; -fx-font-size: 16px; -fx-padding: 0 8 0 0;"/>
                     </graphic>
