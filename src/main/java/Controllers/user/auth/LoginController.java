@@ -49,14 +49,26 @@ public class LoginController {
         siteKey = dotenv.get("key");
         secretKey = dotenv.get("secret");
 
-        if (siteKey != null && captchaWebView != null) {
+        if (siteKey == null || siteKey.isEmpty()) {
+            System.err.println("reCAPTCHA siteKey est NULL ou vide ! Vérifiez le fichier .env");
+            if (captchaWebView != null) {
+                captchaWebView.getEngine().loadContent("<div style='color:red;font-family:sans-serif;padding:10px;'>Erreur: Clé reCAPTCHA manquante (.env)</div>");
+            }
+            return;
+        }
+
+        if (captchaWebView != null) {
             try {
+                // Configurer le WebView
+                captchaWebView.setPageFill(javafx.scene.paint.Color.TRANSPARENT);
+                
                 InputStream is = getClass().getResourceAsStream("/recaptcha.html");
                 if (is != null) {
                     Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
                     String rawHtml = scanner.hasNext() ? scanner.next() : "";
                     final String html = rawHtml.replace("__SITE_KEY__", siteKey);
-                    // Démarrer un mini-serveur HTTP local pour contourner la restriction de domaine
+                    
+                    // Démarrer un mini-serveur HTTP local
                     try {
                         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
                         server.createContext("/", exchange -> {
@@ -72,20 +84,21 @@ public class LoginController {
                         
                         int port = server.getAddress().getPort();
                         captchaWebView.getEngine().load("http://127.0.0.1:" + port + "/");
-                        
-                        // Assurez-vous d'arrêter le serveur quand la fenêtre se ferme si nécessaire
-                        // mais pour le login, un port éphémère est généralement ok
                     } catch (Exception ex) {
                         System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
-                        // Fallback
+                        // Fallback : chargement direct du contenu
                         captchaWebView.getEngine().loadContent(html);
                     }
                 } else {
-                    System.err.println("recaptcha.html introuvable !");
+                    System.err.println("recaptcha.html introuvable dans les ressources !");
+                    captchaWebView.getEngine().loadContent("<div style='color:red;'>Fichier recaptcha.html introuvable.</div>");
                 }
             } catch (Exception e) {
+                System.err.println("Erreur lors de l'initialisation du WebView reCAPTCHA: " + e.getMessage());
                 e.printStackTrace();
             }
+        } else {
+            System.err.println("captchaWebView est NULL ! Vérifiez l'injection @FXML dans login.fxml");
         }
     }
 
