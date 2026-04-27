@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox prefWidth="400.0" prefHeight="500.0" style="-fx-background-color: #0f172a; -fx-border-color: #8b5cf6; -fx-border-width: 2; -fx-border-radius: 15; -fx-background-radius: 15;" spacing="20" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.user.NotificationPopUpController">
+    <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+    <children>
+        <HBox alignment="CENTER_LEFT">
+            <children>
+                <Label text="Mes Notifications" textFill="WHITE" style="-fx-font-size: 20; -fx-font-weight: 900;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#closePopUp" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 18; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+        
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-hbar-policy: never;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="notifContainer" spacing="15" style="-fx-background-color: transparent;">
+                    <!-- Items loaded here -->
+                </VBox>
+            </content>
+        </ScrollPane>
+        
+        <Button onAction="#markAllAsRead" maxWidth="Infinity" text="Tout marquer comme lu" 
+                style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 12; -fx-font-weight: bold; -fx-cursor: hand;" />
+    </children>
+</VBox>
