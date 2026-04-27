@@ -240,5 +240,56 @@
             </ScrollPane>
          </children>
       </VBox>
+      
+      <!-- Layer 2: Floating Overlays (Absolute Positioning) -->
+      <VBox fx:id="chatContainer" AnchorPane.bottomAnchor="40" AnchorPane.rightAnchor="40" spacing="20" alignment="BOTTOM_RIGHT" pickOnBounds="false">
+          <children>
+              <!-- Chat Window -->
+              <VBox fx:id="chatWindow" visible="false" prefHeight="600" prefWidth="420" 
+                    style="-fx-background-color: #0f172a; -fx-background-radius: 32; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 60, 0, 0, 30); -fx-border-color: rgba(255,255,255,0.12); -fx-border-radius: 32;">
+                  <children>
+                      <HBox alignment="CENTER_LEFT" spacing="18" prefHeight="100" style="-fx-background-color: linear-gradient(to right, #4f46e5, #9333ea); -fx-background-radius: 32 32 0 0;">
+                          <padding><Insets left="35" right="35"/></padding>
+                          <children>
+                              <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                  <children>
+                                      <Label text="SkillPath Intelligence" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 17;" />
+                                      <Label text="Online Advisor • Llama 3.2" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 11; -fx-font-weight: 800;" />
+                                  </children>
+                              </VBox>
+                              <Button onAction="#toggleChat" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28; -fx-cursor: hand; -fx-padding: 0;" text="×" />
+                          </children>
+                      </HBox>
+                      
+                      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                          <content>
+                              <VBox fx:id="chatMessages" spacing="28" style="-fx-padding: 35; -fx-background-color: #0f172a;" />
+                          </content>
+                      </ScrollPane>
+
+                      <VBox spacing="20" style="-fx-background-color: #1a2234; -fx-padding: 30; -fx-border-color: rgba(255,255,255,0.06); -fx-border-width: 1 0 0 0; -fx-background-radius: 0 0 32 32;">
+                          <children>
+                              <HBox spacing="15" alignment="CENTER">
+                                  <children>
+                                      <TextField fx:id="txtChatInput" promptText="Comment puis-je vous aider ?" HBox.hgrow="ALWAYS" onAction="#sendChatMessage"
+                                                 style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 16 30; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 30;" />
+                                      <Button onAction="#sendChatMessage" prefHeight="60" prefWidth="60" 
+                                              style="-fx-background-color: #6366f1; -fx-background-radius: 30; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.5), 25, 0, 0, 10);">
+                                          <graphic><Label text="➜" textFill="WHITE" style="-fx-font-size: 22; -fx-font-weight: bold;" /></graphic>
+                                      </Button>
+                                  </children>
+                              </HBox>
+                          </children>
+                      </VBox>
+                  </children>
+              </VBox>
+
+              <!-- Toggle Button -->
+              <Button onAction="#toggleChat" prefHeight="85" prefWidth="85" 
+                      style="-fx-background-color: linear-gradient(to bottom right, #6366f1, #9333ea); -fx-background-radius: 45; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.6), 40, 0, 0, 20); -fx-cursor: hand;">
+                  <graphic><Label text="💬" textFill="WHITE" style="-fx-font-size: 38;" /></graphic>
+              </Button>
+          </children>
+      </VBox>
    </children>
 </AnchorPane>
