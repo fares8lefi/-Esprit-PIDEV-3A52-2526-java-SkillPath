@@ -140,4 +140,17 @@ public class ModuleService implements Iservice<Module> {
         }
         return modules;
     }
+
+    /**
+     * Deletes all modules associated with a specific course.
+     */
+    public void supprimerParCours(int courseId) throws SQLDataException {
+        String sql = "DELETE FROM module WHERE course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
 }

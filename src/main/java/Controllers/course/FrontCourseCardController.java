@@ -81,10 +81,14 @@ public class FrontCourseCardController {
             if (loadedImage != null) {
                 imgCourse.setImage(loadedImage);
             } else {
-                // Last resort Classpath fallback
-                URL res = getClass().getResource("/FrontOffice/images/default-course.png");
-                if (res != null) imgCourse.setImage(new Image(res.toExternalForm()));
+                // Professional placeholder if file not found or wrong format
+                URL placeholderRes = getClass().getResource("/FrontOffice/images/default-course.png");
+                if (placeholderRes != null) imgCourse.setImage(new Image(placeholderRes.toExternalForm()));
             }
+        } else {
+            // Default placeholder if no image path exists at all
+            URL placeholderRes = getClass().getResource("/FrontOffice/images/default-course.png");
+            if (placeholderRes != null) imgCourse.setImage(new Image(placeholderRes.toExternalForm()));
         }
 
         // Simulate AI Probability if not exists

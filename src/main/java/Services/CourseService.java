@@ -33,6 +33,10 @@ public class CourseService implements Iservice<Course> {
 
     @Override
     public void supprimer(Course course) throws SQLDataException {
+        // First delete all associated modules to avoid foreign key constraint issues
+        ModuleService moduleService = new ModuleService();
+        moduleService.supprimerParCours(course.getId());
+        
         String sql = "DELETE FROM course WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, course.getId());
