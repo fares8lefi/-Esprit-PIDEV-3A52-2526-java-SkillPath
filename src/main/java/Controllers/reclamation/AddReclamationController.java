@@ -153,7 +153,6 @@ public class AddReclamationController {
                 updated.setPieceJointe(pieceJointePath);
                 updated.setUserIdBytes(userIdBytes);
                 reclamationService.modifier(updated);
-
                 showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete modifiee avec succes.");
             } else {
                 Reclamation reclamation = new Reclamation(sujet, description, pieceJointePath, userIdBytes);

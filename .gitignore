@@ -37,3 +37,8 @@ build/
 ### Mac OS ###
 .DS_Store
 .env
+.venv/
+__pycache__/
+*.pyc
+scratch/
+temp_tounsi.wav

@@ -2,8 +2,14 @@ package Services;
 
 import Models.Reclamation;
 import Utils.Database;
+import Utils.OllamaContentFilterService;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +25,21 @@ public class ReclamationService implements Iservice<Reclamation> {
     public void ajouter(Reclamation reclamation) throws SQLDataException {
         String sql = "INSERT INTO reclamation (sujet, description, statut, piece_jointe, user_id) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reclamation.getSujet());
-            ps.setString(2, reclamation.getDescription());
+            String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
+            String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            reclamation.setSujet(filteredSujet);
+            reclamation.setDescription(filteredDescription);
+
+            ps.setString(1, filteredSujet);
+            ps.setString(2, filteredDescription);
             ps.setString(3, reclamation.getStatut());
             ps.setString(4, reclamation.getPieceJointe());
             ps.setBytes(5, reclamation.getUserIdBytes());
             ps.executeUpdate();
-            System.out.println("Reclamation ajoutée avec succès.");
+            System.out.println("Reclamation ajoutee avec succes.");
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage Ollama reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur ajout reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -38,7 +52,7 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, reclamation.getId());
             ps.executeUpdate();
-            System.out.println("Reclamation supprimée avec succès.");
+            System.out.println("Reclamation supprimee avec succes.");
         } catch (SQLException e) {
             System.err.println("Erreur suppression reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -49,13 +63,21 @@ public class ReclamationService implements Iservice<Reclamation> {
     public void modifier(Reclamation reclamation) throws SQLDataException {
         String sql = "UPDATE reclamation SET sujet = ?, description = ?, statut = ?, piece_jointe = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reclamation.getSujet());
-            ps.setString(2, reclamation.getDescription());
+            String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
+            String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            reclamation.setSujet(filteredSujet);
+            reclamation.setDescription(filteredDescription);
+
+            ps.setString(1, filteredSujet);
+            ps.setString(2, filteredDescription);
             ps.setString(3, reclamation.getStatut());
             ps.setString(4, reclamation.getPieceJointe());
             ps.setInt(5, reclamation.getId());
             ps.executeUpdate();
-            System.out.println("Reclamation modifiée avec succès.");
+            System.out.println("Reclamation modifiee avec succes.");
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage Ollama reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur modification reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -67,7 +89,7 @@ public class ReclamationService implements Iservice<Reclamation> {
         List<Reclamation> reclamations = new ArrayList<>();
         String sql = "SELECT * FROM reclamation";
         try (Statement st = connection.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Reclamation r = new Reclamation();
                 r.setId(rs.getInt("id"));
@@ -113,8 +135,8 @@ public class ReclamationService implements Iservice<Reclamation> {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT r.id, r.sujet, r.description, r.statut, r.piece_jointe, r.user_id, u.username " +
-                "FROM reclamation r " +
-                "JOIN user u ON u.id = r.user_id "
+                        "FROM reclamation r " +
+                        "JOIN user u ON u.id = r.user_id "
         );
 
         boolean hasSearch = usernameSearch != null && !usernameSearch.isBlank();

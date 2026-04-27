@@ -2,8 +2,14 @@ package Services;
 
 import Models.Reponse;
 import Utils.Database;
+import Utils.OllamaContentFilterService;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +25,17 @@ public class ReponseService implements Iservice<Reponse> {
     public void ajouter(Reponse reponse) throws SQLDataException {
         String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reponse.getMessage());
+            String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
+            reponse.setMessage(filteredMessage);
+
+            ps.setString(1, filteredMessage);
             ps.setInt(2, reponse.getReclamationId());
             ps.setBytes(3, reponse.getUserIdBytes());
             ps.executeUpdate();
-            System.out.println("Reponse ajoutée avec succès.");
+            System.out.println("Reponse ajoutee avec succes.");
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage Ollama reponse : " + e.getMessage());
+            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur ajout reponse : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -36,7 +48,7 @@ public class ReponseService implements Iservice<Reponse> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, reponse.getId());
             ps.executeUpdate();
-            System.out.println("Reponse supprimée avec succès.");
+            System.out.println("Reponse supprimee avec succes.");
         } catch (SQLException e) {
             System.err.println("Erreur suppression reponse : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -47,10 +59,16 @@ public class ReponseService implements Iservice<Reponse> {
     public void modifier(Reponse reponse) throws SQLDataException {
         String sql = "UPDATE reponse SET message = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reponse.getMessage());
+            String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
+            reponse.setMessage(filteredMessage);
+
+            ps.setString(1, filteredMessage);
             ps.setInt(2, reponse.getId());
             ps.executeUpdate();
-            System.out.println("Reponse modifiée avec succès.");
+            System.out.println("Reponse modifiee avec succes.");
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage Ollama reponse : " + e.getMessage());
+            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur modification reponse : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -78,7 +96,6 @@ public class ReponseService implements Iservice<Reponse> {
         return reponses;
     }
 
-    // Method to get the thread of responses for a specific reclamation
     public List<Reponse> getReponsesByReclamation(int reclamationId) throws SQLDataException {
         List<Reponse> reponses = new ArrayList<>();
         String sql = "SELECT * FROM reponse WHERE reclamation_id = ?";

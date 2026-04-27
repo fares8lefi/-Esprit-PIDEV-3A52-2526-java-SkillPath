@@ -146,7 +146,8 @@ public class AdminReclamationsController {
 
     @FXML
     private void handleOpenAttachment() {
-        if (selectedReclamation == null || selectedReclamation.getPieceJointe() == null || selectedReclamation.getPieceJointe().isBlank()) {
+        if (selectedReclamation == null || selectedReclamation.getPieceJointe() == null
+                || selectedReclamation.getPieceJointe().isBlank()) {
             showAlert(Alert.AlertType.INFORMATION, "Piece jointe", "Aucune piece jointe disponible.");
             return;
         }
@@ -254,7 +255,8 @@ public class AdminReclamationsController {
             return;
         }
 
-        selectedReclamationLabel.setText("#" + reclamation.getId() + " - " + safe(reclamation.getUsername()) + " - " + safe(reclamation.getSujet()));
+        selectedReclamationLabel.setText("#" + reclamation.getId() + " - " + safe(reclamation.getUsername()) + " - "
+                + safe(reclamation.getSujet()));
         selectedDescriptionLabel.setText(safe(reclamation.getDescription()));
 
         String pieceJointe = reclamation.getPieceJointe();
