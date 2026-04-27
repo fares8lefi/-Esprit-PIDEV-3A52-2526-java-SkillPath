@@ -2,6 +2,8 @@ package Controllers.course;
 
 import Models.Course;
 import Services.CourseService;
+import Utils.Session;
+import javafx.event.ActionEvent;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -9,9 +11,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -35,6 +41,8 @@ public class FrontCourseListController implements Initializable {
     @FXML private VBox chatWindow;
     @FXML private VBox chatMessages;
     @FXML private TextField txtChatInput;
+    @FXML private StackPane notifBadge;
+    @FXML private Label lblNotifCount;
 
     private final CourseService courseService = new CourseService();
     private List<Course> masterList = new ArrayList<>();
@@ -48,6 +56,17 @@ public class FrontCourseListController implements Initializable {
         Platform.runLater(() -> {
             loadData();
             setupFilters();
+            
+            // Initialize notifications
+            Utils.Session session = Utils.Session.getInstance();
+            if (session.isLoggedIn()) {
+                Services.NotificationService notificationService = new Services.NotificationService();
+                int count = notificationService.getUnreadCount(session.getCurrentUser().getId().toString());
+                if (count > 0) {
+                    lblNotifCount.setText(String.valueOf(count));
+                    notifBadge.setVisible(true);
+                }
+            }
         });
         
         // Listeners for real-time search
@@ -149,6 +168,19 @@ public class FrontCourseListController implements Initializable {
         lblResultCount.setText(filtered.size() + " formations trouvées");
         
         displayCourses(filtered);
+    }
+
+    @FXML
+    private void handleRecommendations(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/recommendations.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML private void handleSortAZ() { setSort("AZ"); }
@@ -329,6 +361,49 @@ public class FrontCourseListController implements Initializable {
             stage.show();
         } catch (IOException e) {
             System.err.println("Erreur redirection events : " + e.getMessage());
+        }
+    }
+    @FXML
+    private void handleLogout(ActionEvent event) {
+        System.out.println("Clic sur Déconnexion...");
+        Session.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setTitle("Connexion - SkillPath");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur redirection login : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showNotifications(javafx.scene.input.MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/notifPopUp.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.setTitle("Mes Notifications");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            
+            // Refresh badge
+            Services.NotificationService notificationService = new Services.NotificationService();
+            int count = notificationService.getUnreadCount(Session.getInstance().getCurrentUser().getId().toString());
+            if (count <= 0) {
+                notifBadge.setVisible(false);
+            } else {
+                lblNotifCount.setText(String.valueOf(count));
+                notifBadge.setVisible(true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

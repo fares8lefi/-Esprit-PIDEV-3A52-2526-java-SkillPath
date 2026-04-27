@@ -36,15 +36,17 @@ public class FrontCourseCardController {
     private Course course;
     private boolean isLiked = false;
 
-    // Simple static storage to remember likes during the application run
-    private static final java.util.Set<Integer> likedCourses = new java.util.HashSet<>();
+    private final Services.FavoriteService favoriteService = new Services.FavoriteService();
 
     public void setData(Course course) {
         this.course = course;
         
-        // Initialize favorite state from memory
-        isLiked = likedCourses.contains(course.getId());
-        updateFavoriteUI();
+        // Initialize favorite state from DB
+        Utils.Session session = Utils.Session.getInstance();
+        if (session.isLoggedIn()) {
+            isLiked = favoriteService.isFavorite(session.getCurrentUser().getId().toString(), course.getId());
+            updateFavoriteUI();
+        }
         
         lblTitle.setText(course.getTitle());
         lblDescription.setText(course.getDescription());
@@ -108,28 +110,74 @@ public class FrontCourseCardController {
     @FXML
     private void handleViewDetails(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/courseDetails.fxml"));
-            Parent root = loader.load();
+            // Track click for recommendations (Session + Persistence)
+            Utils.Session session = Utils.Session.getInstance();
+            session.trackClick(course);
             
-            FrontCourseDetailsController controller = loader.getController();
-            controller.setCourse(course);
+            try {
+                if (session.isLoggedIn()) {
+                    Services.UserInteractionService interactionService = new Services.UserInteractionService();
+                    interactionService.recordInteraction(
+                        session.getCurrentUser().getId(), 
+                        course.getId(), 
+                        course.getCategory(), 
+                        course.getLevel()
+                    );
+                }
+            } catch (Exception ex) {
+                System.err.println("Erreur tracking IA (non bloquante) : " + ex.getMessage());
+            }
             
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Erreur navigation vers détails : " + e.getMessage());
+            // Check if there are modules for this course
+            Services.ModuleService moduleService = new Services.ModuleService();
+            java.util.List<Models.Module> modules = moduleService.getByCourse(course.getId());
+            
+            if (modules != null && !modules.isEmpty()) {
+                // Navigate to the first module using the new premium template
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/moduleShow.fxml"));
+                Parent root = loader.load();
+                
+                FrontModuleShowController controller = loader.getController();
+                controller.setData(modules.get(0));
+                
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setTitle(course.getTitle() + " - " + modules.get(0).getTitle());
+                stage.setScene(new Scene(root));
+                stage.show();
+            } else {
+                // If no modules, go to the generic course details
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/courseDetails.fxml"));
+                Parent root = loader.load();
+                
+                FrontCourseDetailsController controller = loader.getController();
+                controller.setCourse(course);
+                
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur navigation vers cours/module : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+
+
     @FXML
     private void handleFavoriteToggle() {
+        Utils.Session session = Utils.Session.getInstance();
+        if (!session.isLoggedIn()) return;
+
+        String userId = session.getCurrentUser().getId().toString();
         isLiked = !isLiked;
+        
         if (isLiked) {
-            likedCourses.add(course.getId());
+            favoriteService.addFavorite(userId, course.getId());
         } else {
-            likedCourses.remove(course.getId());
+            favoriteService.removeFavorite(userId, course.getId());
         }
+        
         updateFavoriteUI();
         
         // Simple scale effect for feedback

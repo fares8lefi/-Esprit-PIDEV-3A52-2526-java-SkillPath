@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import Models.Course;
@@ -33,8 +34,11 @@ public class HomeUserController implements Initializable {
     @FXML private FlowPane courseContainer;
     @FXML private Button logoutBtn;
     @FXML private Label navCatalogue;
+    @FXML private StackPane notifBadge;
+    @FXML private Label lblNotifCount;
 
     private final CourseService courseService = new CourseService();
+    private final Services.NotificationService notificationService = new Services.NotificationService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -48,6 +52,14 @@ public class HomeUserController implements Initializable {
             if (currentUser.getUsername() != null && !currentUser.getUsername().isEmpty()) {
                 avatarInitial.setText(currentUser.getUsername().substring(0, 1).toUpperCase());
             }
+
+            // --- NEW: Load Notifications ---
+            int count = notificationService.getUnreadCount(currentUser.getId().toString());
+            if (count > 0) {
+                lblNotifCount.setText(String.valueOf(count));
+                notifBadge.setVisible(true);
+            }
+            // ------------------------------
 
             // Chargement des cours en arrière-plan
             Platform.runLater(this::loadFeaturedCourses);
@@ -79,7 +91,7 @@ public class HomeUserController implements Initializable {
     }
 
     @FXML
-    private void handleCatalogue(MouseEvent event) {
+    private void handleCatalogue(javafx.event.Event event) {
         navigateTo(event, "/FrontOffice/course/courseList.fxml", "Catalogue des Formations - SkillPath");
     }
 
@@ -106,6 +118,11 @@ public class HomeUserController implements Initializable {
         }
     }
 
+    @FXML
+    private void handleRecommendations(ActionEvent event) {
+        navigateTo(event, "/FrontOffice/course/recommendations.fxml", "Recommandations IA - SkillPath");
+    }
+
     private void navigateTo(javafx.event.Event event, String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -118,6 +135,34 @@ public class HomeUserController implements Initializable {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void showNotifications(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/notifPopUp.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED); // Modern look without window bars
+            stage.setTitle("Mes Notifications");
+            stage.setScene(new Scene(root));
+            
+            // Position the popup near the bell if possible, or center it
+            stage.showAndWait();
+            
+            // Refresh badge after closing
+            int count = notificationService.getUnreadCount(Session.getInstance().getCurrentUser().getId().toString());
+            if (count <= 0) {
+                notifBadge.setVisible(false);
+            } else {
+                lblNotifCount.setText(String.valueOf(count));
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void openAddReclamation(ActionEvent event) {
         navigateTo(event, "/FrontOffice/reclamation/AddReclamation.fxml", "Nouvelle Réclamation");
