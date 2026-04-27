@@ -101,6 +101,15 @@
                 </HBox>
             </graphic>
         </Button>
+
+        <Button fx:id="btnSecurity" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleSecurity" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="🛡" style="-fx-font-size: 18;"/>
+                    <Label text="Shield Center"/>
+                </HBox>
+            </graphic>
+        </Button>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS"/>
