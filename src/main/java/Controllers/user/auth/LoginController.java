@@ -30,6 +30,7 @@ import javafx.scene.web.WebView;
 import javafx.application.Platform;
 import java.awt.Desktop;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -193,9 +194,9 @@ public class LoginController {
 
         new Thread(() -> {
             try {
-                // 1. Démarrer un serveur local pour recevoir le callback
-                HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-                int port = server.getAddress().getPort();
+                // 1. Démarrer un serveur local pour recevoir le callback (Port fixe 54321)
+                HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 54321), 0);
+                int port = 54321;
                 String redirectUri = "http://127.0.0.1:" + port + "/callback";
 
                 server.createContext("/callback", exchange -> {
