@@ -73,8 +73,12 @@ public class UserService implements Iservice<User> {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
-    // ─── Vérifie si un email existe déjà ───
+  
     public boolean emailExists(String email) {
+        if (connection == null) {
+            System.err.println("Erreur : Connexion à la base de données absente.");
+            return false;
+        }
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -205,6 +209,9 @@ public class UserService implements Iservice<User> {
     // ─── Inscription ───
     @Override
     public void ajouter(User user) throws SQLDataException {
+        if (connection == null) {
+            throw new SQLDataException("Connexion à la base de données indisponible. Veuillez vérifier votre configuration.");
+        }
         String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
