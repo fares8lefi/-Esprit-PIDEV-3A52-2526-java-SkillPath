@@ -16,6 +16,10 @@ public class UserService implements Iservice<User> {
 
     private Connection connection;
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    private final String URL = dotenv.get("DB_URL", "jdbc:mysql://localhost:3306/skillpathdb2");
+    private final String USERNAME = dotenv.get("DB_USER", "root");
+    private final String PASSWORD = dotenv.get("DB_PASS", "");
+
     public UserService() {
         connection = Utils.Database.getInstance().getConnection();
     }
@@ -301,8 +305,15 @@ public class UserService implements Iservice<User> {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                boolean isVerified = rs.getBoolean("is_verified");
                 String storedHash = rs.getString("password");
-                System.out.println("Hash trouvé en base : " + storedHash);
+                
+                System.out.println("Compte trouvé pour " + email + ". Vérifié: " + isVerified);
+
+                if (!isVerified) {
+                    System.err.println("ERREUR : Le compte '" + email + "' n'est pas vérifié (is_verified = 0 dans la base).");
+                    return null;
+                }
 
                 if (verifyPassword(password, storedHash)) {
                     User user = new User();

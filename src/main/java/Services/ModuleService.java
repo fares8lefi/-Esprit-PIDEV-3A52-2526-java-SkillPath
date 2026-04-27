@@ -29,6 +29,41 @@ public class ModuleService implements Iservice<Module> {
             ps.setInt(10, module.getCourseId());
             ps.setTimestamp(11, module.getScheduledAt() != null ? Timestamp.valueOf(module.getScheduledAt()) : null);
             ps.executeUpdate();
+            
+            // --- NEW: Notification System ---
+            try {
+                NotificationService notificationService = new NotificationService();
+                CourseService courseService = new CourseService();
+                Models.Course course = courseService.recupererParId(module.getCourseId());
+                
+                if (course != null) {
+                    // Find all users who "follow" or have this course (from user_course table)
+                    String findUsersSql = "SELECT user_id FROM user_course WHERE course_id = ?";
+                    try (PreparedStatement psUsers = connection.prepareStatement(findUsersSql)) {
+                        psUsers.setInt(1, module.getCourseId());
+                        ResultSet rs = psUsers.executeQuery();
+                        while (rs.next()) {
+                            byte[] idBytes = rs.getBytes("user_id");
+                            if (idBytes != null && idBytes.length == 16) {
+                                java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(idBytes);
+                                long high = bb.getLong();
+                                long low = bb.getLong();
+                                String userIdStr = new java.util.UUID(high, low).toString();
+                                
+                                notificationService.sendNotification(
+                                    userIdStr,
+                                    "Nouveau module : " + course.getTitle(),
+                                    "Le module \"" + module.getTitle() + "\" a été ajouté à votre formation."
+                                );
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur envoi notifications : " + e.getMessage());
+            }
+            // ---------------------------------
+
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }

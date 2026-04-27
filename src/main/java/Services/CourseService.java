@@ -87,4 +87,29 @@ public class CourseService implements Iservice<Course> {
         }
         return courses;
     }
+
+    public Course recupererParId(int id) {
+        String sql = "SELECT * FROM course WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Course c = new Course();
+                    c.setId(rs.getInt("id"));
+                    c.setTitle(rs.getString("title"));
+                    c.setDescription(rs.getString("description"));
+                    c.setLevel(rs.getString("level"));
+                    c.setImage(rs.getString("image"));
+                    c.setCategory(rs.getString("category"));
+                    c.setPrice(rs.getDouble("price"));
+                    c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    c.setUpdatedAt(rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
+                    return c;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur recupererParId: " + e.getMessage());
+        }
+        return null;
+    }
 }
