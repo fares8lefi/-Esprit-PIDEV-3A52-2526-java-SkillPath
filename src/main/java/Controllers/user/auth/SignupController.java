@@ -33,7 +33,8 @@ public class SignupController {
 
     @FXML
     public void handleSignup() {
-        hideAlert();
+        try {
+            hideAlert();
 
         String username = usernameField.getText().trim();
         String email    = emailField.getText().trim();
@@ -79,32 +80,49 @@ public class SignupController {
             return;
         }
 
-        // Envoi de l'email de vérification 
-        boolean emailSent = userService.sendVerificationEmail(email, username, verificationCode);
-        if (!emailSent) {
-            showError("Compte créé, mais l'email de vérification n'a pas pu être envoyé.");
-        }
+        // Envoi de l'email de vérification et redirection
+        submitButton.setDisable(true); // Désactiver le bouton pendant le traitement
 
-        //  Rediriger vers la page de vérification
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/FrontOffice/user/auth/verify.fxml")
-            );
-            Parent root = loader.load();
+        new Thread(() -> {
+            try {
+                boolean emailSent = userService.sendVerificationEmail(email, username, verificationCode);
+                
+                javafx.application.Platform.runLater(() -> {
+                    submitButton.setDisable(false);
+                    if (!emailSent) {
+                        showError("Compte créé, mais l'email de vérification n'a pas pu être envoyé.");
+                    }
 
-            // Passer l'email au controller de vérification
-            VerifyController verifyController = loader.getController();
-            verifyController.setEmail(email);
+                    // Rediriger vers la page de vérification
+                    try {
+                        FXMLLoader loader = new FXMLLoader(
+                            getClass().getResource("/FrontOffice/user/auth/verify.fxml")
+                        );
+                        Parent root = loader.load();
 
-            Stage stage = (Stage) submitButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            // Si la page de vérification n'existe pas encore, afficher un message
-            showSuccess("Compte créé ! Code envoyé à " + email);
-            System.out.println("Redirection verify.fxml : " + e.getMessage());
-        }
+                        VerifyController verifyController = loader.getController();
+                        verifyController.setEmail(email);
+
+                        Stage stage = (Stage) submitButton.getScene().getWindow();
+                        stage.setScene(new Scene(root));
+                        stage.show();
+                    } catch (IOException e) {
+                        showSuccess("Compte créé ! Code envoyé à " + email);
+                        System.err.println("Redirection verify.fxml : " + e.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    submitButton.setDisable(false);
+                    showError("Erreur lors de la finalisation : " + e.getMessage());
+                });
+            }
+        }).start();
+    } catch (Exception e) {
+        showError("Une erreur inattendue est survenue : " + e.getMessage());
+        e.printStackTrace();
     }
+}
 
     @FXML
     public void goToLogin() {
@@ -124,6 +142,7 @@ public class SignupController {
     private void showError(String message) {
         if (alertBox != null) {
             alertBox.setVisible(true);
+            alertBox.setManaged(true);
             alertBox.setStyle(
                 "-fx-background-color: rgba(244,63,94,0.12);" +
                 "-fx-border-color: rgba(244,63,94,0.25);" +
@@ -139,6 +158,7 @@ public class SignupController {
     private void showSuccess(String message) {
         if (alertBox != null) {
             alertBox.setVisible(true);
+            alertBox.setManaged(true);
             alertBox.setStyle(
                 "-fx-background-color: rgba(16,185,129,0.12);" +
                 "-fx-border-color: rgba(16,185,129,0.25);" +
@@ -152,7 +172,10 @@ public class SignupController {
     }
 
     private void hideAlert() {
-        if (alertBox != null) alertBox.setVisible(false);
+        if (alertBox != null) {
+            alertBox.setVisible(false);
+            alertBox.setManaged(false);
+        }
     }
 
     private void showAlert(Alert.AlertType type, String message) {
