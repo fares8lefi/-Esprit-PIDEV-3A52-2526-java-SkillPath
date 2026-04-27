@@ -1,0 +1,39 @@
+/* Module Show Specific Styles */
+.root-pane {
+    -fx-background-color: #0f172a;
+}
+
+.nav-item-hover:hover {
+    -fx-background-color: rgba(139, 92, 246, 0.05);
+    -fx-border-color: rgba(139, 92, 246, 0.1);
+}
+
+.nav-item-active {
+    -fx-background-color: rgba(139, 92, 246, 0.1);
+    -fx-border-color: rgba(139, 92, 246, 0.2);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.nav-item-active #indexBox {
+    -fx-background-color: #8b5cf6;
+}
+
+.nav-item-active #indexLabel {
+    -fx-text-fill: white;
+}
+
+.nav-item-active #titleLabel {
+    -fx-text-fill: white;
+}
+
+.doc-shell {
+    -fx-background-color: #0d111c;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 24;
+}
+
+.traffic-light-red { -fx-fill: #f87171; }
+.traffic-light-amber { -fx-fill: #fbbf24; }
+.traffic-light-green { -fx-fill: #34d399; }
