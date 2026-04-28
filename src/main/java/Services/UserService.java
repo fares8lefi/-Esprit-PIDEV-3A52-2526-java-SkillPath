@@ -473,5 +473,101 @@ public List<User> getClientList() throws SQLDataException {
         }
         return false;
     }
+
+    // ═══════════════════════════════════════════════════════
+    //   STATISTIQUES AVANCÉES — Dashboard Admin
+    // ═══════════════════════════════════════════════════════
+
+    /** Nombre d'utilisateurs avec status = 'active' */
+    public int countActive() {
+        String sql = "SELECT COUNT(*) FROM users WHERE status = 'active'";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println("Erreur countActive : " + e.getMessage());
+        }
+        return 0;
+    }
+
+    /** Nombre d'utilisateurs non vérifiés (is_verified = false) */
+    public int countUnverified() {
+        String sql = "SELECT COUNT(*) FROM users WHERE is_verified = false";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println("Erreur countUnverified : " + e.getMessage());
+        }
+        return 0;
+    }
+
+    /** Nombre d'utilisateurs inscrits dans les 7 derniers jours */
+    public int countNewThisWeek() {
+        String sql = "SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL 7 DAY";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println("Erreur countNewThisWeek : " + e.getMessage());
+        }
+        return 0;
+    }
+
+    /** Répartition par rôle : {role -> count} */
+    public java.util.Map<String, Integer> countByRole() {
+        java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
+        String sql = "SELECT COALESCE(role, 'inconnu') as role, COUNT(*) as cnt FROM users GROUP BY role ORDER BY cnt DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                map.put(rs.getString("role"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur countByRole : " + e.getMessage());
+        }
+        return map;
+    }
+
+    /** Répartition par statut : {status -> count} */
+    public java.util.Map<String, Integer> countByStatus() {
+        java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
+        String sql = "SELECT COALESCE(status, 'inconnu') as status, COUNT(*) as cnt FROM users GROUP BY status ORDER BY cnt DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                map.put(rs.getString("status"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur countByStatus : " + e.getMessage());
+        }
+        return map;
+    }
+
+    /**
+     * Inscriptions par jour sur les N derniers jours.
+     * Retourne une map ordonnée {date (dd/MM) -> count}
+     */
+    public java.util.Map<String, Integer> getRegistrationsByDay(int days) {
+        java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
+        String sql = "SELECT DATE(created_at) as day, COUNT(*) as cnt " +
+                     "FROM users " +
+                     "WHERE created_at >= NOW() - INTERVAL ? DAY " +
+                     "GROUP BY DATE(created_at) " +
+                     "ORDER BY day ASC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            ResultSet rs = ps.executeQuery();
+            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
+            while (rs.next()) {
+                java.sql.Date d = rs.getDate("day");
+                String label = d.toLocalDate().format(fmt);
+                map.put(label, rs.getInt("cnt"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur getRegistrationsByDay : " + e.getMessage());
+        }
+        return map;
+    }
 }
 
