@@ -8,7 +8,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class Database {
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-    private final String URL = dotenv.get("DB_URL", "jdbc:mysql://localhost:3306/skillpathdb2");
+    private final String URL = dotenv.get("DB_URL", "jdbc:mysql://localhost:3306/skillpathdb");
     private final String USERNAME = dotenv.get("DB_USER", "root");
     private final String PASSWORD = dotenv.get("DB_PASS", "");
     private Connection connection;
