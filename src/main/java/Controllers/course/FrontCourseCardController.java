@@ -93,9 +93,30 @@ public class FrontCourseCardController {
             if (placeholderRes != null) imgCourse.setImage(new Image(placeholderRes.toExternalForm()));
         }
 
-        // Simulate AI Probability if not exists
-        int prob = 70 + new Random().nextInt(25);
-        lblAiProb.setText(prob + "% SUCCÈS");
+        // Real AI Prediction from Flask
+        Services.PredictionService predictionService = new Services.PredictionService();
+        Services.ModuleService moduleService = new Services.ModuleService();
+        
+        try {
+            int totalModules = moduleService.getByCourse(course.getId()).size();
+            if (session.isLoggedIn()) {
+                predictionService.predictSuccess(session.getCurrentUser(), course, totalModules)
+                    .thenAccept(prob -> {
+                        javafx.application.Platform.runLater(() -> {
+                            if (prob >= 0) {
+                                lblAiProb.setText(String.format("%.0f%% SUCCÈS", prob));
+                            } else {
+                                lblAiProb.setText("ÉVAL... %");
+                            }
+                        });
+                    });
+            } else {
+                lblAiProb.setText("CONNECTEZ-VOUS");
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Erreur chargement modules pour IA : " + e.getMessage());
+            lblAiProb.setText("INDISP.");
+        }
     }
 
     @FXML

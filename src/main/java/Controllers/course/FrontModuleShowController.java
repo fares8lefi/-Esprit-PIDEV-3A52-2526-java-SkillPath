@@ -1,9 +1,13 @@
 package Controllers.course;
 
+import java.sql.SQLDataException;
+
 import Models.Course;
 import Models.Module;
 import Services.CourseService;
 import Services.ModuleService;
+import Services.PDFService;
+import Services.ProgressService;
 import Utils.AssetLoader;
 import Utils.Session;
 import javafx.application.Platform;
@@ -56,6 +60,11 @@ public class FrontModuleShowController implements Initializable {
     @FXML private VBox nextModuleBtn;
     @FXML private Label nextModuleTitle;
     @FXML private Button finishCourseBtn;
+    @FXML private HBox finishActionsBox;
+    @FXML private Button topDownloadCertBtn;
+    @FXML private HBox aiPredictionBox;
+    @FXML private Label aiPredictionLabel;
+    private final PDFService pdfService = new PDFService();
     
     @FXML private VBox chatWindow;
     @FXML private VBox chatMessages;
@@ -66,6 +75,9 @@ public class FrontModuleShowController implements Initializable {
     private final CourseService courseService = new CourseService();
     private final ModuleService moduleService = new ModuleService();
     private final Services.ChatbotService chatbotService = new Services.ChatbotService();
+    private final Services.PredictionService predictionService = new Services.PredictionService();
+    private final Services.ProgressService progressService = new Services.ProgressService();
+    private final Services.CertificateService certificateService = new Services.CertificateService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -78,6 +90,40 @@ public class FrontModuleShowController implements Initializable {
         updateUI();
         loadSidebar();
         updateNavigationButtons();
+        loadAIPrediction();
+    }
+
+    private void loadAIPrediction() {
+        if (Session.getInstance().getCurrentUser() != null && currentCourse != null) {
+            aiPredictionLabel.setText("Calcul en cours...");
+            // Trouver le nombre total de modules pour la prédiction
+            try {
+                List<Module> allModules = moduleService.getByCourse(currentCourse.getId());
+                predictionService.predictSuccess(Session.getInstance().getCurrentUser(), currentCourse, allModules.size())
+                    .thenAccept(score -> {
+                        Platform.runLater(() -> {
+                            if (score >= 0) {
+                                aiPredictionLabel.setText(String.format("%.1f%% chances de réussite", score));
+                                if (score > 75) {
+                                    aiPredictionBox.setStyle("-fx-background-color: rgba(52, 211, 153, 0.1); -fx-background-radius: 8; -fx-padding: 8; -fx-border-color: rgba(52, 211, 153, 0.3);");
+                                    aiPredictionLabel.setStyle("-fx-text-fill: #34d399; -fx-font-weight: bold; -fx-font-size: 12;");
+                                } else if (score < 40) {
+                                    aiPredictionBox.setStyle("-fx-background-color: rgba(248, 113, 113, 0.1); -fx-background-radius: 8; -fx-padding: 8; -fx-border-color: rgba(248, 113, 113, 0.3);");
+                                    aiPredictionLabel.setStyle("-fx-text-fill: #f87171; -fx-font-weight: bold; -fx-font-size: 12;");
+                                }
+                            } else {
+                                aiPredictionLabel.setText("Prédiction indisponible");
+                            }
+                        });
+                    });
+            } catch (SQLDataException e) {
+                System.err.println("Erreur chargement modules pour prédiction : " + e.getMessage());
+                aiPredictionLabel.setText("Prédiction indisponible");
+            }
+        } else {
+            aiPredictionBox.setVisible(false);
+            aiPredictionBox.setManaged(false);
+        }
     }
 
     private void updateUI() {
@@ -155,9 +201,15 @@ public class FrontModuleShowController implements Initializable {
                 modulesContainer.getChildren().add(item);
             }
             
-            double progress = allModules.isEmpty() ? 0 : (double) 1 / allModules.size();
+            Models.UserCourseProgress progressObj = null;
+            if (Session.getInstance().getCurrentUser() != null) {
+                progressObj = progressService.getProgress(Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
+            }
+            int completedModules = progressObj != null ? progressObj.getCompletedModules() : 0;
+            double progress = allModules.isEmpty() ? 0 : (double) completedModules / allModules.size();
+            
             courseProgressBar.setProgress(progress);
-            progressPercent.setText((int)(progress * 100) + "% Complété");
+            progressPercent.setText((int)(progress * 100) + "% Complété (" + completedModules + "/" + allModules.size() + ")");
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -174,29 +226,68 @@ public class FrontModuleShowController implements Initializable {
                     break;
                 }
             }
-            
+
+            // Previous button
             if (currentIndex > 0) {
                 Module prev = modules.get(currentIndex - 1);
                 prevModuleBtn.setVisible(true);
+                prevModuleBtn.setManaged(true);
                 prevModuleTitle.setText(prev.getTitle());
                 prevModuleBtn.setOnMouseClicked(e -> setData(prev));
             } else {
                 prevModuleBtn.setVisible(false);
+                prevModuleBtn.setManaged(false);
             }
-            
+
+            boolean isLastModule = (currentIndex == modules.size() - 1);
+            boolean isCurrentModuleDone = Session.getInstance().getCurrentUser() != null &&
+                    progressService.isModuleCompleted(Session.getInstance().getCurrentUser().getId(), currentModule.getId());
+
+            // 1. Bouton Téléchargement (Haut) - Visible si certificat obtenu
+            boolean hasCert = Session.getInstance().getCurrentUser() != null &&
+                    certificateService.hasCertificate(Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
+            topDownloadCertBtn.setVisible(hasCert);
+            topDownloadCertBtn.setManaged(hasCert);
+
+            // 2. Bouton Suivant (Bas) - Toujours visible si ce n'est pas le dernier module
             if (currentIndex < modules.size() - 1) {
                 Module next = modules.get(currentIndex + 1);
                 nextModuleBtn.setVisible(true);
+                nextModuleBtn.setManaged(true);
                 nextModuleTitle.setText(next.getTitle());
                 nextModuleBtn.setOnMouseClicked(e -> setData(next));
-                finishCourseBtn.setVisible(false);
+                
+                // On montre le bouton "Marquer terminé" si CE module n'est pas encore fait
+                if (!isCurrentModuleDone) {
+                    finishActionsBox.setVisible(true);
+                    finishActionsBox.setManaged(true);
+                    finishCourseBtn.setVisible(true);
+                    finishCourseBtn.setManaged(true);
+                    finishCourseBtn.setText("Marquer terminé et continuer →");
+                    nextModuleForNavigation = next;
+                } else {
+                    finishActionsBox.setVisible(false);
+                    finishActionsBox.setManaged(false);
+                }
             } else {
                 nextModuleBtn.setVisible(false);
-                finishCourseBtn.setVisible(true);
+                nextModuleBtn.setManaged(false);
+                
+                // Sur le dernier module, si pas encore fait, montrer "Terminer le cours"
+                if (!isCurrentModuleDone) {
+                    finishActionsBox.setVisible(true);
+                    finishActionsBox.setManaged(true);
+                    finishCourseBtn.setVisible(true);
+                    finishCourseBtn.setManaged(true);
+                    finishCourseBtn.setText("Terminer le cours ✓");
+                } else {
+                    finishActionsBox.setVisible(false);
+                    finishActionsBox.setManaged(false);
+                }
             }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (SQLDataException e) {
+            System.err.println("Erreur updateNavigationButtons: " + e.getMessage());
         }
     }
 
@@ -231,13 +322,87 @@ public class FrontModuleShowController implements Initializable {
         navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
     }
 
+    // Stores the next module to navigate to after marking current as done
+    private Module nextModuleForNavigation = null;
+
     @FXML
     private void handleFinishCourse() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Félicitations !");
-        alert.setHeaderText("Cours terminé");
-        alert.setContentText("Vous avez terminé le cours " + currentCourse.getTitle());
-        alert.show();
+        if (Session.getInstance().getCurrentUser() == null) {
+            System.err.println("Utilisateur non connecté !");
+            return;
+        }
+
+        try {
+            List<Module> allModules = moduleService.getByCourse(currentCourse.getId());
+            progressService.incrementProgress(
+                    Session.getInstance().getCurrentUser().getId(),
+                    currentCourse.getId(),
+                    currentModule.getId(),
+                    allModules.size());
+
+            Models.UserCourseProgress progressObj = progressService.getProgress(
+                    Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
+
+            if (progressObj != null && progressObj.isCompleted()) {
+                // Course 100% done
+                certificateService.generateCertificate(
+                        Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
+
+                loadSidebar();
+                updateNavigationButtons();
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Félicitations !");
+                alert.setHeaderText("🏆 Cours terminé à 100%");
+                alert.setContentText("Vous avez terminé \"" + currentCourse.getTitle() +
+                        "\" et obtenu votre certificat !");
+                alert.show();
+
+            } else if (nextModuleForNavigation != null) {
+                // Mid-course: mark done then advance to next module
+                loadSidebar();
+                setData(nextModuleForNavigation);
+                nextModuleForNavigation = null;
+
+            } else {
+                loadSidebar();
+                updateNavigationButtons();
+                System.out.println("Module marqué comme terminé !");
+            }
+
+        } catch (SQLDataException e) {
+            System.err.println("Erreur lors de la finalisation du module : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleDownloadCertificate() {
+        if (Session.getInstance().getCurrentUser() == null || currentCourse == null) return;
+
+        String path = pdfService.generateCertificate(Session.getInstance().getCurrentUser(), currentCourse);
+
+        if (path != null) {
+            try {
+                java.io.File file = new java.io.File(path);
+                if (file.exists() && java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(file);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur");
+                    alert.setHeaderText("Fichier introuvable");
+                    alert.setContentText("Le certificat n'a pas pu être ouvert.");
+                    alert.show();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Échec de génération");
+            alert.setContentText("Une erreur est survenue lors de la création du PDF.");
+            alert.show();
+        }
     }
 
     private void navigateTo(javafx.event.Event event, String fxmlPath, String title) {
