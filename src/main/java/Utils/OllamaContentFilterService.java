@@ -72,25 +72,25 @@ public final class OllamaContentFilterService {
     }
 
     private static String buildDetectionPrompt(String text) {
-        return "Detect only offensive, insulting, abusive, hate, or sexual vulgar terms in this text in ANY language.\n"
-                + "Return ONLY valid JSON and nothing else.\n"
-                + "JSON format: {\"bad_terms\":[\"exact term from input\", \"another exact term\"]}\n"
-                + "Rules:\n"
-                + "1) Include only terms that are explicitly offensive in context.\n"
-                + "2) Terms must appear exactly in the input.\n"
-                + "3) Support French, English, Arabic, Tunisian dialect, and Arabizi (Latin+digits).\n"
-                + "4) If none, return {\"bad_terms\":[]}.\n"
+        return "Detect ONLY highly offensive, insulting, abusive, hate speech, or sexual vulgarity in this text.\n"
+                + "Return ONLY valid JSON.\n"
+                + "JSON format: {\"bad_terms\":[]}\n"
+                + "CRITICAL RULES:\n"
+                + "1) DO NOT detect neutral words: 'problème', 'erreur', 'cours', 'bug', 'panne', 'aide', 'question', 'technique'.\n"
+                + "2) DO NOT detect common complaints or technical terms.\n"
+                + "3) Terms must appear exactly in the input.\n"
+                + "4) Support French, English, Arabic, and Tunisian dialect.\n"
                 + "Input:\n"
                 + text;
     }
 
     private static String buildDirectCensorPrompt(String text) {
-        return "Censor this text.\n"
-                + "Replace offensive terms only with exactly *****.\n"
-                + "Keep all other characters unchanged.\n"
-                + "Keep original language and order.\n"
-                + "Support French, English, Arabic, Tunisian dialect, and Arabizi (Latin+digits).\n"
-                + "Output only censored text.\n"
+        return "Censor ONLY extreme vulgarity or hate speech in this text.\n"
+                + "Rules:\n"
+                + "1) Replace ONLY offensive terms with exactly *****.\n"
+                + "2) DO NOT TOUCH words like 'problème', 'erreur', 'cours', 'technique', or other neutral terms.\n"
+                + "3) Keep all other characters unchanged.\n"
+                + "4) Output ONLY the processed text.\n"
                 + "Input:\n"
                 + text;
     }

@@ -323,15 +323,28 @@ public class AdminReclamationsController {
     }
 
     private VBox buildResponseBubble(Reponse response) {
+        byte[] aiUserId = new byte[16];
+        boolean fromAI = response.getUserIdBytes() != null && Arrays.equals(response.getUserIdBytes(), aiUserId);
+
         boolean fromClient = selectedReclamation != null
                 && selectedReclamation.getUserIdBytes() != null
                 && response.getUserIdBytes() != null
                 && Arrays.equals(selectedReclamation.getUserIdBytes(), response.getUserIdBytes());
 
-        Label fromLabel = new Label(fromClient ? "Client" : "Admin");
+        String author = "Admin";
+        if (fromClient) {
+            author = "Client";
+        } else if (fromAI) {
+            author = "Assistant IA (Llama 3)";
+        }
+
+        Label fromLabel = new Label(author);
         fromLabel.getStyleClass().add("response-author");
         if (fromClient) {
             fromLabel.getStyleClass().add("response-author-client");
+        } else if (fromAI) {
+            fromLabel.getStyleClass().add("response-author-ai");
+            fromLabel.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
         } else {
             fromLabel.getStyleClass().add("response-author-admin");
         }
@@ -341,6 +354,9 @@ public class AdminReclamationsController {
         messageLabel.getStyleClass().add("response-message");
         if (fromClient) {
             messageLabel.getStyleClass().add("response-message-client");
+        } else if (fromAI) {
+            messageLabel.getStyleClass().add("response-message-ai");
+            messageLabel.setStyle("-fx-background-color: rgba(16, 185, 129, 0.1); -fx-border-color: #10b981; -fx-border-radius: 10; -fx-background-radius: 10;");
         } else {
             messageLabel.getStyleClass().add("response-message-admin");
         }

@@ -4,6 +4,7 @@ import Models.Reclamation;
 import Models.Reponse;
 import Services.ReclamationService;
 import Services.ReponseService;
+import Utils.OllamaReclamationAssistant;
 import Utils.Session;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -176,10 +177,32 @@ public class ReclamationDetailsController {
             txtReponse.clear();
             addResponseToChat(reponse);
             scrollToBottom();
+            generateAssistantReply(msg);
 
         } catch (SQLDataException e) {
             System.err.println("Erreur envoi reponse : " + e.getMessage());
         }
+    }
+
+    private void generateAssistantReply(String userMessage) {
+        if (currentReclamation == null || userMessage == null || userMessage.isBlank()) {
+            return;
+        }
+
+        final int reclamationId = currentReclamation.getId();
+        final String context = "Sujet: " + currentReclamation.getSujet()
+                + "\nDescription: " + currentReclamation.getDescription()
+                + "\nStatut: " + currentReclamation.getStatut();
+
+        new Thread(() -> {
+            String assistantMessage = OllamaReclamationAssistant.generateAssistantResponse(userMessage, context);
+            if (assistantMessage == null || assistantMessage.isBlank()) {
+                return;
+            }
+
+            reclamationService.saveAssistantResponse(reclamationId, assistantMessage);
+            Platform.runLater(this::loadResponses);
+        }).start();
     }
 
     @FXML

@@ -3,6 +3,7 @@ package Services;
 import Models.Reclamation;
 import Utils.Database;
 import Utils.OllamaContentFilterService;
+import Utils.OllamaReclamationAssistant;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +25,7 @@ public class ReclamationService implements Iservice<Reclamation> {
     @Override
     public void ajouter(Reclamation reclamation) throws SQLDataException {
         String sql = "INSERT INTO reclamation (sujet, description, statut, piece_jointe, user_id) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
             String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
             reclamation.setSujet(filteredSujet);
@@ -36,7 +37,51 @@ public class ReclamationService implements Iservice<Reclamation> {
             ps.setString(4, reclamation.getPieceJointe());
             ps.setBytes(5, reclamation.getUserIdBytes());
             ps.executeUpdate();
-            System.out.println("Reclamation ajoutee avec succes.");
+
+            // Récupérer l'ID généré pour la réponse automatique
+            int reclamationId = -1;
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    reclamationId = generatedKeys.getInt(1);
+                }
+            }
+            
+            // Fallback si l'ID n'a pas été récupéré par getGeneratedKeys
+            if (reclamationId == -1) {
+                try (Statement st = connection.createStatement();
+                     ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()")) {
+                    if (rs.next()) reclamationId = rs.getInt(1);
+                }
+            }
+
+            System.out.println("[AI] Reclamation ID capturé: " + reclamationId);
+
+            // --- RÉPONSE AUTOMATIQUE IA (LLAMA 3) ---
+            if (reclamationId > 0) {
+                final int finalId = reclamationId;
+                final String desc = filteredDescription;
+                
+                new Thread(() -> {
+                    try {
+                        // Petit délai pour s'assurer que la réclamation est bien persistée
+                        Thread.sleep(1000); 
+                        System.out.println("[AI] Lancement de la génération pour #" + finalId);
+                        String aiResponseText = OllamaReclamationAssistant.generateAutoResponse(desc);
+                        
+                        if (aiResponseText != null && !aiResponseText.isBlank()) {
+                            saveAssistantResponse(finalId, aiResponseText);
+                        } else {
+                            System.err.println("[AI] Aucune réponse générée par Ollama.");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[AI] Erreur dans le thread de réponse: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }).start();
+            } else {
+                System.err.println("[AI] Impossible de récupérer l'ID de la réclamation, l'IA ne peut pas répondre.");
+            }
+
         } catch (RuntimeException e) {
             System.err.println("Erreur filtrage Ollama reclamation : " + e.getMessage());
             throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
@@ -44,6 +89,45 @@ public class ReclamationService implements Iservice<Reclamation> {
             System.err.println("Erreur ajout reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
         }
+    }
+
+    public void saveAssistantResponse(int reclamationId, String message) {
+        String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, message);
+            ps.setInt(2, reclamationId);
+
+            // On récupère l'ID d'un admin existant pour éviter les erreurs de clé étrangère
+            byte[] adminId = getAIUserId();
+            ps.setBytes(3, adminId);
+
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("[AI] Réponse automatique enregistrée pour la réclamation #" + reclamationId);
+            } else {
+                System.err.println("[AI] Échec de l'insertion de la réponse pour #" + reclamationId);
+            }
+        } catch (SQLException e) {
+            System.err.println("[AI] Erreur SQL lors de l'enregistrement: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private byte[] getAIUserId() {
+        // On cherche le premier admin pour lui attribuer la réponse IA (ou un ID par
+        // défaut si non trouvé)
+        String sql = "SELECT id FROM user WHERE role = 'admin' LIMIT 1";
+        try (Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getBytes("id");
+            }
+        } catch (SQLException e) {
+            System.err.println("[AI] Impossible de trouver un ID admin: " + e.getMessage());
+        }
+
+        // Fallback: 16 octets à zéro (si la DB ne contraint pas la clé étrangère)
+        return new byte[16];
     }
 
     @Override
@@ -89,7 +173,7 @@ public class ReclamationService implements Iservice<Reclamation> {
         List<Reclamation> reclamations = new ArrayList<>();
         String sql = "SELECT * FROM reclamation";
         try (Statement st = connection.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Reclamation r = new Reclamation();
                 r.setId(rs.getInt("id"));
@@ -130,14 +214,14 @@ public class ReclamationService implements Iservice<Reclamation> {
         return reclamations;
     }
 
-    public List<Reclamation> getAllReclamationsWithUsername(String usernameSearch, String statusFilter) throws SQLDataException {
+    public List<Reclamation> getAllReclamationsWithUsername(String usernameSearch, String statusFilter)
+            throws SQLDataException {
         List<Reclamation> reclamations = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
                 "SELECT r.id, r.sujet, r.description, r.statut, r.piece_jointe, r.user_id, u.username " +
                         "FROM reclamation r " +
-                        "JOIN user u ON u.id = r.user_id "
-        );
+                        "JOIN user u ON u.id = r.user_id ");
 
         boolean hasSearch = usernameSearch != null && !usernameSearch.isBlank();
         boolean hasStatusFilter = statusFilter != null && !statusFilter.isBlank();
@@ -206,7 +290,7 @@ public class ReclamationService implements Iservice<Reclamation> {
             connection.setAutoCommit(false);
 
             try (PreparedStatement psResp = connection.prepareStatement(deleteResponsesSql);
-                 PreparedStatement psRecl = connection.prepareStatement(deleteReclamationSql)) {
+                    PreparedStatement psRecl = connection.prepareStatement(deleteReclamationSql)) {
                 psResp.setInt(1, reclamationId);
                 psResp.executeUpdate();
 
