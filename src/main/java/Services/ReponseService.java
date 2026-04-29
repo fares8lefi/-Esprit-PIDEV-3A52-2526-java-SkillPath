@@ -29,7 +29,7 @@ public class ReponseService implements Iservice<Reponse> {
         String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
-            suspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
+            rejectAndSuspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
             reponse.setMessage(filteredMessage);
 
             ps.setString(1, filteredMessage);
@@ -64,7 +64,7 @@ public class ReponseService implements Iservice<Reponse> {
         String sql = "UPDATE reponse SET message = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
-            suspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
+            rejectAndSuspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
             reponse.setMessage(filteredMessage);
 
             ps.setString(1, filteredMessage);
@@ -122,10 +122,11 @@ public class ReponseService implements Iservice<Reponse> {
         return reponses;
     }
 
-    private void suspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
+    private void rejectAndSuspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
         if (originalText == null || filteredText == null || originalText.equals(filteredText)) {
             return;
         }
         userService.deactivateClientTemporarily(userIdBytes, BAD_WORD_DEACTIVATION_SECONDS);
+        throw new IllegalStateException("Message refuse: contenu inapproprie detecte.");
     }
 }

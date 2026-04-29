@@ -374,11 +374,14 @@ public class UserService implements Iservice<User> {
     }
 
     private void updateClientStatus(byte[] userIdBytes, String status) {
-        String sql = "UPDATE user SET status = ? WHERE id = ? AND role = 'client'";
+        String sql = "UPDATE user SET status = ? WHERE id = ? AND LOWER(role) <> 'admin'";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setBytes(2, userIdBytes);
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                System.err.println("Aucun compte trouve pour appliquer le statut: " + status);
+            }
         } catch (SQLException e) {
             System.err.println("Erreur updateClientStatus : " + e.getMessage());
         }

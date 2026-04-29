@@ -166,6 +166,9 @@ public class AddReclamationController {
 
             navigateToReclamationsList(event);
         } catch (SQLDataException e) {
+            if (showBanMessageAndRedirectIfNeeded(event)) {
+                return;
+            }
             showAlert(Alert.AlertType.ERROR, "Erreur base de donnees", "Impossible d'enregistrer la reclamation: " + e.getMessage());
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur fichier", "Impossible d'enregistrer la piece jointe: " + e.getMessage());
@@ -197,13 +200,20 @@ public class AddReclamationController {
     }
 
     private boolean showSubmissionResult(String successMessage, ActionEvent event) {
-        String banMessage = Session.consumeTemporaryBanMessage();
-        if (banMessage != null && !banMessage.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Compte temporairement desactive", successMessage + "\n\n" + banMessage);
-            navigateToLogin(event);
+        if (showBanMessageAndRedirectIfNeeded(event)) {
             return true;
         }
         showAlert(Alert.AlertType.INFORMATION, "Succes", successMessage);
+        return false;
+    }
+
+    private boolean showBanMessageAndRedirectIfNeeded(ActionEvent event) {
+        String banMessage = Session.consumeTemporaryBanMessage();
+        if (banMessage != null && !banMessage.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Compte temporairement desactive", banMessage);
+            navigateToLogin(event);
+            return true;
+        }
         return false;
     }
 

@@ -32,8 +32,8 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
             String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
-            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
-            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
             reclamation.setSujet(filteredSujet);
             reclamation.setDescription(filteredDescription);
 
@@ -161,11 +161,12 @@ public class ReclamationService implements Iservice<Reclamation> {
         return space > 0 ? space : maxLength;
     }
 
-    private void suspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
+    private void rejectAndSuspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
         if (originalText == null || filteredText == null || originalText.equals(filteredText)) {
             return;
         }
         userService.deactivateClientTemporarily(userIdBytes, BAD_WORD_DEACTIVATION_SECONDS);
+        throw new IllegalStateException("Message refuse: contenu inapproprie detecte.");
     }
 
     private byte[] getAIUserId() {
@@ -204,8 +205,8 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
             String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
-            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
-            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
             reclamation.setSujet(filteredSujet);
             reclamation.setDescription(filteredDescription);
 

@@ -183,6 +183,9 @@ public class ReclamationDetailsController {
             generateAssistantReply(msg);
 
         } catch (SQLDataException e) {
+            if (showTemporaryBanMessageIfNeeded(event)) {
+                return;
+            }
             System.err.println("Erreur envoi reponse : " + e.getMessage());
         }
     }
