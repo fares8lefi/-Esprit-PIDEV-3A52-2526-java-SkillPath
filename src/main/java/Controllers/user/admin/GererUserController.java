@@ -71,6 +71,12 @@ public class GererUserController implements Initializable {
             flowPane.getChildren().add(createUserCard(currentUsers.get(i)));
         }
 
+        // Update total label to show range
+        int total = currentUsers.size();
+        int start = fromIndex + 1;
+        int end = toIndex;
+        lblTotalUsers.setText(String.format("Affichage %d-%d sur %d utilisateurs", start, end, total));
+
         return flowPane;
     }
 
