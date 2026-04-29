@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 import pickle
-import numpy as np
 import os
 import pandas as pd
+from groq import Groq
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
+# Chargement du modèle
 model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
-
 try:
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
@@ -64,9 +65,6 @@ def predict():
         print(f"Erreur lors de la prédiction : {e}")
         return jsonify({'error': str(e)}), 400
 
-from groq import Groq
-from dotenv import load_dotenv
-
 # On charge les clés depuis le .env à la racine du projet
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -82,7 +80,6 @@ def summarize():
 
         print(f"--- Résumé IA (Groq) en cours ---")
         
-        # Utilisation du dernier modèle Llama 3.3 pour un résumé de haute qualité
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -95,11 +92,37 @@ def summarize():
         
         summary = completion.choices[0].message.content
         print("--- Résumé Groq terminé ---")
-        
         return jsonify({'summary': summary})
-
     except Exception as e:
-        print(f"!!! ERREUR GROQ : {str(e)}")
+        print(f"!!! ERREUR GROQ : {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '')
+        
+        if not user_message:
+            return jsonify({'error': 'Message vide'}), 400
+
+        print(f"--- Chatbot IA (Groq) en cours ---")
+        
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "Tu es un assistant d'étude intelligent. Aide l'étudiant avec ses questions de manière pédagogique et encourageante. Réponds en Français."},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.7,
+            max_tokens=800
+        )
+        
+        reply = completion.choices[0].message.content
+        print("--- Chatbot Groq terminé ---")
+        return jsonify({'reply': reply})
+    except Exception as e:
+        print(f"!!! ERREUR CHATBOT : {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
