@@ -262,7 +262,7 @@
                     <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                         <children>
                             <Label text="SkillPath Intelligence" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 17;" />
-                            <Label text="Study Assistant • Llama 3.2" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 11; -fx-font-weight: 800;" />
+                            <Label text="Study Assistant • Llama 3.3" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 11; -fx-font-weight: 800;" />
                         </children>
                     </VBox>
                     <Button onAction="#toggleChat" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28; -fx-cursor: hand; -fx-padding: 0;" text="×" />
