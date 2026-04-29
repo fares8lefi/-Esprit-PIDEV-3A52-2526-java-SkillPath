@@ -84,6 +84,21 @@
                                 <Label fx:id="lblAiStatus" text="..." textFill="#64748b" style="-fx-font-size: 8; -fx-font-weight: bold;" />
                             </children>
                         </VBox>
+
+                        <!-- Agenda Section -->
+                        <VBox alignment="CENTER" spacing="5">
+                            <children>
+                                <Label text="AGENDA" textFill="#94a3b8" style="-fx-font-size: 7; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                                <StackPane fx:id="agendaContainer" prefHeight="45" prefWidth="45" style="-fx-cursor: hand; -fx-background-color: rgba(139, 92, 246, 0.1); -fx-background-radius: 25; -fx-border-color: rgba(139, 92, 246, 0.2); -fx-border-radius: 25;">
+                                    <children>
+                                        <Label text="📅" style="-fx-font-size: 18;">
+                                            <tooltip><Tooltip fx:id="agendaTooltip" style="-fx-show-delay: 100ms; -fx-font-size: 12;" /></tooltip>
+                                        </Label>
+                                    </children>
+                                </StackPane>
+                                <Label fx:id="lblScheduleCount" text="0 module" textFill="#64748b" style="-fx-font-size: 8; -fx-font-weight: bold;" />
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
 

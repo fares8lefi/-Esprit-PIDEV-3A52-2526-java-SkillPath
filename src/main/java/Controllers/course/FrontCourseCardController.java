@@ -3,6 +3,7 @@ package Controllers.course;
 import Models.Course;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -30,6 +31,7 @@ import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Random;
 
 public class FrontCourseCardController {
@@ -43,6 +45,9 @@ public class FrontCourseCardController {
     @FXML private Label lblAiProb;
     @FXML private Label lblAiStatus;
     @FXML private StackPane predictionCircleContainer;
+    @FXML private StackPane agendaContainer;
+    @FXML private Tooltip agendaTooltip;
+    @FXML private Label lblScheduleCount;
     @FXML private StackPane imageContainer;
     @FXML private javafx.scene.control.Button btnFavorite;
     
@@ -129,6 +134,38 @@ public class FrontCourseCardController {
         } catch (java.sql.SQLException e) {
             System.err.println("Erreur chargement modules pour IA : " + e.getMessage());
             lblAiProb.setText("!");
+        }
+
+        // --- AGENDA LOGIC ---
+        try {
+            List<Models.Module> allModules = moduleService.getByCourse(course.getId());
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            List<Models.Module> scheduledModules = allModules.stream()
+                .filter(m -> m.getScheduledAt() != null && m.getScheduledAt().isAfter(now))
+                .sorted((m1, m2) -> m1.getScheduledAt().compareTo(m2.getScheduledAt()))
+                .collect(java.util.stream.Collectors.toList());
+
+            if (scheduledModules.isEmpty()) {
+                agendaTooltip.setText("Aucun module planifié");
+                lblScheduleCount.setText("Aucun module");
+                agendaContainer.setOpacity(0.5);
+            } else {
+                StringBuilder sb = new StringBuilder("📅 Modules Planifiés :\n\n");
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM à HH:mm");
+                
+                for (Models.Module m : scheduledModules) {
+                    sb.append("• ").append(m.getTitle())
+                      .append("\n  └─ ")
+                      .append(m.getScheduledAt().format(formatter))
+                      .append("\n\n");
+                }
+                agendaTooltip.setText(sb.toString().trim());
+                lblScheduleCount.setText(scheduledModules.size() + (scheduledModules.size() > 1 ? " modules" : " module"));
+                agendaContainer.setOpacity(1.0);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement Agenda : " + e.getMessage());
+            lblScheduleCount.setText("Erreur");
         }
     }
 

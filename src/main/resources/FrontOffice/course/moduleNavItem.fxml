@@ -21,6 +21,7 @@
                   <Label id="typeLabel" text="VIDEO" textFill="#64748b" style="-fx-font-size: 10; -fx-font-weight: bold; -fx-letter-spacing: 1;" />
                </children>
             </VBox>
+            <Label id="lockIcon" text="🔒" visible="false" managed="false" style="-fx-font-size: 14;" />
          </children>
       </HBox>
    </children>

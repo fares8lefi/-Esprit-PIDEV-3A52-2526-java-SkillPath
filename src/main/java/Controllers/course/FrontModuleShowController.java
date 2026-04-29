@@ -80,6 +80,8 @@ public class FrontModuleShowController implements Initializable {
     @FXML private Label aiPredictionLabel;
     @FXML private StackPane predictionCircleContainer;
     @FXML private Label predictionStatusLabel;
+    @FXML private StackPane lockOverlay;
+    @FXML private Label lockMessageLabel;
     private final PDFService pdfService = new PDFService();
     
     @FXML private VBox chatWindow;
@@ -103,10 +105,34 @@ public class FrontModuleShowController implements Initializable {
         this.currentModule = module;
         this.currentCourse = courseService.recupererParId(module.getCourseId());
         
-        updateUI();
-        loadSidebar();
-        updateNavigationButtons();
-        loadAIPrediction();
+        // --- TIME-BASED ACCESS CONTROL ---
+        boolean isLocked = false;
+        if (currentModule.getScheduledAt() != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            if (now.isBefore(currentModule.getScheduledAt())) {
+                isLocked = true;
+            }
+        }
+
+        if (isLocked) {
+            lockOverlay.setVisible(true);
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy à HH:mm");
+            lockMessageLabel.setText("Ce module sera débloqué le " + currentModule.getScheduledAt().format(formatter));
+            
+            // Still load sidebar so user can navigate elsewhere
+            loadSidebar();
+            breadcrumbModule.setText("Verrouillé");
+            if (currentCourse != null) {
+                courseTitleSidebar.setText(currentCourse.getTitle());
+                breadcrumbCourse.setText(currentCourse.getTitle());
+            }
+        } else {
+            lockOverlay.setVisible(false);
+            updateUI();
+            loadSidebar();
+            updateNavigationButtons();
+            loadAIPrediction();
+        }
     }
 
     private void loadAIPrediction() {
@@ -270,6 +296,14 @@ public class FrontModuleShowController implements Initializable {
                 titleLabel.setText(m.getTitle());
                 typeLabel.setText(m.getType().toUpperCase());
                 
+                // --- LOCK ICON LOGIC ---
+                Label lockIcon = (Label) item.lookup("#lockIcon");
+                if (m.getScheduledAt() != null && java.time.LocalDateTime.now().isBefore(m.getScheduledAt())) {
+                    lockIcon.setVisible(true);
+                    lockIcon.setManaged(true);
+                    wrapper.setOpacity(0.6); // Slightly fade locked modules
+                }
+
                 if (m.getId() == currentModule.getId()) {
                     wrapper.getStyleClass().add("nav-item-active");
                 }

@@ -341,4 +341,21 @@
             </VBox>
         </children>
     </StackPane>
+    <!-- Layer 4: Lock Overlay (Time-based access control) -->
+    <StackPane fx:id="lockOverlay" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="320.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-background-color: #0f172a;">
+        <children>
+            <VBox alignment="CENTER" spacing="30">
+                <children>
+                    <Label text="🔒" style="-fx-font-size: 80;" />
+                    <VBox alignment="CENTER" spacing="10">
+                        <children>
+                            <Label text="CONTENU VERROUILLÉ" textFill="WHITE" style="-fx-font-size: 32; -fx-font-weight: 900; -fx-letter-spacing: 2;" />
+                            <Label fx:id="lockMessageLabel" text="Ce module sera disponible prochainement." textFill="#94a3b8" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+                        </children>
+                    </VBox>
+                    <Button onAction="#goToHome" text="Retour à l'accueil" style="-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 15 30; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12; -fx-cursor: hand;" />
+                </children>
+            </VBox>
+        </children>
+    </StackPane>
 </AnchorPane>
