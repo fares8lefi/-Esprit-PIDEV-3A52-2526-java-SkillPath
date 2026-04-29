@@ -107,7 +107,13 @@
                     <VBox.margin>
                         <Insets top="2" bottom="2"/>
                     </VBox.margin>
-                </javafx.scene.web.WebView> 
+                </javafx.scene.web.WebView>
+
+                <!-- Loading Indicator (Hidden by default) -->
+                <StackPane fx:id="loadingContainer" visible="false" managed="false" 
+                          style="-fx-min-height: 45px; -fx-alignment: center;">
+                    <ProgressIndicator fx:id="loadingIndicator" prefWidth="30" prefHeight="30" progress="-1"/>
+                </StackPane>
 
                 <Button fx:id="loginBtn" onAction="#handleLogin" text="Se connecter" styleClass="btn-primary" maxWidth="Infinity">
                     <VBox.margin>

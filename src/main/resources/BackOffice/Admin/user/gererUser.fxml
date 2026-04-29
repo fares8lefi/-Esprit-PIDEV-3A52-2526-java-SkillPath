@@ -45,14 +45,10 @@
                      <ComboBox fx:id="comboTri" onAction="#handleSort" prefWidth="180.0" style="-fx-background-color: rgba(15, 23, 42, 0.5); -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 2; -fx-text-fill: white; -fx-cursor: hand;" />
                 </HBox>
 
-                <!-- LIST CONTAINER -->
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
-                    <content>
-                        <FlowPane fx:id="usersContainer" hgap="25.0" vgap="25.0" style="-fx-background-color: transparent; -fx-padding: 10;">
-                            <!-- Les cartes utilisateurs seront injectées ici -->
-                        </FlowPane>
-                    </content>
-                </ScrollPane>
+                <!-- PAGINATION CONTAINER -->
+                <VBox alignment="CENTER" spacing="20.0" VBox.vgrow="ALWAYS">
+                    <Pagination fx:id="pagination" maxPageIndicatorCount="5" pageCount="1" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" />
+                </VBox>
             </children>
         </VBox>
     </children>

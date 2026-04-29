@@ -75,7 +75,9 @@
                    </children>
                 </HBox>
 
-                <!-- 2. Stats Bento Grid (6 colonnes) -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- 2. KPI Ligne 1 — Stats globales (6 colonnes)               -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
                 <GridPane hgap="20.0" vgap="20.0">
                   <columnConstraints>
                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -92,7 +94,7 @@
                       <!-- Utilisateurs -->
                       <VBox spacing="10.0" style="-fx-border-color: #8b5cf6; -fx-border-width: 0 0 4 0;" styleClass="glass-card">
                          <children>
-                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="UTILISATEURS" textFill="#64748b" />
+                            <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="UTILISATEURS TOTAL" textFill="#64748b" />
                             <Label fx:id="userCountLabel" style="-fx-font-size: 24; -fx-font-weight: 900;" text="—" textFill="WHITE" />
                          </children>
                          <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
@@ -145,14 +147,119 @@
                    </children>
                 </GridPane>
 
-                <!-- 3. Graphiques -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- 3. KPI Ligne 2 — Statistiques avancées utilisateurs (4 col) -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <VBox spacing="12.0">
+                   <children>
+                      <HBox alignment="CENTER_LEFT" spacing="8.0">
+                         <children>
+                            <Label text="📊" style="-fx-font-size: 16;" />
+                            <Label text="Statistiques Avancées — Utilisateurs"
+                                   style="-fx-font-weight: bold; -fx-font-size: 16;"
+                                   textFill="WHITE" />
+                            <Label text="Données en temps réel"
+                                   style="-fx-font-size: 11; -fx-padding: 2 8; -fx-background-color: rgba(139,92,246,0.2); -fx-background-radius: 10;"
+                                   textFill="#a78bfa" />
+                         </children>
+                      </HBox>
+
+                      <GridPane hgap="20.0" vgap="20.0">
+                        <columnConstraints>
+                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                          <RowConstraints minHeight="130.0" prefHeight="130.0" vgrow="SOMETIMES" />
+                        </rowConstraints>
+                         <children>
+
+                            <!-- Utilisateurs actifs -->
+                            <VBox spacing="8.0" style="-fx-border-color: #10b981; -fx-border-width: 0 0 4 0;" styleClass="glass-card">
+                               <children>
+                                  <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                     <children>
+                                        <Label text="🟢" style="-fx-font-size: 14;" />
+                                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="UTILISATEURS ACTIFS" textFill="#64748b" />
+                                     </children>
+                                  </HBox>
+                                  <Label fx:id="activeUsersLabel" style="-fx-font-size: 34; -fx-font-weight: 900;" text="—" textFill="#10b981" />
+                                  <Label text="Comptes avec status actif" style="-fx-font-size: 10;" textFill="#475569" />
+                               </children>
+                               <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                            </VBox>
+
+                            <!-- Non vérifiés -->
+                            <VBox spacing="8.0" style="-fx-border-color: #ef4444; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="1">
+                               <children>
+                                  <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                     <children>
+                                        <Label text="⚠️" style="-fx-font-size: 14;" />
+                                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="NON VÉRIFIÉS" textFill="#64748b" />
+                                     </children>
+                                  </HBox>
+                                  <Label fx:id="unverifiedUsersLabel" style="-fx-font-size: 34; -fx-font-weight: 900;" text="—" textFill="#ef4444" />
+                                  <Label text="Email non confirmé" style="-fx-font-size: 10;" textFill="#475569" />
+                               </children>
+                               <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                            </VBox>
+
+                            <!-- Nouveaux cette semaine -->
+                            <VBox spacing="8.0" style="-fx-border-color: #3b82f6; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="2">
+                               <children>
+                                  <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                     <children>
+                                        <Label text="🆕" style="-fx-font-size: 14;" />
+                                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="INSCRITS CETTE SEMAINE" textFill="#64748b" />
+                                     </children>
+                                  </HBox>
+                                  <Label fx:id="newThisWeekLabel" style="-fx-font-size: 34; -fx-font-weight: 900;" text="—" textFill="#3b82f6" />
+                                  <Label text="Sur les 7 derniers jours" style="-fx-font-size: 10;" textFill="#475569" />
+                               </children>
+                               <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                            </VBox>
+
+                            <!-- Taux d'activation -->
+                            <VBox spacing="8.0" style="-fx-border-color: #a855f7; -fx-border-width: 0 0 4 0;" styleClass="glass-card" GridPane.columnIndex="3">
+                               <children>
+                                  <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                     <children>
+                                        <Label text="📈" style="-fx-font-size: 14;" />
+                                        <Label style="-fx-font-weight: 900; -fx-font-size: 10;" text="TAUX D'ACTIVATION" textFill="#64748b" />
+                                     </children>
+                                  </HBox>
+                                  <Label fx:id="activationRateLabel" style="-fx-font-size: 34; -fx-font-weight: 900;" text="—" textFill="#a855f7" />
+                                  <ProgressBar fx:id="activationProgressBar"
+                                               progress="0.0"
+                                               maxWidth="Infinity"
+                                               style="-fx-accent: #a855f7; -fx-background-color: rgba(168,85,247,0.15); -fx-background-radius: 4; -fx-pref-height: 6;" />
+                                  <Label text="Actifs / Total utilisateurs" style="-fx-font-size: 10;" textFill="#475569" />
+                               </children>
+                               <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                            </VBox>
+
+                         </children>
+                      </GridPane>
+                   </children>
+                </VBox>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- 4. Graphiques — Ligne 1                                    -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
                 <HBox spacing="25.0">
                    <children>
-                      <!-- Courbe de croissance -->
+                      <!-- Courbe de croissance (30 jours, données réelles) -->
                       <VBox spacing="15.0" styleClass="glass-card" HBox.hgrow="ALWAYS">
                          <children>
-                            <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Croissance des Utilisateurs" textFill="WHITE" />
-                            <LineChart fx:id="registrationChart" style="-fx-background-color: transparent;" prefHeight="280.0">
+                            <VBox spacing="4.0">
+                               <children>
+                                  <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Croissance des Utilisateurs" textFill="WHITE" />
+                                  <Label style="-fx-font-size: 11;" text="Inscriptions sur les 30 derniers jours" textFill="#64748b" />
+                               </children>
+                            </VBox>
+                            <LineChart fx:id="registrationChart" style="-fx-background-color: transparent;" prefHeight="280.0" animated="true">
                               <xAxis><CategoryAxis side="BOTTOM" tickLabelFill="#94a3b8" /></xAxis>
                               <yAxis><NumberAxis side="LEFT" tickLabelFill="#94a3b8" /></yAxis>
                             </LineChart>
@@ -160,20 +267,33 @@
                          <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
                       </VBox>
 
-                      <!-- Graphiques de distribution -->
-                      <VBox prefWidth="380.0" spacing="20.0">
+                      <!-- Graphiques de distribution (rôles + statut) -->
+                      <VBox prefWidth="400.0" spacing="20.0">
                          <children>
+                            <!-- PieChart Rôles — données réelles -->
                             <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
                                <children>
-                                  <Label style="-fx-font-weight: bold;" text="Répartition des Rôles" textFill="WHITE" />
-                                  <PieChart fx:id="rolesChart" labelsVisible="false" prefHeight="200.0" />
+                                  <VBox spacing="3.0">
+                                     <children>
+                                        <Label style="-fx-font-weight: bold;" text="Répartition des Rôles" textFill="WHITE" />
+                                        <Label style="-fx-font-size: 10;" text="Distribution réelle depuis la base" textFill="#64748b" />
+                                     </children>
+                                  </VBox>
+                                  <PieChart fx:id="rolesChart" labelsVisible="true" prefHeight="180.0" legendVisible="false" animated="true" />
                                </children>
                                <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
                             </VBox>
+
+                            <!-- BarChart Statut comptes — données réelles -->
                             <VBox alignment="CENTER" spacing="10.0" styleClass="glass-card" VBox.vgrow="ALWAYS">
                                <children>
-                                  <Label style="-fx-font-weight: bold;" text="Cours par Catégorie" textFill="WHITE" />
-                                  <BarChart fx:id="categoryChart" legendVisible="false" prefHeight="200.0">
+                                  <VBox spacing="3.0">
+                                     <children>
+                                        <Label style="-fx-font-weight: bold;" text="Statut des Comptes" textFill="WHITE" />
+                                        <Label style="-fx-font-size: 10;" text="Actif / Inactif / En attente" textFill="#64748b" />
+                                     </children>
+                                  </VBox>
+                                  <BarChart fx:id="statusChart" legendVisible="false" prefHeight="180.0" animated="true">
                                     <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
                                     <yAxis><NumberAxis side="LEFT" /></yAxis>
                                   </BarChart>
@@ -185,7 +305,9 @@
                    </children>
                 </HBox>
 
-                <!-- 4. Recrues récentes + Accès rapide -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- 5. Recrues récentes + Accès rapide                         -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
                 <HBox spacing="25.0">
                    <children>
                       <!-- Table utilisateurs récents -->
@@ -196,7 +318,7 @@
                                   <VBox HBox.hgrow="ALWAYS">
                                      <children>
                                         <Label style="-fx-font-weight: bold; -fx-font-size: 18;" text="Recrues Récentes" textFill="WHITE" />
-                                        <Label style="-fx-font-size: 12;" text="Les 5 derniers membres inscrits." textFill="#64748b" />
+                                        <Label style="-fx-font-size: 12;" text="Les 5 derniers membres inscrits avec leur statut de vérification." textFill="#64748b" />
                                      </children>
                                   </VBox>
                                   <Button style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6;" text="Tout Voir →" />
@@ -214,11 +336,11 @@
                          <children>
                             <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to right, #8b5cf6, #d946ef); -fx-background-radius: 20; -fx-padding: 30;">
                                <children>
-                                  <Label style="-fx-font-weight: 900; -fx-font-size: 20;" text="Gestion des&#10;Cours" textFill="WHITE" />
-                                  <Label opacity="0.7" style="-fx-font-size: 12;" text="Contrôlez les contenus pédagogiques." textFill="WHITE" />
+                                  <Label style="-fx-font-weight: 900; -fx-font-size: 20;" text="Gestion des&#10;Utilisateurs" textFill="WHITE" />
+                                  <Label opacity="0.7" style="-fx-font-size: 12;" text="Gérez les comptes, rôles et accès de vos membres." textFill="WHITE" />
                                   <Button maxWidth="Infinity"
                                           style="-fx-background-color: white; -fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12;"
-                                          text="Accéder aux Cours" />
+                                          text="Accéder aux Utilisateurs" />
                                </children>
                             </VBox>
 
@@ -232,13 +354,32 @@
                                     </columnConstraints>
                                     <rowConstraints>
                                       <RowConstraints minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                                      <RowConstraints minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
                                     </rowConstraints>
                                      <children>
-                                        <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;">
-                                           <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Soutien" textFill="#94a3b8" /></children>
+                                        <VBox alignment="CENTER" spacing="4" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;">
+                                           <children>
+                                              <Label text="🛡" style="-fx-font-size: 18;" />
+                                              <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Shield Center" textFill="#94a3b8" />
+                                           </children>
                                         </VBox>
-                                        <VBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.columnIndex="1">
-                                           <children><Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Ma Vue" textFill="#94a3b8" /></children>
+                                        <VBox alignment="CENTER" spacing="4" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.columnIndex="1">
+                                           <children>
+                                              <Label text="📋" style="-fx-font-size: 18;" />
+                                              <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Réclamations" textFill="#94a3b8" />
+                                           </children>
+                                        </VBox>
+                                        <VBox alignment="CENTER" spacing="4" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.rowIndex="1">
+                                           <children>
+                                              <Label text="👥" style="-fx-font-size: 18;" />
+                                              <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Annuaire" textFill="#94a3b8" />
+                                           </children>
+                                        </VBox>
+                                        <VBox alignment="CENTER" spacing="4" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                           <children>
+                                              <Label text="📊" style="-fx-font-size: 18;" />
+                                              <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="Statistiques" textFill="#94a3b8" />
+                                           </children>
                                         </VBox>
                                      </children>
                                   </GridPane>

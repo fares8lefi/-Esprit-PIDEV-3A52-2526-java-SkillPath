@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<!--
+    Wrapper : HBox(SideBar | security_dashboard content)
+    Reprend exactement le même pattern que homeAdmin.fxml
+-->
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.user.auth.SecurityDashboardController"
+      prefHeight="700.0"
+      prefWidth="1200.0"
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../../FrontOffice/user/auth/style.css">
+
+   <children>
+
+      <!-- ══ SIDEBAR (fixe, gauche) ══════════════════════════════ -->
+      <fx:include fx:id="sideBar" source="../SideBar.fxml" />
+
+      <!-- ══ CONTENU PRINCIPAL (droite, pleine hauteur) ══════════ -->
+      <AnchorPane HBox.hgrow="ALWAYS"
+                  stylesheets="@style_dashboard.css"
+                  style="-fx-background-color: #0f172a;">
+
+         <children>
+            <VBox spacing="20.0"
+                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <padding><Insets bottom="24.0" left="24.0" right="24.0" top="24.0" /></padding>
+               <children>
+
+                  <!-- ══ En-tête ══════════════════════════════════ -->
+                  <HBox alignment="CENTER_LEFT" spacing="12.0">
+                     <children>
+                        <Label text="🛡  Security Shield Center" textFill="#8b5cf6">
+                           <font><Font name="System Bold" size="22.0" /></font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="refreshBtn" mnemonicParsing="false"
+                                onAction="#refreshData"
+                                text="⟳  Actualiser"
+                                styleClass="refresh-btn" />
+                     </children>
+                  </HBox>
+
+                  <!-- ══ KPI Cards ════════════════════════════════ -->
+                  <HBox spacing="16.0">
+                     <children>
+
+                        <!-- Card 1 : Bloquées aujourd'hui -->
+                        <VBox styleClass="kpi-card"
+                              style="-fx-border-color: rgba(244,63,94,0.45);"
+                              HBox.hgrow="ALWAYS">
+                           <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
+                           <children>
+                              <Label text="🚫  Bloquées aujourd'hui" textFill="#94a3b8">
+                                 <font><Font size="11.0" /></font>
+                              </Label>
+                              <Label fx:id="totalBlockedLabel" text="0" textFill="#f43f5e">
+                                 <font><Font name="System Bold" size="34.0" /></font>
+                              </Label>
+                           </children>
+                        </VBox>
+
+                        <!-- Card 2 : Score moyen -->
+                        <VBox styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                           <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
+                           <children>
+                              <Label text="📊  Score de Risque Moyen" textFill="#94a3b8">
+                                 <font><Font size="11.0" /></font>
+                              </Label>
+                              <Label fx:id="avgScoreLabel" text="0.00" textFill="#fbbf24">
+                                 <font><Font name="System Bold" size="34.0" /></font>
+                              </Label>
+                           </children>
+                        </VBox>
+
+                        <!-- Card 3 : Top IP menaçante -->
+                        <VBox styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                           <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
+                           <children>
+                              <Label text="⚡  Top IP Menaçante" textFill="#94a3b8">
+                                 <font><Font size="11.0" /></font>
+                              </Label>
+                              <Label fx:id="topThreatLabel" text="Aucune" textFill="#8b5cf6">
+                                 <font><Font name="System Bold" size="20.0" /></font>
+                                 <VBox.margin><Insets top="8.0" /></VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+
+                     </children>
+                  </HBox>
+
+                  <!-- ══ Onglets ══════════════════════════════════ -->
+                  <TabPane tabClosingPolicy="UNAVAILABLE"
+                           styleClass="dashboard-tabs"
+                           VBox.vgrow="ALWAYS">
+                     <tabs>
+
+                        <!-- Onglet 1 : Événements ML -->
+                        <Tab text="Derniers Événements ML">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <TableView fx:id="eventsTable"
+                                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <columns>
+                                          <TableColumn fx:id="colDateEvent"  prefWidth="170.0" text="Date" />
+                                          <TableColumn fx:id="colIpEvent"    prefWidth="150.0" text="IP Source" />
+                                          <TableColumn fx:id="colUserEvent"  prefWidth="200.0" text="Utilisateur" />
+                                          <TableColumn fx:id="colAction"     prefWidth="130.0" text="Action ML" />
+                                          <TableColumn fx:id="colRisk"       prefWidth="120.0" text="Risque" />
+                                       </columns>
+                                       <placeholder>
+                                          <Label text="Aucun événement enregistré." textFill="#64748b" />
+                                       </placeholder>
+                                    </TableView>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </Tab>
+
+                        <!-- Onglet 2 : IPs Bloquées -->
+                        <Tab text="🚫  IPs Bloquées">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <VBox spacing="10.0"
+                                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <TableView fx:id="blockedTable" VBox.vgrow="ALWAYS">
+                                             <columns>
+                                                <TableColumn fx:id="colIpBlocked"    prefWidth="160.0" text="IP" />
+                                                <TableColumn fx:id="colReason"       prefWidth="320.0" text="Raison du blocage" />
+                                                <TableColumn fx:id="colScoreBlocked" prefWidth="110.0" text="Score ML" />
+                                                <TableColumn fx:id="colDateBlocked"  prefWidth="170.0" text="Date de blocage" />
+                                             </columns>
+                                             <placeholder>
+                                                <Label text="Aucune IP bloquée actuellement." textFill="#64748b" />
+                                             </placeholder>
+                                          </TableView>
+                                          <HBox alignment="CENTER_RIGHT">
+                                             <padding><Insets bottom="6.0" right="6.0" /></padding>
+                                             <children>
+                                                <Button mnemonicParsing="false"
+                                                        onAction="#handleUnblock"
+                                                        styleClass="unblock-btn"
+                                                        text="✔  Débloquer l'IP sélectionnée" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </Tab>
+
+                     </tabs>
+                  </TabPane>
+
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
+
+   </children>
+</HBox>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane styleClass="root-pane" stylesheets="@security-dashboard-style.css" 
+            xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="Controllers.user.admin.SecurityDashboardController" 
+            prefWidth="1400" prefHeight="900">
+    
+    <children>
+        <!-- Main VBox -->
+        <VBox spacing="20" style="-fx-padding: 20px;" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" 
+              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <VBox spacing="5">
+                    <Text text="Tableau de Bord de Sécurité" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-fill: #1f2937;"/>
+                    <Text text="Surveillance des tentatives d'accès et gestion des IPs bloquées" 
+                          style="-fx-font-size: 12; -fx-fill: #6b7280;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <ProgressIndicator fx:id="loadingIndicator" visible="false" minWidth="30" minHeight="30"/>
+                    <Button fx:id="refreshButton" text="🔄 Rafraîchir" style="-fx-padding: 8px 16px; -fx-font-size: 11; -fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-border-radius: 6px; -fx-cursor: hand;" 
+                            onAction="#onRefreshButtonClicked"/>
+                    <Label fx:id="lastUpdateLabel" text="Dernière mise à jour: --:--:--" 
+                           style="-fx-font-size: 11; -fx-text-fill: #6b7280;"/>
+                </HBox>
+            </HBox>
+            
+            <!-- Statistics Cards Row -->
+            <HBox spacing="15" style="-fx-padding: 0;">
+                <!-- Total Blocked -->
+                <VBox styleClass="stat-card" spacing="8" prefWidth="250" minHeight="120">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <StackPane style="-fx-background-color: rgba(239,68,68,0.1); -fx-background-radius: 8px;" 
+                                   minWidth="50" minHeight="50">
+                            <Text text="🚫" style="-fx-font-size: 24;"/>
+                        </StackPane>
+                        <VBox spacing="3" VBox.vgrow="ALWAYS">
+                            <Text text="IPs Bloquées" style="-fx-font-size: 13; -fx-fill: #6b7280; -fx-font-weight: 500;"/>
+                            <Label fx:id="totalBlockedLabel" text="0" 
+                                   style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+                
+                <!-- Average Score -->
+                <VBox styleClass="stat-card" spacing="8" prefWidth="250" minHeight="120">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <StackPane style="-fx-background-color: rgba(251,146,60,0.1); -fx-background-radius: 8px;" 
+                                   minWidth="50" minHeight="50">
+                            <Text text="📊" style="-fx-font-size: 24;"/>
+                        </StackPane>
+                        <VBox spacing="3" VBox.vgrow="ALWAYS">
+                            <Text text="Score Moyen" style="-fx-font-size: 13; -fx-fill: #6b7280; -fx-font-weight: 500;"/>
+                            <Label fx:id="averageScoreLabel" text="0.00" 
+                                   style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #f97316;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+                
+                <!-- Top Threat -->
+                <VBox styleClass="stat-card" spacing="8" prefWidth="450" minHeight="120">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <StackPane style="-fx-background-color: rgba(168,85,247,0.1); -fx-background-radius: 8px;" 
+                                   minWidth="50" minHeight="50">
+                            <Text text="⚠️" style="-fx-font-size: 24;"/>
+                        </StackPane>
+                        <VBox spacing="3" VBox.vgrow="ALWAYS">
+                            <Text text="Menace Principale" style="-fx-font-size: 13; -fx-fill: #6b7280; -fx-font-weight: 500;"/>
+                            <Label fx:id="topThreatLabel" text="N/A" 
+                                   style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #a855f7; -fx-font-family: 'Courier New';"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </HBox>
+            
+            <!-- Separator -->
+            <Separator style="-fx-padding: 10px 0px;"/>
+            
+            <!-- Main Content: Two Tables -->
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                
+                <!-- Left: Blocked IPs Table -->
+                <VBox spacing="10" prefWidth="50%">
+                    <Text text="IPs Bloquées Actuelles" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-fill: #1f2937;"/>
+                    <TableView fx:id="blockedIpsTable" prefHeight="400" style="-fx-font-size: 11;">
+                        <columns>
+                            <TableColumn fx:id="ipColumn" text="Adresse IP" prefWidth="120" sortType="ASCENDING"/>
+                            <TableColumn fx:id="reasonColumn" text="Raison du Blocage" prefWidth="180"/>
+                            <TableColumn fx:id="scoreColumn" text="Score ML" prefWidth="80"/>
+                            <TableColumn fx:id="blockedAtColumn" text="Date de Blocage" prefWidth="140"/>
+                            <TableColumn fx:id="actionColumn" text="Action" prefWidth="70"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="Aucune IP bloquée pour le moment"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+                
+                <!-- Right: Security Events Table -->
+                <VBox spacing="10" prefWidth="50%">
+                    <Text text="Derniers Événements de Sécurité" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-fill: #1f2937;"/>
+                    <TableView fx:id="eventsTable" prefHeight="400" style="-fx-font-size: 11;">
+                        <columns>
+                            <TableColumn fx:id="eventIpColumn" text="IP" prefWidth="100"/>
+                            <TableColumn fx:id="eventUsernameColumn" text="Utilisateur" prefWidth="100"/>
+                            <TableColumn fx:id="eventScoreColumn" text="Score" prefWidth="60"/>
+                            <TableColumn fx:id="eventActionColumn" text="Action" prefWidth="80"/>
+                            <TableColumn fx:id="eventRiskColumn" text="Risque" prefWidth="80"/>
+                            <TableColumn fx:id="eventDateColumn" text="Date" prefWidth="120"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="Aucun événement enregistré"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+            </HBox>
+            
+            <!-- Footer -->
+            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10px 0px; -fx-border-top: 1px solid #e5e7eb;">
+                <Text text="ℹ️ Mise à jour automatique toutes les 30 secondes" 
+                      style="-fx-font-size: 11; -fx-fill: #6b7280;"/>
+                <Text text="• Serveur Flask:" style="-fx-font-size: 11; -fx-fill: #6b7280;"/>
+                <Text text="http://localhost:5000" style="-fx-font-size: 11; -fx-fill: #8b5cf6; -fx-font-family: 'Courier New';"/>
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

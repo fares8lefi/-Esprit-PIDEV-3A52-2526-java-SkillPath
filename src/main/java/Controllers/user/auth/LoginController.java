@@ -1,7 +1,10 @@
 package Controllers.user.auth;
 
 import Models.User;
+import Models.LoginResult;
+import Services.SecurityService;
 import Services.UserService;
+import Utils.DatabaseConnection;
 import Utils.Session;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,10 +12,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -45,6 +46,8 @@ public class LoginController {
     @FXML private Button loginBtn;
     @FXML private Button googleBtn;
     @FXML private WebView captchaWebView;
+    @FXML private StackPane loadingContainer;
+    @FXML private ProgressIndicator loadingIndicator;
 
     private final UserService userService = new UserService();
     private String siteKey;
@@ -126,63 +129,96 @@ public class LoginController {
             return;
         }
 
-        // Vérification du Rate Limiter
-        if (rateLimiter.isLockedOut()) {
-            showError("Trop de tentatives. Veuillez patienter " + rateLimiter.getSecondsLeft() + " secondes.");
-            return;
-        }
-
-        // Vérification du reCAPTCHA
-        if (captchaWebView != null && secretKey != null && !secretKey.isEmpty()) {
-            try {
-                // Vérifier d'abord si le captcha a été coché
-                Object verifiedObj = captchaWebView.getEngine().executeScript("isCaptchaVerified()");
-                boolean isVerified = verifiedObj instanceof Boolean ? (Boolean) verifiedObj : false;
-                
-                if (!isVerified) {
-                    showError("Veuillez cocher la case 'Je ne suis pas un robot' pour continuer.");
-                    return;
-                }
-                
-                String token = (String) captchaWebView.getEngine().executeScript("getCaptchaResponse()");
-                if (token == null || token.isEmpty()) {
-                    showError("Erreur de communication avec reCAPTCHA. Veuillez réessayer.");
-                    return;
-                }
-                if (!verifierCaptcha(token)) {
-                    showError("La vérification reCAPTCHA a échoué. Veuillez réessayer.");
-                    return;
-                }
-            } catch (Exception e) {
-                System.err.println("Erreur exécution script reCAPTCHA: " + e.getMessage());
-                showError("Erreur lors de la vérification. Veuillez réessayer.");
+        // ── Vérification reCAPTCHA ──────────────────────────────────────────
+        if (captchaWebView != null) {
+            // Lire les valeurs JS depuis le WebView (FX thread)
+            Object verified = captchaWebView.getEngine()
+                    .executeScript("isCaptchaVerified()");
+            if (!Boolean.TRUE.equals(verified)) {
+                showError(" Veuillez compléter le reCAPTCHA avant de vous connecter.");
+                return;
+            }
+            String captchaToken = (String) captchaWebView.getEngine()
+                    .executeScript("getCaptchaResponse()");
+            if (!verifierCaptcha(captchaToken)) {
+                showError(" La vérification reCAPTCHA a échoué. Veuillez réessayer.");
+                // Réinitialiser le widget pour forcer une nouvelle tentative
+                captchaWebView.getEngine().executeScript("grecaptcha.reset()");
+                return;
             }
         }
+        // ────────────────────────────────────────────────────────────────────
 
-        User user = userService.login(email, password);
+        // Désactiver l'interface pendant la vérification
+        loginBtn.setDisable(true);
+        googleBtn.setDisable(true);
+        emailField.setDisable(true);
+        passwordField.setDisable(true);
+        errorLabel.setVisible(false);
+        
+        // Afficher le loading indicator
+        loadingContainer.setVisible(true);
+        loadingContainer.setManaged(true);
 
-        if (user != null) {
-            // Réinitialiser les tentatives après un succès
-            rateLimiter.recordSuccess();
+        javafx.concurrent.Task<LoginResult> loginTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected LoginResult call() throws Exception {
+                String clientIp = java.net.InetAddress.getLocalHost().getHostAddress();
+                java.sql.Connection conn = DatabaseConnection.getConnection();
+                SecurityService securityService = new SecurityService();
+                return securityService.login(email, password, clientIp, conn);
+            }
+        };
+
+        loginTask.setOnSucceeded(e -> {
+            // Masquer le loading indicator et réactiver les contrôles
+            loadingContainer.setVisible(false);
+            loadingContainer.setManaged(false);
+            loginBtn.setDisable(false);
+            googleBtn.setDisable(false);
+            emailField.setDisable(false);
+            passwordField.setDisable(false);
             
-            // Stockage dans la session
-            Session.getInstance().login(user);
-            System.out.println("Connexion réussie : " + user.getUsername());
-            
-            // Redirection selon le rôle
-            if ("admin".equalsIgnoreCase(user.getRole())) {
-                navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
-            } else {
-                navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+            LoginResult result = loginTask.getValue();
+
+            if (result.isBlocked()) {
+                showError(" ACCÈS BLOQUÉ : " + result.getMessage());
+                errorLabel.setStyle("-fx-text-fill: #f43f5e; -fx-font-weight: bold; -fx-font-size: 12px;");
+                return;
             }
-        } else {
-            rateLimiter.recordFailure();
-            if (rateLimiter.isLockedOut()) {
-                showError("Compte bloqué temporairement (30s) suite à plusieurs échecs.");
+
+            if (result.isSuccess()) {
+                User user = result.getUser();
+                Utils.Session.getInstance().login(user);
+                System.out.println("✓ Connexion réussie : " + user.getUsername());
+                
+                if ("admin".equalsIgnoreCase(user.getRole())) {
+                    navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
+                } else {
+                    navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                }
             } else {
-                showError("Email ou mot de passe incorrect. Il vous reste " + rateLimiter.getAttemptsLeft() + " tentative(s).");
+                showError(result.getMessage());
             }
-        }
+        });
+
+        loginTask.setOnFailed(e -> {
+            // Masquer le loading indicator et réactiver les contrôles
+            loadingContainer.setVisible(false);
+            loadingContainer.setManaged(false);
+            loginBtn.setDisable(false);
+            googleBtn.setDisable(false);
+            emailField.setDisable(false);
+            passwordField.setDisable(false);
+            // Réinitialiser le captcha après un échec
+            if (captchaWebView != null) {
+                captchaWebView.getEngine().executeScript("grecaptcha.reset()");
+            }
+            showError("Erreur de connexion au service de sécurité.");
+            loginTask.getException().printStackTrace();
+        });
+
+        new Thread(loginTask).start();
     }
 
     @FXML
