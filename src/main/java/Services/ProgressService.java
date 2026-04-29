@@ -75,48 +75,62 @@ public class ProgressService {
     }
 
     public void incrementProgress(UUID userId, int courseId, int moduleId, int totalModules) {
-        // Check if module is already completed
-        if (isModuleCompleted(userId, moduleId)) {
-            System.out.println("Module déjà terminé, progression ignorée.");
-            return;
-        }
-
-        // Mark module as completed
-        String markModuleSql = "INSERT INTO user_module_completion (user_id, module_id) VALUES (?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(markModuleSql)) {
-            stmt.setBytes(1, UUIDToBytes(userId));
-            stmt.setInt(2, moduleId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Erreur markModuleSql: " + e.getMessage());
-            return;
-        }
-
-        // Increment course progress
-        UserCourseProgress progress = getProgress(userId, courseId);
-        if (progress == null) {
-            String sql = "INSERT INTO user_course_progress (user_id, course_id, completed_modules, is_completed) VALUES (?, ?, 1, ?)";
+        // 1. Enregistrer la complétion du module si pas déjà fait
+        if (!isModuleCompleted(userId, moduleId)) {
+            String sql = "INSERT INTO user_module_completion (user_id, module_id) VALUES (?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setBytes(1, UUIDToBytes(userId));
+                stmt.setInt(2, moduleId);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("Erreur markModuleAsCompleted: " + e.getMessage());
+            }
+        }
+
+        // 2. Recalculer et mettre à jour le progrès global du cours
+        syncCourseProgress(userId, courseId, totalModules);
+    }
+
+    private void syncCourseProgress(UUID userId, int courseId, int totalModules) {
+        // Compter le nombre réel de modules complétés pour ce cours
+        String sqlCount = "SELECT COUNT(*) FROM user_module_completion umc " +
+                         "JOIN module m ON umc.module_id = m.id " +
+                         "WHERE umc.user_id = ? AND m.course_id = ?";
+        
+        int actualCount = 0;
+        try (PreparedStatement stmt = connection.prepareStatement(sqlCount)) {
+            stmt.setBytes(1, UUIDToBytes(userId));
+            stmt.setInt(2, courseId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                actualCount = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur count completed modules: " + e.getMessage());
+        }
+
+        // Mettre à jour la table de progression globale
+        UserCourseProgress progress = getProgress(userId, courseId);
+        if (progress == null) {
+            String sqlInsert = "INSERT INTO user_course_progress (user_id, course_id, completed_modules, is_completed) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement stmt = connection.prepareStatement(sqlInsert)) {
+                stmt.setBytes(1, UUIDToBytes(userId));
                 stmt.setInt(2, courseId);
-                stmt.setBoolean(3, 1 >= totalModules);
+                stmt.setInt(3, actualCount);
+                stmt.setBoolean(4, actualCount >= totalModules);
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 System.err.println("Erreur insert progress: " + e.getMessage());
             }
         } else {
-            if (!progress.isCompleted()) {
-                int newCount = progress.getCompletedModules() + 1;
-                boolean completed = newCount >= totalModules;
-                String sql = "UPDATE user_course_progress SET completed_modules = ?, is_completed = ? WHERE id = ?";
-                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                    stmt.setInt(1, newCount);
-                    stmt.setBoolean(2, completed);
-                    stmt.setInt(3, progress.getId());
-                    stmt.executeUpdate();
-                } catch (SQLException e) {
-                    System.err.println("Erreur update progress: " + e.getMessage());
-                }
+            String sqlUpdate = "UPDATE user_course_progress SET completed_modules = ?, is_completed = ? WHERE id = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sqlUpdate)) {
+                stmt.setInt(1, actualCount);
+                stmt.setBoolean(2, actualCount >= totalModules);
+                stmt.setInt(3, progress.getId());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("Erreur update progress: " + e.getMessage());
             }
         }
     }

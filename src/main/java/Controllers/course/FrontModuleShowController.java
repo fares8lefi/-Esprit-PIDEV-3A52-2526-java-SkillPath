@@ -6,6 +6,8 @@ import Models.Course;
 import Models.Module;
 import Services.CourseService;
 import Services.ModuleService;
+import Services.AIService;
+import Services.CertificateService;
 import Services.PDFService;
 import Services.ProgressService;
 import Utils.AssetLoader;
@@ -24,6 +26,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextFlow;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 import java.io.File;
@@ -243,13 +246,18 @@ public class FrontModuleShowController implements Initializable {
             boolean isCurrentModuleDone = Session.getInstance().getCurrentUser() != null &&
                     progressService.isModuleCompleted(Session.getInstance().getCurrentUser().getId(), currentModule.getId());
 
+            Models.UserCourseProgress progressObj = null;
+            if (Session.getInstance().getCurrentUser() != null) {
+                progressObj = progressService.getProgress(Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
+            }
+
             // 1. Bouton Téléchargement (Haut) - Visible si certificat obtenu
             boolean hasCert = Session.getInstance().getCurrentUser() != null &&
                     certificateService.hasCertificate(Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
             topDownloadCertBtn.setVisible(hasCert);
             topDownloadCertBtn.setManaged(hasCert);
 
-            // 2. Bouton Suivant (Bas) - Toujours visible si ce n'est pas le dernier module
+            // 2. Bouton Suivant (Bas)
             if (currentIndex < modules.size() - 1) {
                 Module next = modules.get(currentIndex + 1);
                 nextModuleBtn.setVisible(true);
@@ -273,16 +281,26 @@ public class FrontModuleShowController implements Initializable {
                 nextModuleBtn.setVisible(false);
                 nextModuleBtn.setManaged(false);
                 
-                // Sur le dernier module, si pas encore fait, montrer "Terminer le cours"
-                if (!isCurrentModuleDone) {
+                // Sur le dernier module
+                // On montre le bouton si le module n'est pas fait OU si le cours n'est pas à 100% (pour corriger les erreurs)
+                int completedModules = (progressObj != null) ? progressObj.getCompletedModules() : 0;
+                boolean courseNotFinished = (completedModules < modules.size());
+
+                if (!isCurrentModuleDone || courseNotFinished) {
                     finishActionsBox.setVisible(true);
                     finishActionsBox.setManaged(true);
                     finishCourseBtn.setVisible(true);
                     finishCourseBtn.setManaged(true);
-                    finishCourseBtn.setText("Terminer le cours ✓");
+                    finishCourseBtn.setText(isCurrentModuleDone ? "Actualiser la progression ✓" : "Terminer le cours ✓");
                 } else {
-                    finishActionsBox.setVisible(false);
-                    finishActionsBox.setManaged(false);
+                    // Cours vraiment fini et à 100%
+                    finishActionsBox.setVisible(true);
+                    finishActionsBox.setManaged(true);
+                    finishCourseBtn.setVisible(true);
+                    finishCourseBtn.setManaged(true);
+                    finishCourseBtn.setText("Certificat Obtenu 🏆");
+                    finishCourseBtn.setDisable(false); // On peut cliquer pour voir le certificat
+                    finishCourseBtn.setOnAction(e -> handleDownloadCertificate());
                 }
             }
 
@@ -343,13 +361,15 @@ public class FrontModuleShowController implements Initializable {
             Models.UserCourseProgress progressObj = progressService.getProgress(
                     Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
 
+            // On rafraîchit TOUT immédiatement
+            loadSidebar();
+            updateNavigationButtons();
+            loadAIPrediction();
+
             if (progressObj != null && progressObj.isCompleted()) {
                 // Course 100% done
                 certificateService.generateCertificate(
                         Session.getInstance().getCurrentUser().getId(), currentCourse.getId());
-
-                loadSidebar();
-                updateNavigationButtons();
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Félicitations !");
@@ -359,15 +379,9 @@ public class FrontModuleShowController implements Initializable {
                 alert.show();
 
             } else if (nextModuleForNavigation != null) {
-                // Mid-course: mark done then advance to next module
-                loadSidebar();
+                // Mid-course: advance to next module
                 setData(nextModuleForNavigation);
                 nextModuleForNavigation = null;
-
-            } else {
-                loadSidebar();
-                updateNavigationButtons();
-                System.out.println("Module marqué comme terminé !");
             }
 
         } catch (SQLDataException e) {
@@ -441,6 +455,62 @@ public class FrontModuleShowController implements Initializable {
                 addMessageBubble(response, false);
             });
         });
+    }
+
+    @FXML private StackPane summaryOverlay;
+    @FXML private TextFlow summaryTextFlow;
+
+    @FXML
+    private void handleSummarize() {
+        if (currentModule == null || currentModule.getContent() == null || currentModule.getContent().isEmpty()) {
+            return;
+        }
+
+        // Animation de chargement visuelle (Optionnel : on pourrait ajouter un spinner)
+        summaryTextFlow.getChildren().clear();
+        javafx.scene.text.Text loadingText = new javafx.scene.text.Text("🧠 L'IA analyse le contenu...");
+        loadingText.setFill(javafx.scene.paint.Color.web("#94a3b8"));
+        summaryTextFlow.getChildren().add(loadingText);
+        
+        summaryOverlay.setVisible(true);
+        summaryOverlay.setOpacity(0);
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), summaryOverlay);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
+
+        AIService aiService = new AIService();
+        aiService.summarizeContent(currentModule.getContent()).thenAccept(summary -> {
+            Platform.runLater(() -> {
+                summaryTextFlow.getChildren().clear();
+                
+                // On formate un peu le texte pour le rendre plus beau
+                String[] lines = summary.split("\n");
+                for (String line : lines) {
+                    javafx.scene.text.Text textNode = new javafx.scene.text.Text(line + "\n");
+                    textNode.setFill(javafx.scene.paint.Color.WHITE);
+                    textNode.setStyle("-fx-font-size: 15;");
+                    
+                    if (line.startsWith("**") || line.startsWith("#")) {
+                        textNode.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
+                        textNode.setFill(javafx.scene.paint.Color.web("#10b981"));
+                    } else if (line.trim().startsWith("*") || line.trim().startsWith("-")) {
+                        textNode.setFill(javafx.scene.paint.Color.web("#3b82f6"));
+                    }
+                    
+                    summaryTextFlow.getChildren().add(textNode);
+                }
+            });
+        });
+    }
+
+    @FXML
+    private void closeSummary() {
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(200), summaryOverlay);
+        ft.setFromValue(1);
+        ft.setToValue(0);
+        ft.setOnFinished(e -> summaryOverlay.setVisible(false));
+        ft.play();
     }
 
     private void addMessageBubble(String text, boolean isUser) {
