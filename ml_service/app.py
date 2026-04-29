@@ -64,5 +64,43 @@ def predict():
         print(f"Erreur lors de la prédiction : {e}")
         return jsonify({'error': str(e)}), 400
 
+from groq import Groq
+from dotenv import load_dotenv
+
+# On charge les clés depuis le .env à la racine du projet
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+@app.route('/api/summarize', methods=['POST'])
+def summarize():
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        
+        if not content:
+            return jsonify({'error': 'Contenu vide'}), 400
+
+        print(f"--- Résumé IA (Groq) en cours ---")
+        
+        # Utilisation du dernier modèle Llama 3.3 pour un résumé de haute qualité
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "Tu es un assistant pédagogique expert. Résume le contenu de ce cours de manière structurée avec des puces, en soulignant les points clés. Réponds en Français."},
+                {"role": "user", "content": f"Voici le contenu du cours :\n\n{content}"}
+            ],
+            temperature=0.5,
+            max_tokens=1024
+        )
+        
+        summary = completion.choices[0].message.content
+        print("--- Résumé Groq terminé ---")
+        
+        return jsonify({'summary': summary})
+
+    except Exception as e:
+        print(f"!!! ERREUR GROQ : {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

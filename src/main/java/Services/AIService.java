@@ -58,4 +58,26 @@ public class AIService {
                     return -1.0;
                 });
     }
+
+    public CompletableFuture<String> summarizeContent(String content) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("content", content);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://127.0.0.1:5000/api/summarize"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
+                .build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    if (response.statusCode() == 200) {
+                        JsonObject jsonResponse = gson.fromJson(response.body(), JsonObject.class);
+                        return jsonResponse.get("summary").getAsString();
+                    } else {
+                        return "Erreur (Status " + response.statusCode() + ") : " + response.body();
+                    }
+                })
+                .exceptionally(ex -> "Impossible de contacter le service de résumé.");
+    }
 }
