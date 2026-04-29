@@ -15,10 +15,13 @@ import java.util.List;
 
 public class ReponseService implements Iservice<Reponse> {
 
+    private static final int BAD_WORD_DEACTIVATION_SECONDS = 30;
     private final Connection connection;
+    private final UserService userService;
 
     public ReponseService() {
         this.connection = Database.getInstance().getConnection();
+        this.userService = new UserService();
     }
 
     @Override
@@ -26,6 +29,7 @@ public class ReponseService implements Iservice<Reponse> {
         String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
+            suspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
             reponse.setMessage(filteredMessage);
 
             ps.setString(1, filteredMessage);
@@ -34,8 +38,8 @@ public class ReponseService implements Iservice<Reponse> {
             ps.executeUpdate();
             System.out.println("Reponse ajoutee avec succes.");
         } catch (RuntimeException e) {
-            System.err.println("Erreur filtrage Ollama reponse : " + e.getMessage());
-            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
+            System.err.println("Erreur filtrage reponse : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur ajout reponse : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -60,6 +64,7 @@ public class ReponseService implements Iservice<Reponse> {
         String sql = "UPDATE reponse SET message = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredMessage = OllamaContentFilterService.censorBadWords(reponse.getMessage());
+            suspendClientIfProfanityDetected(reponse.getUserIdBytes(), reponse.getMessage(), filteredMessage);
             reponse.setMessage(filteredMessage);
 
             ps.setString(1, filteredMessage);
@@ -67,8 +72,8 @@ public class ReponseService implements Iservice<Reponse> {
             ps.executeUpdate();
             System.out.println("Reponse modifiee avec succes.");
         } catch (RuntimeException e) {
-            System.err.println("Erreur filtrage Ollama reponse : " + e.getMessage());
-            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
+            System.err.println("Erreur filtrage reponse : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur modification reponse : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -115,5 +120,12 @@ public class ReponseService implements Iservice<Reponse> {
             throw new SQLDataException(e.getMessage());
         }
         return reponses;
+    }
+
+    private void suspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
+        if (originalText == null || filteredText == null || originalText.equals(filteredText)) {
+            return;
+        }
+        userService.deactivateClientTemporarily(userIdBytes, BAD_WORD_DEACTIVATION_SECONDS);
     }
 }

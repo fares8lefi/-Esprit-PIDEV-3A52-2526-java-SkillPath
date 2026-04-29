@@ -153,11 +153,15 @@ public class AddReclamationController {
                 updated.setPieceJointe(pieceJointePath);
                 updated.setUserIdBytes(userIdBytes);
                 reclamationService.modifier(updated);
-                showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete modifiee avec succes.");
+                if (showSubmissionResult("Votre reclamation a ete modifiee avec succes.", event)) {
+                    return;
+                }
             } else {
                 Reclamation reclamation = new Reclamation(sujet, description, pieceJointePath, userIdBytes);
                 reclamationService.ajouter(reclamation);
-                showAlert(Alert.AlertType.INFORMATION, "Succes", "Votre reclamation a ete soumise avec succes.");
+                if (showSubmissionResult("Votre reclamation a ete soumise avec succes.", event)) {
+                    return;
+                }
             }
 
             navigateToReclamationsList(event);
@@ -190,6 +194,28 @@ public class AddReclamationController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private boolean showSubmissionResult(String successMessage, ActionEvent event) {
+        String banMessage = Session.consumeTemporaryBanMessage();
+        if (banMessage != null && !banMessage.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Compte temporairement desactive", successMessage + "\n\n" + banMessage);
+            navigateToLogin(event);
+            return true;
+        }
+        showAlert(Alert.AlertType.INFORMATION, "Succes", successMessage);
+        return false;
+    }
+
+    private void navigateToLogin(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private String storeAttachment(File sourceFile) throws IOException {

@@ -16,10 +16,14 @@ import java.util.List;
 
 public class ReclamationService implements Iservice<Reclamation> {
 
+    private static final int MAX_RESPONSE_MESSAGE_LENGTH = 240;
+    private static final int BAD_WORD_DEACTIVATION_SECONDS = 30;
     private final Connection connection;
+    private final UserService userService;
 
     public ReclamationService() {
         this.connection = Database.getInstance().getConnection();
+        this.userService = new UserService();
     }
 
     @Override
@@ -28,6 +32,8 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
             String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
             reclamation.setSujet(filteredSujet);
             reclamation.setDescription(filteredDescription);
 
@@ -66,6 +72,7 @@ public class ReclamationService implements Iservice<Reclamation> {
                         // Petit délai pour s'assurer que la réclamation est bien persistée
                         Thread.sleep(1000); 
                         System.out.println("[AI] Lancement de la génération pour #" + finalId);
+                        saveAssistantResponse(finalId, OllamaReclamationAssistant.WELCOME_MESSAGE);
                         String aiResponseText = OllamaReclamationAssistant.generateAutoResponse(desc);
                         
                         if (aiResponseText != null && !aiResponseText.isBlank()) {
@@ -83,8 +90,8 @@ public class ReclamationService implements Iservice<Reclamation> {
             }
 
         } catch (RuntimeException e) {
-            System.err.println("Erreur filtrage Ollama reclamation : " + e.getMessage());
-            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
+            System.err.println("Erreur filtrage reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur ajout reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -92,6 +99,16 @@ public class ReclamationService implements Iservice<Reclamation> {
     }
 
     public void saveAssistantResponse(int reclamationId, String message) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
+        for (String part : splitMessageForDatabase(message)) {
+            insertAssistantResponse(reclamationId, part);
+        }
+    }
+
+    private void insertAssistantResponse(int reclamationId, String message) {
         String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, message);
@@ -111,6 +128,44 @@ public class ReclamationService implements Iservice<Reclamation> {
             System.err.println("[AI] Erreur SQL lors de l'enregistrement: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private List<String> splitMessageForDatabase(String message) {
+        List<String> parts = new ArrayList<>();
+        String remaining = message.trim();
+
+        while (remaining.length() > MAX_RESPONSE_MESSAGE_LENGTH) {
+            int splitAt = findSplitPosition(remaining, MAX_RESPONSE_MESSAGE_LENGTH);
+            parts.add(remaining.substring(0, splitAt).trim());
+            remaining = remaining.substring(splitAt).trim();
+        }
+
+        if (!remaining.isBlank()) {
+            parts.add(remaining);
+        }
+        return parts;
+    }
+
+    private int findSplitPosition(String text, int maxLength) {
+        int paragraphBreak = text.lastIndexOf("\n\n", maxLength);
+        if (paragraphBreak > 0) {
+            return paragraphBreak;
+        }
+
+        int lineBreak = text.lastIndexOf('\n', maxLength);
+        if (lineBreak > 0) {
+            return lineBreak;
+        }
+
+        int space = text.lastIndexOf(' ', maxLength);
+        return space > 0 ? space : maxLength;
+    }
+
+    private void suspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
+        if (originalText == null || filteredText == null || originalText.equals(filteredText)) {
+            return;
+        }
+        userService.deactivateClientTemporarily(userIdBytes, BAD_WORD_DEACTIVATION_SECONDS);
     }
 
     private byte[] getAIUserId() {
@@ -149,6 +204,8 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
             String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            suspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
             reclamation.setSujet(filteredSujet);
             reclamation.setDescription(filteredDescription);
 
@@ -160,8 +217,8 @@ public class ReclamationService implements Iservice<Reclamation> {
             ps.executeUpdate();
             System.out.println("Reclamation modifiee avec succes.");
         } catch (RuntimeException e) {
-            System.err.println("Erreur filtrage Ollama reclamation : " + e.getMessage());
-            throw new SQLDataException("Filtrage IA impossible: " + e.getMessage());
+            System.err.println("Erreur filtrage reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur modification reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());

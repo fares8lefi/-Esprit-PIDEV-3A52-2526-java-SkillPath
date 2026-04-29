@@ -25,7 +25,6 @@ public final class OllamaContentFilterService {
     private static final Pattern RESPONSE_PATTERN = Pattern.compile("\"response\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"");
     private static final Pattern BAD_TERMS_BLOCK_PATTERN = Pattern.compile("\"bad_terms\"\\s*:\\s*\\[(.*?)]", Pattern.DOTALL);
     private static final Pattern ARRAY_ITEM_PATTERN = Pattern.compile("\"((?:\\\\.|[^\"\\\\])*)\"");
-    private static final Pattern PARTIAL_MASKED_TOKEN_PATTERN = Pattern.compile("(?iu)(?<!\\p{L}|\\p{N})([\\p{L}\\p{N}_-]*\\*{2,}[\\p{L}\\p{N}_-]*)(?!\\p{L}|\\p{N})");
 
     private OllamaContentFilterService() {
     }
@@ -35,67 +34,40 @@ public final class OllamaContentFilterService {
             return inputText;
         }
 
-        List<String> aiTerms = detectBadTermsWithOllama(inputText);
-        if (!aiTerms.isEmpty()) {
-            return maskDetectedTerms(inputText, aiTerms);
-        }
-
-        String directCensored = directCensorWithOllama(inputText);
-        if (directCensored == null || directCensored.isBlank()) {
-            return inputText;
-        }
-        return normalizeCensoredText(directCensored);
-    }
-
-    private static List<String> detectBadTermsWithOllama(String inputText) {
         try {
-            String responseText = callOllama(buildDetectionPrompt(inputText));
-            if (responseText == null || responseText.isBlank()) {
-                return List.of();
-            }
-            return parseBadTermsFromModelResponse(responseText);
-        } catch (Exception e) {
-            return List.of();
-        }
-    }
-
-    private static String directCensorWithOllama(String inputText) {
-        try {
-            String response = callOllama(buildDirectCensorPrompt(inputText));
-            if (response == null || response.isBlank()) {
+            List<String> badTerms = detectBadTerms(inputText);
+            if (badTerms.isEmpty()) {
                 return inputText;
             }
-            return response;
+            return maskDetectedTerms(inputText, badTerms);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to censor text with Ollama: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to filter text with Ollama: " + e.getMessage(), e);
         }
+    }
+
+    private static List<String> detectBadTerms(String inputText) throws Exception {
+        String responseText = callOllama(buildDetectionPrompt(inputText));
+        if (responseText == null || responseText.isBlank()) {
+            return List.of();
+        }
+        return parseBadTermsFromModelResponse(responseText, inputText);
     }
 
     private static String buildDetectionPrompt(String text) {
-        return "Detect ONLY highly offensive, insulting, abusive, hate speech, or sexual vulgarity in this text.\n"
-                + "Return ONLY valid JSON.\n"
-                + "JSON format: {\"bad_terms\":[]}\n"
-                + "CRITICAL RULES:\n"
-                + "1) DO NOT detect neutral words: 'problème', 'erreur', 'cours', 'bug', 'panne', 'aide', 'question', 'technique'.\n"
-                + "2) DO NOT detect common complaints or technical terms.\n"
-                + "3) Terms must appear exactly in the input.\n"
-                + "4) Support French, English, Arabic, and Tunisian dialect.\n"
-                + "Input:\n"
-                + text;
-    }
-
-    private static String buildDirectCensorPrompt(String text) {
-        return "Censor ONLY extreme vulgarity or hate speech in this text.\n"
+        return "You are a profanity detector for a SkillPath support application.\n"
+                + "Task: identify ONLY words or short expressions in the input that are clearly vulgar, insulting, abusive, hateful, sexual profanity, or direct harassment.\n"
+                + "Return ONLY valid JSON with this exact format: {\"bad_terms\":[]}\n"
                 + "Rules:\n"
-                + "1) Replace ONLY offensive terms with exactly *****.\n"
-                + "2) DO NOT TOUCH words like 'problème', 'erreur', 'cours', 'technique', or other neutral terms.\n"
-                + "3) Keep all other characters unchanged.\n"
-                + "4) Output ONLY the processed text.\n"
+                + "1) Do not rewrite, translate, censor, explain, or add text.\n"
+                + "2) Each bad_terms item must be copied exactly from the input text.\n"
+                + "3) Do not include normal complaint words, technical words, course names, usernames, or neutral negative words.\n"
+                + "4) Support French, English, Arabic, and Tunisian dialect/transliteration.\n"
+                + "5) If there is no clear profanity, return {\"bad_terms\":[]}.\n\n"
                 + "Input:\n"
                 + text;
     }
 
-    private static List<String> parseBadTermsFromModelResponse(String responseText) {
+    private static List<String> parseBadTermsFromModelResponse(String responseText, String inputText) {
         String cleaned = responseText.trim();
         if (cleaned.startsWith("```")) {
             cleaned = cleaned.replace("```json", "").replace("```", "").trim();
@@ -109,7 +81,7 @@ public final class OllamaContentFilterService {
 
         Matcher blockMatcher = BAD_TERMS_BLOCK_PATTERN.matcher(cleaned);
         if (!blockMatcher.find()) {
-            throw new IllegalStateException("Invalid Ollama filter format: missing bad_terms array.");
+            return List.of();
         }
 
         String arrayBody = blockMatcher.group(1);
@@ -117,7 +89,7 @@ public final class OllamaContentFilterService {
         Set<String> terms = new LinkedHashSet<>();
         while (itemMatcher.find()) {
             String term = unescapeJson(itemMatcher.group(1)).trim();
-            if (!term.isBlank() && term.length() <= 80) {
+            if (!term.isBlank() && term.length() <= 80 && containsIgnoreCase(inputText, term)) {
                 terms.add(term);
             }
         }
@@ -131,87 +103,34 @@ public final class OllamaContentFilterService {
 
         String masked = text;
         for (String term : terms) {
-            String trimmed = term == null ? "" : term.trim();
-            if (trimmed.isEmpty()) {
-                continue;
-            }
-
-            Pattern p = buildTermPattern(trimmed);
-            Matcher m = p.matcher(masked);
-            masked = m.replaceAll("*****");
+            Pattern pattern = buildTermPattern(term);
+            Matcher matcher = pattern.matcher(masked);
+            String replacement = repeatStars(term.length());
+            masked = matcher.replaceAll(Matcher.quoteReplacement(replacement));
         }
         return masked;
     }
 
     private static Pattern buildTermPattern(String term) {
-        boolean hasOnlyLettersDigitsSpaces = term.codePoints()
-                .allMatch(cp -> Character.isLetterOrDigit(cp) || Character.isWhitespace(cp));
+        boolean wordLike = term.codePoints()
+                .allMatch(cp -> Character.isLetterOrDigit(cp) || Character.isWhitespace(cp) || cp == '_' || cp == '-');
 
-        if (hasOnlyLettersDigitsSpaces) {
-            return Pattern.compile("(?iu)(?<!\\p{L})" + Pattern.quote(term) + "(?!\\p{L})");
+        if (wordLike) {
+            return Pattern.compile("(?iu)(?<!\\p{L}|\\p{N})" + Pattern.quote(term) + "(?!\\p{L}|\\p{N})");
         }
         return Pattern.compile(Pattern.quote(term), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     }
 
-    private static String normalizeCensoredText(String rawText) {
-        String text = rawText.trim();
-        if (text.startsWith("```")) {
-            text = text.replace("```", "").trim();
+    private static String repeatStars(int count) {
+        StringBuilder sb = new StringBuilder(Math.max(1, count));
+        for (int i = 0; i < Math.max(1, count); i++) {
+            sb.append('*');
         }
-        if (text.startsWith("\"") && text.endsWith("\"") && text.length() >= 2) {
-            text = text.substring(1, text.length() - 1);
-        }
-
-        Matcher m = PARTIAL_MASKED_TOKEN_PATTERN.matcher(text);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            String token = m.group(1);
-            boolean hasLetterOrDigit = token.codePoints().anyMatch(cp -> Character.isLetterOrDigit(cp));
-            if (hasLetterOrDigit) {
-                m.appendReplacement(sb, "*****");
-            } else {
-                m.appendReplacement(sb, Matcher.quoteReplacement(token));
-            }
-        }
-        m.appendTail(sb);
         return sb.toString();
     }
 
-    private static String normalizeBaseUrl(String value) {
-        String url = value == null || value.isBlank() ? DEFAULT_OLLAMA_URL : value.trim();
-        while (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
-        }
-        return url;
-    }
-
-    private static String readConfig(String key, String fallback) {
-        String env = System.getenv(key);
-        if (env != null && !env.isBlank()) {
-            return env.trim();
-        }
-
-        String dot = DOTENV.get(key);
-        if (dot != null && !dot.isBlank()) {
-            return dot.trim();
-        }
-        return fallback;
-    }
-
-    private static String readBody(HttpURLConnection conn, boolean fromError) throws Exception {
-        InputStream is = fromError ? conn.getErrorStream() : conn.getInputStream();
-        if (is == null) {
-            return "";
-        }
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
-        }
+    private static boolean containsIgnoreCase(String text, String term) {
+        return text.toLowerCase().contains(term.toLowerCase());
     }
 
     private static String callOllama(String prompt) throws Exception {
@@ -229,8 +148,8 @@ public final class OllamaContentFilterService {
         HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-        conn.setConnectTimeout(3000);
-        conn.setReadTimeout(20000);
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(30000);
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -244,22 +163,48 @@ public final class OllamaContentFilterService {
             throw new IllegalStateException("Ollama filter HTTP error " + code + ": " + body);
         }
 
-        String responseText = extractResponseText(body);
-        if (responseText == null) {
-            throw new IllegalStateException("Invalid Ollama response: missing response field.");
-        }
-        return responseText;
-    }
-
-    private static String extractResponseText(String json) {
-        if (json == null || json.isBlank()) {
-            return null;
-        }
-        Matcher matcher = RESPONSE_PATTERN.matcher(json);
+        Matcher matcher = RESPONSE_PATTERN.matcher(body);
         if (!matcher.find()) {
             return null;
         }
         return unescapeJson(matcher.group(1));
+    }
+
+    private static String readConfig(String key, String fallback) {
+        String env = System.getenv(key);
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+
+        String dot = DOTENV.get(key);
+        if (dot != null && !dot.isBlank()) {
+            return dot.trim();
+        }
+        return fallback;
+    }
+
+    private static String normalizeBaseUrl(String value) {
+        String url = value == null || value.isBlank() ? DEFAULT_OLLAMA_URL : value.trim();
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
+    private static String readBody(HttpURLConnection conn, boolean fromError) throws Exception {
+        InputStream is = fromError ? conn.getErrorStream() : conn.getInputStream();
+        if (is == null) {
+            return "";
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        }
     }
 
     private static String escapeJson(String value) {

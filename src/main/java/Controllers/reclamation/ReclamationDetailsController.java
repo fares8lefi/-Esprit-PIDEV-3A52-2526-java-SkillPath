@@ -177,6 +177,9 @@ public class ReclamationDetailsController {
             txtReponse.clear();
             addResponseToChat(reponse);
             scrollToBottom();
+            if (showTemporaryBanMessageIfNeeded(event)) {
+                return;
+            }
             generateAssistantReply(msg);
 
         } catch (SQLDataException e) {
@@ -203,6 +206,27 @@ public class ReclamationDetailsController {
             reclamationService.saveAssistantResponse(reclamationId, assistantMessage);
             Platform.runLater(this::loadResponses);
         }).start();
+    }
+
+    private boolean showTemporaryBanMessageIfNeeded(ActionEvent event) {
+        String banMessage = Session.consumeTemporaryBanMessage();
+        if (banMessage != null && !banMessage.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Compte temporairement desactive", banMessage);
+            navigateToLogin(event);
+            return true;
+        }
+        return false;
+    }
+
+    private void navigateToLogin(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
