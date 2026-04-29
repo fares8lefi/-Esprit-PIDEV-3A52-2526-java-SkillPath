@@ -31,17 +31,47 @@ public class GererUserController implements Initializable {
 
     @FXML private TextField searchField;
     @FXML private Label lblTotalUsers;
-    @FXML private FlowPane usersContainer;
     @FXML private ComboBox<String> comboTri;
+    @FXML private Pagination pagination;
 
     private final UserService userService = new UserService();
     private List<User> currentUsers;
+    private static final int ITEMS_PER_PAGE = 6;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         comboTri.getItems().addAll("Nom (A-Z)", "Nom (Z-A)", "Plus Récent", "Plus Ancien", "Rôle");
         comboTri.getSelectionModel().select("Nom (A-Z)");
+        
+        pagination.setPageFactory(this::createPage);
+        
         loadUsers(null);
+    }
+
+    private Node createPage(int pageIndex) {
+        FlowPane flowPane = new FlowPane();
+        flowPane.setHgap(25.0);
+        flowPane.setVgap(25.0);
+        flowPane.setAlignment(Pos.TOP_LEFT);
+        flowPane.setPadding(new javafx.geometry.Insets(10));
+        flowPane.setStyle("-fx-background-color: transparent;");
+
+        if (currentUsers == null || currentUsers.isEmpty()) {
+            return flowPane;
+        }
+
+        int fromIndex = pageIndex * ITEMS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ITEMS_PER_PAGE, currentUsers.size());
+
+        if (fromIndex >= currentUsers.size()) {
+            return flowPane;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            flowPane.getChildren().add(createUserCard(currentUsers.get(i)));
+        }
+
+        return flowPane;
     }
 
     @FXML
@@ -69,7 +99,6 @@ public class GererUserController implements Initializable {
     }
 
     private void loadUsers(String query) {
-        usersContainer.getChildren().clear();
         try {
             if (query != null && !query.trim().isEmpty()) {
                 User fake = new User();
@@ -132,11 +161,13 @@ public class GererUserController implements Initializable {
                 break;
         }
         
-        // Re-render
-        usersContainer.getChildren().clear();
-        for (User user : currentUsers) {
-            usersContainer.getChildren().add(createUserCard(user));
-        }
+        // Update pagination
+        int pageCount = (int) Math.ceil((double) currentUsers.size() / ITEMS_PER_PAGE);
+        pagination.setPageCount(Math.max(1, pageCount));
+        pagination.setCurrentPageIndex(0);
+        
+        // Refresh page factory to update content
+        pagination.setPageFactory(this::createPage);
     }
 
     private VBox createUserCard(User user) {
