@@ -14,6 +14,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +41,8 @@ public class FrontCourseCardController {
     @FXML private Label lblDescription;
     @FXML private Label lblLevel;
     @FXML private Label lblAiProb;
-    @FXML private HBox aiBadge;
+    @FXML private Label lblAiStatus;
+    @FXML private StackPane predictionCircleContainer;
     @FXML private StackPane imageContainer;
     @FXML private javafx.scene.control.Button btnFavorite;
     
@@ -102,20 +115,82 @@ public class FrontCourseCardController {
             if (session.isLoggedIn()) {
                 predictionService.predictSuccess(session.getCurrentUser(), course, totalModules)
                     .thenAccept(prob -> {
-                        javafx.application.Platform.runLater(() -> {
+                        Platform.runLater(() -> {
                             if (prob >= 0) {
-                                lblAiProb.setText(String.format("%.0f%% SUCCÈS", prob));
+                                animatePredictionCircle(prob);
                             } else {
-                                lblAiProb.setText("ÉVAL... %");
+                                lblAiProb.setText("--%");
                             }
                         });
                     });
             } else {
-                lblAiProb.setText("CONNECTEZ-VOUS");
+                lblAiProb.setText("?");
             }
         } catch (java.sql.SQLException e) {
             System.err.println("Erreur chargement modules pour IA : " + e.getMessage());
-            lblAiProb.setText("INDISP.");
+            lblAiProb.setText("!");
+        }
+    }
+
+    private void animatePredictionCircle(double targetScore) {
+        // Nettoyer les anciens arcs
+        predictionCircleContainer.getChildren().removeIf(node -> node instanceof Arc);
+
+        // Créer l'arc de progression (plus petit pour la carte)
+        Arc arc = new Arc(0, 0, 18, 18, 90, 0);
+        arc.setType(ArcType.OPEN);
+        arc.setFill(Color.TRANSPARENT);
+        arc.setStrokeWidth(4);
+        arc.setStrokeLineCap(StrokeLineCap.ROUND);
+
+        // Détermination des couleurs
+        Color startColor;
+        Color endColor;
+        String status;
+
+        if (targetScore < 40) {
+            startColor = Color.web("#f87171");
+            endColor = Color.web("#ef4444");
+            status = "Faible";
+        } else if (targetScore < 70) {
+            startColor = Color.web("#fbbf24");
+            endColor = Color.web("#f59e0b");
+            status = "Moyen";
+        } else {
+            startColor = Color.web("#34d399");
+            endColor = Color.web("#10b981");
+            status = "Élevé";
+        }
+
+        lblAiStatus.setText(status);
+        lblAiStatus.setTextFill(endColor);
+
+        arc.setStroke(new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, startColor),
+                new Stop(1, endColor)));
+
+        // Ajouter l'arc au conteneur
+        predictionCircleContainer.getChildren().add(0, arc);
+
+        // Animation de l'arc
+        Timeline timeline = new Timeline();
+        KeyFrame kf = new KeyFrame(Duration.millis(1200), 
+            new KeyValue(arc.lengthProperty(), -targetScore * 3.6)
+        );
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
+
+        // Animation du compteur textuel
+        Timeline counter = new Timeline();
+        int steps = (int) targetScore;
+        if (steps > 0) {
+            for (int i = 0; i <= steps; i++) {
+                final int val = i;
+                counter.getKeyFrames().add(new KeyFrame(Duration.millis(i * (1200.0/steps)), e -> {
+                    lblAiProb.setText(val + "%");
+                }));
+            }
+            counter.play();
         }
     }
 

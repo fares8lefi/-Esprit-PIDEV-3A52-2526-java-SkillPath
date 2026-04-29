@@ -28,6 +28,17 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.TextFlow;
 import javafx.geometry.Insets;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
@@ -65,8 +76,10 @@ public class FrontModuleShowController implements Initializable {
     @FXML private Button finishCourseBtn;
     @FXML private HBox finishActionsBox;
     @FXML private Button topDownloadCertBtn;
-    @FXML private HBox aiPredictionBox;
+    @FXML private VBox aiPredictionBox;
     @FXML private Label aiPredictionLabel;
+    @FXML private StackPane predictionCircleContainer;
+    @FXML private Label predictionStatusLabel;
     private final PDFService pdfService = new PDFService();
     
     @FXML private VBox chatWindow;
@@ -98,35 +111,96 @@ public class FrontModuleShowController implements Initializable {
 
     private void loadAIPrediction() {
         if (Session.getInstance().getCurrentUser() != null && currentCourse != null) {
-            aiPredictionLabel.setText("Calcul en cours...");
-            // Trouver le nombre total de modules pour la prédiction
+            predictionStatusLabel.setText("Analyse...");
             try {
                 List<Module> allModules = moduleService.getByCourse(currentCourse.getId());
                 predictionService.predictSuccess(Session.getInstance().getCurrentUser(), currentCourse, allModules.size())
                     .thenAccept(score -> {
                         Platform.runLater(() -> {
                             if (score >= 0) {
-                                aiPredictionLabel.setText(String.format("%.1f%% chances de réussite", score));
-                                if (score > 75) {
-                                    aiPredictionBox.setStyle("-fx-background-color: rgba(52, 211, 153, 0.1); -fx-background-radius: 8; -fx-padding: 8; -fx-border-color: rgba(52, 211, 153, 0.3);");
-                                    aiPredictionLabel.setStyle("-fx-text-fill: #34d399; -fx-font-weight: bold; -fx-font-size: 12;");
-                                } else if (score < 40) {
-                                    aiPredictionBox.setStyle("-fx-background-color: rgba(248, 113, 113, 0.1); -fx-background-radius: 8; -fx-padding: 8; -fx-border-color: rgba(248, 113, 113, 0.3);");
-                                    aiPredictionLabel.setStyle("-fx-text-fill: #f87171; -fx-font-weight: bold; -fx-font-size: 12;");
-                                }
+                                animatePredictionCircle(score);
                             } else {
-                                aiPredictionLabel.setText("Prédiction indisponible");
+                                aiPredictionLabel.setText("--%");
+                                predictionStatusLabel.setText("Indisponible");
                             }
                         });
                     });
             } catch (SQLDataException e) {
-                System.err.println("Erreur chargement modules pour prédiction : " + e.getMessage());
-                aiPredictionLabel.setText("Prédiction indisponible");
+                System.err.println("Erreur prédiction : " + e.getMessage());
+                predictionStatusLabel.setText("Erreur");
             }
         } else {
             aiPredictionBox.setVisible(false);
             aiPredictionBox.setManaged(false);
         }
+    }
+
+    private void animatePredictionCircle(double targetScore) {
+        // Nettoyer les anciens arcs
+        predictionCircleContainer.getChildren().removeIf(node -> node instanceof Arc);
+
+        // Créer l'arc de progression
+        Arc arc = new Arc(0, 0, 40, 40, 90, 0);
+        arc.setType(ArcType.OPEN);
+        arc.setFill(Color.TRANSPARENT);
+        arc.setStrokeWidth(8);
+        arc.setStrokeLineCap(StrokeLineCap.ROUND);
+
+        // Détermination des couleurs et du statut
+        Color startColor;
+        Color endColor;
+        String status;
+        String borderColor;
+
+        if (targetScore < 40) {
+            startColor = Color.web("#f87171"); // Rouge clair
+            endColor = Color.web("#ef4444");   // Rouge foncé
+            status = "Faible";
+            borderColor = "rgba(239, 68, 68, 0.4)";
+        } else if (targetScore < 70) {
+            startColor = Color.web("#fbbf24"); // Orange/Ambre
+            endColor = Color.web("#f59e0b");
+            status = "Moyen";
+            borderColor = "rgba(245, 158, 11, 0.4)";
+        } else {
+            startColor = Color.web("#34d399"); // Émeraude/Vert
+            endColor = Color.web("#10b981");
+            status = "Élevé";
+            borderColor = "rgba(16, 185, 129, 0.4)";
+        }
+
+        // Appliquer le dégradé
+        LinearGradient gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, startColor),
+                new Stop(1, endColor));
+        arc.setStroke(gradient);
+
+        // Ajouter l'arc au conteneur (en dessous du texte)
+        predictionCircleContainer.getChildren().add(0, arc);
+        
+        // Mettre à jour les textes
+        predictionStatusLabel.setText(status);
+        predictionStatusLabel.setTextFill(endColor);
+        aiPredictionBox.setStyle(aiPredictionBox.getStyle() + "; -fx-border-color: " + borderColor + ";");
+
+        // Animation de l'arc (le cercle fait 360°, donc score * 3.6)
+        Timeline timeline = new Timeline();
+        KeyFrame kf = new KeyFrame(Duration.millis(1500), 
+            new KeyValue(arc.lengthProperty(), -targetScore * 3.6)
+        );
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
+
+        // Animation du compteur textuel
+        Timeline counter = new Timeline();
+        int steps = (int) targetScore;
+        for (int i = 0; i <= steps; i++) {
+            final int val = i;
+            counter.getKeyFrames().add(new KeyFrame(Duration.millis(i * (1500.0/steps)), e -> {
+                aiPredictionLabel.setText(val + "%");
+            }));
+        }
+        counter.play();
     }
 
     private void updateUI() {
