@@ -270,10 +270,10 @@ public class AdminHomeController implements Initializable {
     private String capitalizeStatus(String status) {
         if (status == null || status.isBlank()) return "Inconnu";
         return switch (status.toLowerCase()) {
-            case "active" -> "✅ Actif";
-            case "inactive" -> "❌ Inactif";
-            case "pending" -> "⏳ En attente";
-            case "banned" -> "🚫 Banni";
+            case "active" -> " Actif";
+            case "inactive" -> " Inactif";
+            case "pending" -> " En attente";
+            case "banned" -> " Banni";
             default -> status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
         };
     }
