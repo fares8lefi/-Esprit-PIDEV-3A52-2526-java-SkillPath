@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane style="-fx-background-color: #0f172a; -fx-padding: 30;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.SeatSelectionController">
+    <top>
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="PATHÉ CINEMA MODE" style="-fx-text-fill: #f59e0b; -fx-font-weight: 900; -fx-font-size: 14px; -fx-letter-spacing: 2;"/>
+            <Label fx:id="lblEventTitle" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="Title..."/>
+            <!-- Cinema screen representation -->
+            <VBox alignment="CENTER" style="-fx-background-color: linear-gradient(to bottom, #cbd5e1, #94a3b8); -fx-background-radius: 100 100 0 0; -fx-padding: 10 50;">
+                <Label text="É C R A N" style="-fx-text-fill: #0f172a; -fx-font-weight: 900; -fx-font-size: 18px; -fx-letter-spacing: 15;"/>
+                <VBox.margin>
+                    <Insets top="30" bottom="40"/>
+                </VBox.margin>
+            </VBox>
+        </VBox>
+    </top>
+    
+    <center>
+        <GridPane fx:id="seatGrid" alignment="CENTER" hgap="12" vgap="12">
+            <!-- Populated dynamically by controller -->
+        </GridPane>
+    </center>
+    
+    <bottom>
+        <HBox alignment="CENTER" spacing="20">
+            <BorderPane.margin>
+                <Insets top="30"/>
+            </BorderPane.margin>
+            <HBox alignment="CENTER" spacing="8">
+                <Region prefWidth="15" prefHeight="15" style="-fx-background-color: #3b82f6; -fx-background-radius: 3;"/>
+                <Label text="Disponible" style="-fx-text-fill: #cbd5e1;"/>
+            </HBox>
+            <HBox alignment="CENTER" spacing="8">
+                <Region prefWidth="15" prefHeight="15" style="-fx-background-color: #ef4444; -fx-background-radius: 3;"/>
+                <Label text="Occupé" style="-fx-text-fill: #cbd5e1;"/>
+            </HBox>
+        </HBox>
+    </bottom>
+</BorderPane>

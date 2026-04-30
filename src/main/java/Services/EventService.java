@@ -74,7 +74,7 @@ public class EventService implements Iservice<Event> {
     public List<Event> recuperer() throws SQLDataException {
         List<Event> events = new ArrayList<>();
         // Join with location to get location details
-        String sql = "SELECT e.*, l.name as loc_name, l.building as loc_building, l.room_number as loc_room FROM event e LEFT JOIN location l ON e.location_id = l.id";
+        String sql = "SELECT e.*, l.name as loc_name, l.building as loc_building, l.room_number as loc_room, l.max_capacity as loc_capacity FROM event e LEFT JOIN location l ON e.location_id = l.id";
         try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Event e = new Event();
@@ -94,6 +94,7 @@ public class EventService implements Iservice<Event> {
                     loc.setName(rs.getString("loc_name"));
                     loc.setBuilding(rs.getString("loc_building"));
                     loc.setRoomNumber(rs.getString("loc_room"));
+                    loc.setMaxCapacity(rs.getInt("loc_capacity"));
                     e.setLocation(loc);
                 }
 

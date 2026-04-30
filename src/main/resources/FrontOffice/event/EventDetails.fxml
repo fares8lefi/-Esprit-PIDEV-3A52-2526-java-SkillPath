@@ -46,6 +46,8 @@
                 </HBox>
             </VBox>
 
+            <Button fx:id="btnJoinEvent" text="JOIN EVENT" onAction="#handleJoinEvent" styleClass="btn-primary" style="-fx-font-size: 16px; -fx-padding: 12;" maxWidth="Infinity" />
+
             <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: rgba(255,255,255,0.02); -fx-padding: 15; -fx-background-radius: 10;">
                 <Label text="Leave Rating" style="-fx-text-fill: #cbd5e1; -fx-font-weight: bold;" />
                 <ComboBox fx:id="cbMyRating" prefWidth="80" styleClass="form-input" />

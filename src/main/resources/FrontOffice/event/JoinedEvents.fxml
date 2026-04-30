@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane styleClass="root" stylesheets="@../../FrontOffice/home/home_style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.UserJoinedEventsController" prefWidth="1000" prefHeight="700">
+    <children>
+        <ScrollPane fitToWidth="true" styleClass="main-scroll-pane" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <content>
+                <VBox spacing="40">
+                    <padding><Insets top="50" right="60" bottom="60" left="60" /></padding>
+                    
+                    <VBox spacing="10">
+                        <Label text="🎟️ MY TICKETS" style="-fx-background-color: rgba(16, 185, 129, 0.1); -fx-text-fill: #10b981; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: 900; -fx-font-size: 10px;"/>
+                        <Label text="Mes Inscriptions" styleClass="section-title" style="-fx-font-size: 38px;"/>
+                        <Label text="Events you have committed to attend." styleClass="hero-subtitle"/>
+                    </VBox>
+                    
+                    <FlowPane fx:id="flowPaneEvents" hgap="30" vgap="40" />
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</AnchorPane>

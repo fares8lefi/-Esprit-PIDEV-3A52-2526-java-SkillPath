@@ -16,7 +16,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -283,7 +286,66 @@ public class AdminEventController implements Initializable {
                 fImage.setText(file.toURI().toString());
             }
         });
-        HBox imageBox = new HBox(10, fImage, btnUpload);
+        
+        Button btnGenerate = new Button("✨ Générer Photo IA");
+        btnGenerate.setStyle("-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-padding: 10 15; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;");
+        btnGenerate.setOnAction(ev -> {
+            String title = fTitle.getText();
+            if (title == null || title.trim().isEmpty()) {
+                showFlash("Veuillez d'abord saisir un titre pour générer l'image.", false);
+                return;
+            }
+            try {
+                String encodedTitle = java.net.URLEncoder.encode(title, "UTF-8").replace("+", "%20");
+                String aiImageUrl = "https://image.pollinations.ai/prompt/A%20beautiful%20high%20quality%20event%20photo%20for%20" + encodedTitle + "?width=800&height=600&nologo=true";
+                fImage.setText(aiImageUrl);
+                showFlash("Photo IA générée avec succès!", true);
+            } catch (Exception e) {
+                showFlash("Erreur lors de la génération de l'image.", false);
+            }
+        });
+
+        HBox imageBox = new HBox(10, fImage, btnUpload, btnGenerate);
+
+        // --- Image Preview ---
+        ImageView preview = new ImageView();
+        preview.setFitWidth(370);
+        preview.setFitHeight(160);
+        preview.setPreserveRatio(false);
+        Rectangle previewClip = new Rectangle(370, 160);
+        previewClip.setArcWidth(14);
+        previewClip.setArcHeight(14);
+        preview.setClip(previewClip);
+        preview.setStyle("-fx-background-color: rgba(255,255,255,0.03);");
+        Label previewLabel = new Label("🖼 Aperçu de l'image");
+        previewLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11;");
+        VBox previewBox = new VBox(6, previewLabel, preview);
+        previewBox.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12; -fx-padding: 10; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12;");
+        previewBox.setVisible(false);
+        previewBox.setManaged(false);
+
+        // Load initial image if editing
+        if (event != null && event.getImage() != null && !event.getImage().trim().isEmpty()) {
+            try {
+                preview.setImage(new Image(event.getImage(), true));
+                previewBox.setVisible(true);
+                previewBox.setManaged(true);
+            } catch (Exception ignored) {}
+        }
+
+        // Update preview whenever URL field changes
+        fImage.textProperty().addListener((obs, oldUrl, newUrl) -> {
+            if (newUrl == null || newUrl.trim().isEmpty()) {
+                previewBox.setVisible(false);
+                previewBox.setManaged(false);
+            } else {
+                try {
+                    preview.setImage(new Image(newUrl.trim(), true));
+                    previewBox.setVisible(true);
+                    previewBox.setManaged(true);
+                } catch (Exception ignored) {}
+            }
+        });
 
         Button btnSave = new Button(event == null ? "CRÉER L'ÉVÉNEMENT" : "METTRE À JOUR");
         btnSave.setMaxWidth(Double.MAX_VALUE);
@@ -323,8 +385,8 @@ public class AdminEventController implements Initializable {
             }
         });
 
-        layout.getChildren().addAll(titleHeader, fTitle, fDesc, dpDate, timeBox, cbLocation, imageBox, btnSave);
-        Scene scene = new Scene(layout, 450, 750);
+        layout.getChildren().addAll(titleHeader, fTitle, fDesc, dpDate, timeBox, cbLocation, imageBox, previewBox, btnSave);
+        Scene scene = new Scene(layout, 480, 820);
         try {
             scene.getStylesheets().add(getClass().getResource("/FrontOffice/user/auth/style.css").toExternalForm());
         } catch (Exception ignored) {}
