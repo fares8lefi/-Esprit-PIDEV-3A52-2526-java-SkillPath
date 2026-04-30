@@ -263,20 +263,52 @@ public class QuizPassController {
                 ScrapingService scrapingService = new ScrapingService();
                 String rawRecommendation = scrapingService.getRecommendation(quiz.getTitre());
                 
-                // Extraire le lien
-                String url = "";
-                Pattern pattern = Pattern.compile("https?://\\S+");
-                Matcher matcher = pattern.matcher(rawRecommendation);
-                if (matcher.find()) {
-                    url = matcher.group();
-                }
-                
-                final String finalUrl = url;
-                final String finalText = rawRecommendation.split("\nLien")[0];
-                
                 Platform.runLater(() -> {
-                    recommendationUrl = finalUrl;
-                    lblRecommendation.setText(finalText);
+                    recommendationBox.getChildren().clear();
+
+                    Label titleLabel = new Label("💡 Recommandations pour vous :");
+                    titleLabel.setStyle("-fx-text-fill: #fbbf24; -fx-font-weight: bold; -fx-font-size: 14px;");
+                    recommendationBox.getChildren().add(titleLabel);
+
+                    // Extraire le texte et les liens de rawRecommendation
+                    String[] parts = rawRecommendation.split("\nLien : ");
+                    Label textLabel = new Label(parts[0]);
+                    textLabel.setWrapText(true);
+                    textLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 14px; -fx-alignment: center; -fx-text-alignment: center;");
+                    textLabel.setMaxWidth(Double.MAX_VALUE);
+                    textLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                    recommendationBox.getChildren().add(textLabel);
+                    
+                    // Iterate over all links found
+                    for (int i = 1; i < parts.length; i++) {
+                        String part = parts[i];
+                        String url = part.split("\n")[0].trim();
+                        
+                        Hyperlink link = new Hyperlink("Voir la ressource " + i);
+                        link.setStyle("-fx-text-fill: #38bdf8; -fx-border-color: #38bdf8; -fx-border-style: dashed; -fx-border-radius: 4; -fx-padding: 5 15; -fx-cursor: hand;");
+                        link.setOnAction(e -> {
+                            try {
+                                Desktop.getDesktop().browse(new URI(url));
+                            } catch (Exception ex) {
+                                System.err.println("Erreur ouverture lien : " + ex.getMessage());
+                            }
+                        });
+                        recommendationBox.getChildren().add(link);
+                        
+                        // S'il y a du texte après le lien (pour la prochaine ressource)
+                        if (part.contains("\n")) {
+                            String remainingText = part.substring(part.indexOf("\n") + 1).trim();
+                            if (!remainingText.isEmpty()) {
+                                Label extraText = new Label(remainingText);
+                                extraText.setWrapText(true);
+                                extraText.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 14px; -fx-alignment: center; -fx-text-alignment: center;");
+                                extraText.setMaxWidth(Double.MAX_VALUE);
+                                extraText.setAlignment(javafx.geometry.Pos.CENTER);
+                                recommendationBox.getChildren().add(extraText);
+                            }
+                        }
+                    }
+
                     recommendationBox.setVisible(true);
                     recommendationBox.setManaged(true);
                 });

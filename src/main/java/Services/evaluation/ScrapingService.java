@@ -1,13 +1,10 @@
 package Services.evaluation;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ScrapingService {
 
@@ -17,30 +14,58 @@ public class ScrapingService {
      * @return Un lien vers une ressource pertinente
      */
     public String getRecommendation(String subject) {
-        String query = subject.replace(" ", "+");
-        
-        // Tentative 1 : Dev.to (Articles techniques)
-        try {
-            String url = "https://dev.to/search?q=" + query;
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                    .get();
+        String query = subject.replace(" ", "").toLowerCase();
+        StringBuilder recommendation = new StringBuilder();
+        recommendation.append("Basé sur vos résultats, voici des ressources pour approfondir vos connaissances sur \"").append(subject).append("\" :\n\n");
 
-            // Chercher le premier lien d'article
-            Elements articles = doc.select("h3.crayons-story__title a");
-            if (!articles.isEmpty()) {
-                Element firstArticle = articles.first();
-                String link = "https://dev.to" + firstArticle.attr("href");
-                String title = firstArticle.text();
-                return "Basé sur vos résultats, nous vous suggérons de consulter cet article approfondi pour mieux maîtriser " + subject + " :\n\"" + title + "\"\nLien : " + link;
+        boolean hasArticle = false;
+
+        // Tentative 1 : Dev.to API (Articles techniques)
+        try {
+            String url = "https://dev.to/api/articles?tag=" + query + "&per_page=1";
+            String json = Jsoup.connect(url)
+                    .ignoreContentType(true)
+                    .userAgent("Mozilla/5.0")
+                    .execute()
+                    .body();
+
+            JSONArray articles = new JSONArray(json);
+            if (articles.length() > 0) {
+                JSONObject firstArticle = articles.getJSONObject(0);
+                String link = firstArticle.getString("url");
+                String title = firstArticle.getString("title");
+                recommendation.append("📖 Article Technique : ").append(title).append("\nLien : ").append(link).append("\n\n");
+                hasArticle = true;
             }
-        } catch (IOException e) {
-            System.err.println("Erreur scraping Dev.to : " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erreur API Dev.to : " + e.getMessage());
         }
 
-        // Tentative 2 : YouTube (Si Dev.to échoue ou pour varier)
-        String youtubeUrl = "https://www.youtube.com/results?search_query=" + query + "+tutorial";
-        return "Pour approfondir vos connaissances en " + subject + ", nous avons sélectionné pour vous ce tutoriel vidéo pertinent sur YouTube.\nLien : " + youtubeUrl;
+        // Tentative 2 : Wikipedia (Si pas d'article technique)
+        if (!hasArticle) {
+            try {
+                String wikiUrl = "https://fr.wikipedia.org/api/rest_v1/page/summary/" + subject.trim().replace(" ", "_");
+                String jsonWiki = Jsoup.connect(wikiUrl)
+                        .ignoreContentType(true)
+                        .userAgent("Mozilla/5.0")
+                        .execute()
+                        .body();
 
+                JSONObject wikiObj = new JSONObject(jsonWiki);
+                if (wikiObj.has("content_urls")) {
+                    String link = wikiObj.getJSONObject("content_urls").getJSONObject("desktop").getString("page");
+                    String title = wikiObj.getString("title");
+                    recommendation.append("📖 Article Wikipedia : ").append(title).append("\nLien : ").append(link).append("\n\n");
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur API Wikipedia : " + e.getMessage());
+            }
+        }
+
+        // Ajout systématique de YouTube
+        String youtubeUrl = "https://www.youtube.com/results?search_query=" + subject.replace(" ", "+") + "+tutorial";
+        recommendation.append("📺 Tutoriel Vidéo YouTube\nLien : ").append(youtubeUrl);
+
+        return recommendation.toString();
     }
 }

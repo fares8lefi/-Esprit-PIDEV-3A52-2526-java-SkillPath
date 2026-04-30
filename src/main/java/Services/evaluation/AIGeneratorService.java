@@ -87,17 +87,17 @@ public class AIGeneratorService {
             long randomSeed = System.currentTimeMillis();
             String prompt = "Tu es un expert technique et professeur. Génère 5 questions QCM de niveau avancé pour le domaine : " + courseName + ". " +
                     "Génère des questions TOTALEMENT NOUVELLES et différentes de tes réponses précédentes. " +
-                    "Voici une graine aléatoire pour forcer la diversité : " + randomSeed + ". " +
-                    "Renvoie UNIQUEMENT un tableau JSON valide. Pas de bloc de code markdown (pas de ```json), " +
-                    "juste du texte brut commençant par [ et finissant par ]. " +
+                    "Voici une graine aléatoire : " + randomSeed + ". " +
+                    "Renvoie UNIQUEMENT un objet JSON valide avec une clé 'questions' contenant un tableau d'objets. " +
                     "Chaque objet doit avoir ces clés exactes : " +
                     "'enonce', 'choix_a', 'choix_b', 'choix_c', 'choix_d', " +
-                    "'bonne_reponse' (doit contenir UNIQUEMENT la lettre majuscule 'A', 'B', 'C' ou 'D' correspondant au bon choix), " +
-                    "'points' (un entier entre 1 et 5). Assure-toi d'échapper correctement tous les guillemets internes.";
+                    "'bonne_reponse' (lettre majuscule 'A', 'B', 'C' ou 'D'), " +
+                    "'points' (entier entre 1 et 5).";
 
             // Création du corps de la requête JSON
             JSONObject requestBody = new JSONObject()
                     .put("model", GROQ_MODEL)
+                    .put("response_format", new JSONObject().put("type", "json_object"))
                     .put("messages", new JSONArray()
                             .put(new JSONObject()
                                     .put("role", "user")
@@ -125,18 +125,8 @@ public class AIGeneratorService {
                         .getJSONObject("message")
                         .getString("content");
                 
-                // Au cas où l'IA inclut des balises markdown malgré la consigne
-                aiTextContent = aiTextContent.replace("```json", "").replace("```", "").trim();
-
-                // Extraction robuste : on ne garde que ce qui est entre les crochets [ ]
-                int startIndex = aiTextContent.indexOf('[');
-                int endIndex = aiTextContent.lastIndexOf(']');
-                if (startIndex != -1 && endIndex != -1 && endIndex >= startIndex) {
-                    aiTextContent = aiTextContent.substring(startIndex, endIndex + 1);
-                }
-
-                // Parsing des questions en JSONArray
-                JSONArray questionsJsonArray = new JSONArray(aiTextContent);
+                JSONObject resultObject = new JSONObject(aiTextContent);
+                JSONArray questionsJsonArray = resultObject.getJSONArray("questions");
                 
                 for (int i = 0; i < questionsJsonArray.length(); i++) {
                     JSONObject qObj = questionsJsonArray.getJSONObject(i);
