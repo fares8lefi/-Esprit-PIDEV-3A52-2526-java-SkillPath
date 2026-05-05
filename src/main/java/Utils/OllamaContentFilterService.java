@@ -41,7 +41,9 @@ public final class OllamaContentFilterService {
             }
             return maskDetectedTerms(inputText, badTerms);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to filter text with Ollama: " + e.getMessage(), e);
+            System.err.println("[AI Filter] Error connecting to Ollama: " + e.getMessage());
+            System.err.println("[AI Filter] Skipping AI content filtering. Please ensure Ollama is running at " + readConfig("OLLAMA_URL", DEFAULT_OLLAMA_URL));
+            return inputText; // Fallback: return original text without filtering
         }
     }
 
