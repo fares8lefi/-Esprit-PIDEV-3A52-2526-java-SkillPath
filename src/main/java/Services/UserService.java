@@ -147,7 +147,33 @@ public class UserService implements Iservice<User> {
         return sendMail(toEmail, username, code);
     }
 
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                byte[] idBytes = rs.getBytes("id");
+                if (idBytes != null && idBytes.length == 16) {
+                    java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(idBytes);
+                    user.setId(new java.util.UUID(bb.getLong(), bb.getLong()));
+                }
+                user.setEmail(rs.getString("email"));
+                user.setUsername(rs.getString("username"));
+                user.setRole(rs.getString("role"));
+                user.setStatus(rs.getString("status"));
+                user.setVerified(rs.getBoolean("is_verified"));
+                return user;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur getUserByEmail : " + e.getMessage());
+        }
+        return null;
+    }
+
     /**
+     * Étape 1 : Demander une réinitialisation de mot de passe.
      * Étape 1 : Demander une réinitialisation de mot de passe.
      * Génère un code, le stocke en base et l'envoie par email.
      */
