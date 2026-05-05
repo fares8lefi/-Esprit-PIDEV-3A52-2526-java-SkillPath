@@ -36,7 +36,7 @@ public class GererUserController implements Initializable {
 
     private final UserService userService = new UserService();
     private List<User> currentUsers;
-      private static final int ITEMS_PER_PAGE = 6;
+    private static final int ITEMS_PER_PAGE = 6;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -47,7 +47,6 @@ public class GererUserController implements Initializable {
         
         loadUsers(null);
     }
-
 
     private Node createPage(int pageIndex) {
         FlowPane flowPane = new FlowPane();
