@@ -39,12 +39,12 @@ public class UserReclamationsController {
     }
 
     private void loadUserReclamations() {
-        if (!Session.isLoggedIn() || Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
+        if (!Utils.Session.isLoggedIn() || Utils.Session.getCurrentUser() == null || Utils.Session.getCurrentUser().getId() == null) {
             return;
         }
 
         try {
-            User currentUser = Session.getCurrentUser();
+            User currentUser = Utils.Session.getCurrentUser();
             ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
             bb.putLong(currentUser.getId().getMostSignificantBits());
             bb.putLong(currentUser.getId().getLeastSignificantBits());
