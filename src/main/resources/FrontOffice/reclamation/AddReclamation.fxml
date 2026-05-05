@@ -2,20 +2,21 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="800.0" prefWidth="1200.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.reclamation.AddReclamationController">
    <children>
       <VBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox maxWidth="600.0" prefWidth="600.0" spacing="25.0" styleClass="card">
+            <VBox maxWidth="800.0" prefWidth="600.0" spacing="25.0" styleClass="card">
                <children>
-                  <Button mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="⬅ Retour" />
                   <VBox spacing="8.0">
                      <children>
                         <Label styleClass="title-header" text="Soumettre une Réclamation" />
@@ -28,11 +29,20 @@
                         <Label styleClass="label-form" text="Sujet" />
                         <TextField fx:id="txtSujet" promptText="Exemple: Bug technique sur un cours..." styleClass="text-field-modern" />
       
-                        <Label styleClass="label-form" text="Description">
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label styleClass="label-form" text="Description" />
+                              <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" spacing="10.0">
+                                 <children>
+                                    <ComboBox fx:id="comboVoiceLang" prefWidth="120.0" promptText="Langue" />
+                                    <Button mnemonicParsing="false" onAction="#startVoiceRecognition" styleClass="btn-secondary" text="🎤 Dicter" />
+                                 </children>
+                              </HBox>
+                           </children>
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>
-                        </Label>
+                        </HBox>
                         <TextArea fx:id="txtDescription" prefHeight="200.0" promptText="Détaillez votre problème ici..." styleClass="text-area-modern" wrapText="true" />
       
                         <Label styleClass="label-form" text="Pièce jointe (optionnel)">
@@ -51,7 +61,7 @@
       
                   <HBox alignment="CENTER_RIGHT" spacing="20.0">
                      <children>
-                        <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="Annuler" />
+                        <Button mnemonicParsing="false" onAction="#cancel" styleClass="btn-secondary" text="Annuler" />
                         <Button fx:id="btnSubmit" mnemonicParsing="false" onAction="#submitReclamation" styleClass="btn-primary" text="🚀 Envoyer la demande" />
                      </children>
                      <VBox.margin>

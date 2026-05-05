@@ -1,6 +1,10 @@
 package Utils;
 
 import Models.User;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Singleton class to manage the current user session.
@@ -8,6 +12,11 @@ import Models.User;
 public class Session {
     private static Session instance;
     private User currentUser;
+    private String temporaryBanMessage;
+
+    private final List<Models.Course> clickedCourses = new ArrayList<>();
+    private final Map<String, Integer> categoryPreferences = new HashMap<>();
+    private final Map<String, Integer> levelPreferences = new HashMap<>();
 
     // Private constructor 
     private Session() {}
@@ -23,13 +32,11 @@ public class Session {
         return instance;
     }
 
-    public void login(User user) {
+    // --- Singleton Instance Methods ---
+
+    public void loginInstance(User user) {
         this.currentUser = user;
     }
-
-    private final java.util.List<Models.Course> clickedCourses = new java.util.ArrayList<>();
-    private final java.util.Map<String, Integer> categoryPreferences = new java.util.HashMap<>();
-    private final java.util.Map<String, Integer> levelPreferences = new java.util.HashMap<>();
 
     public void trackClick(Models.Course course) {
         if (!clickedCourses.contains(course)) {
@@ -45,22 +52,47 @@ public class Session {
         levelPreferences.put(level, levelPreferences.getOrDefault(level, 0) + 1);
     }
 
-    public java.util.List<Models.Course> getClickedCourses() { return clickedCourses; }
-    public java.util.Map<String, Integer> getCategoryPreferences() { return categoryPreferences; }
-    public java.util.Map<String, Integer> getLevelPreferences() { return levelPreferences; }
+    public List<Models.Course> getClickedCourses() { return clickedCourses; }
+    public Map<String, Integer> getCategoryPreferences() { return categoryPreferences; }
+    public Map<String, Integer> getLevelPreferences() { return levelPreferences; }
 
-    public void logout() {
+    public void logoutInstance() {
         this.currentUser = null;
         this.clickedCourses.clear();
         this.categoryPreferences.clear();
         this.levelPreferences.clear();
     }
 
-    public User getCurrentUser() {
-        return currentUser;
+    // --- Static Convenience Methods (for backward compatibility and ease of use) ---
+
+    public static User getCurrentUser() {
+        return getInstance().currentUser;
     }
 
-    public boolean isLoggedIn() {
-        return currentUser != null;
+    public static boolean isLoggedIn() {
+        User user = getInstance().currentUser;
+        return user != null && !"inactive".equalsIgnoreCase(user.getStatus());
+    }
+
+    public static void login(User user) {
+        getInstance().loginInstance(user);
+    }
+
+    public static void logout() {
+        getInstance().logoutInstance();
+    }
+
+    public static void logoutKeepTemporaryBanMessage() {
+        getInstance().currentUser = null;
+    }
+
+    public static void setTemporaryBanMessage(String message) {
+        getInstance().temporaryBanMessage = message;
+    }
+
+    public static String consumeTemporaryBanMessage() {
+        String message = getInstance().temporaryBanMessage;
+        getInstance().temporaryBanMessage = null;
+        return message;
     }
 }

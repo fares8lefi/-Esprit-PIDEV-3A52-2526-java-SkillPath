@@ -2,34 +2,188 @@ package Services;
 
 import Models.Reclamation;
 import Utils.Database;
+import Utils.OllamaContentFilterService;
+import Utils.OllamaReclamationAssistant;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReclamationService implements Iservice<Reclamation> {
 
+    private static final int MAX_RESPONSE_MESSAGE_LENGTH = 240;
+    private static final int BAD_WORD_DEACTIVATION_SECONDS = 30;
     private final Connection connection;
+    private final UserService userService;
 
     public ReclamationService() {
         this.connection = Database.getInstance().getConnection();
+        this.userService = new UserService();
     }
 
     @Override
     public void ajouter(Reclamation reclamation) throws SQLDataException {
         String sql = "INSERT INTO reclamation (sujet, description, statut, piece_jointe, user_id) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reclamation.getSujet());
-            ps.setString(2, reclamation.getDescription());
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
+            String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
+            reclamation.setSujet(filteredSujet);
+            reclamation.setDescription(filteredDescription);
+
+            ps.setString(1, filteredSujet);
+            ps.setString(2, filteredDescription);
             ps.setString(3, reclamation.getStatut());
             ps.setString(4, reclamation.getPieceJointe());
             ps.setBytes(5, reclamation.getUserIdBytes());
             ps.executeUpdate();
-            System.out.println("Reclamation ajoutée avec succès.");
+
+            // Récupérer l'ID généré pour la réponse automatique
+            int reclamationId = -1;
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    reclamationId = generatedKeys.getInt(1);
+                }
+            }
+            
+            // Fallback si l'ID n'a pas été récupéré par getGeneratedKeys
+            if (reclamationId == -1) {
+                try (Statement st = connection.createStatement();
+                     ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()")) {
+                    if (rs.next()) reclamationId = rs.getInt(1);
+                }
+            }
+
+            System.out.println("[AI] Reclamation ID capturé: " + reclamationId);
+
+            // --- RÉPONSE AUTOMATIQUE IA (LLAMA 3) ---
+            if (reclamationId > 0) {
+                final int finalId = reclamationId;
+                final String desc = filteredDescription;
+                
+                new Thread(() -> {
+                    try {
+                        // Petit délai pour s'assurer que la réclamation est bien persistée
+                        Thread.sleep(1000); 
+                        System.out.println("[AI] Lancement de la génération pour #" + finalId);
+                        saveAssistantResponse(finalId, OllamaReclamationAssistant.WELCOME_MESSAGE);
+                        String aiResponseText = OllamaReclamationAssistant.generateAutoResponse(desc);
+                        
+                        if (aiResponseText != null && !aiResponseText.isBlank()) {
+                            saveAssistantResponse(finalId, aiResponseText);
+                        } else {
+                            System.err.println("[AI] Aucune réponse générée par Ollama.");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[AI] Erreur dans le thread de réponse: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }).start();
+            } else {
+                System.err.println("[AI] Impossible de récupérer l'ID de la réclamation, l'IA ne peut pas répondre.");
+            }
+
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur ajout reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
         }
+    }
+
+    public void saveAssistantResponse(int reclamationId, String message) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
+        for (String part : splitMessageForDatabase(message)) {
+            insertAssistantResponse(reclamationId, part);
+        }
+    }
+
+    private void insertAssistantResponse(int reclamationId, String message) {
+        String sql = "INSERT INTO reponse (message, reclamation_id, user_id) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, message);
+            ps.setInt(2, reclamationId);
+
+            // On récupère l'ID d'un admin existant pour éviter les erreurs de clé étrangère
+            byte[] adminId = getAIUserId();
+            ps.setBytes(3, adminId);
+
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("[AI] Réponse automatique enregistrée pour la réclamation #" + reclamationId);
+            } else {
+                System.err.println("[AI] Échec de l'insertion de la réponse pour #" + reclamationId);
+            }
+        } catch (SQLException e) {
+            System.err.println("[AI] Erreur SQL lors de l'enregistrement: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> splitMessageForDatabase(String message) {
+        List<String> parts = new ArrayList<>();
+        String remaining = message.trim();
+
+        while (remaining.length() > MAX_RESPONSE_MESSAGE_LENGTH) {
+            int splitAt = findSplitPosition(remaining, MAX_RESPONSE_MESSAGE_LENGTH);
+            parts.add(remaining.substring(0, splitAt).trim());
+            remaining = remaining.substring(splitAt).trim();
+        }
+
+        if (!remaining.isBlank()) {
+            parts.add(remaining);
+        }
+        return parts;
+    }
+
+    private int findSplitPosition(String text, int maxLength) {
+        int paragraphBreak = text.lastIndexOf("\n\n", maxLength);
+        if (paragraphBreak > 0) {
+            return paragraphBreak;
+        }
+
+        int lineBreak = text.lastIndexOf('\n', maxLength);
+        if (lineBreak > 0) {
+            return lineBreak;
+        }
+
+        int space = text.lastIndexOf(' ', maxLength);
+        return space > 0 ? space : maxLength;
+    }
+
+    private void rejectAndSuspendClientIfProfanityDetected(byte[] userIdBytes, String originalText, String filteredText) {
+        if (originalText == null || filteredText == null || originalText.equals(filteredText)) {
+            return;
+        }
+        userService.deactivateClientTemporarily(userIdBytes, BAD_WORD_DEACTIVATION_SECONDS);
+        throw new IllegalStateException("Message refuse: contenu inapproprie detecte.");
+    }
+
+    private byte[] getAIUserId() {
+        // On cherche le premier admin pour lui attribuer la réponse IA (ou un ID par
+        // défaut si non trouvé)
+        String sql = "SELECT id FROM user WHERE role = 'admin' LIMIT 1";
+        try (Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getBytes("id");
+            }
+        } catch (SQLException e) {
+            System.err.println("[AI] Impossible de trouver un ID admin: " + e.getMessage());
+        }
+
+        // Fallback: 16 octets à zéro (si la DB ne contraint pas la clé étrangère)
+        return new byte[16];
     }
 
     @Override
@@ -38,7 +192,7 @@ public class ReclamationService implements Iservice<Reclamation> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, reclamation.getId());
             ps.executeUpdate();
-            System.out.println("Reclamation supprimée avec succès.");
+            System.out.println("Reclamation supprimee avec succes.");
         } catch (SQLException e) {
             System.err.println("Erreur suppression reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -49,13 +203,23 @@ public class ReclamationService implements Iservice<Reclamation> {
     public void modifier(Reclamation reclamation) throws SQLDataException {
         String sql = "UPDATE reclamation SET sujet = ?, description = ?, statut = ?, piece_jointe = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, reclamation.getSujet());
-            ps.setString(2, reclamation.getDescription());
+            String filteredSujet = OllamaContentFilterService.censorBadWords(reclamation.getSujet());
+            String filteredDescription = OllamaContentFilterService.censorBadWords(reclamation.getDescription());
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getSujet(), filteredSujet);
+            rejectAndSuspendClientIfProfanityDetected(reclamation.getUserIdBytes(), reclamation.getDescription(), filteredDescription);
+            reclamation.setSujet(filteredSujet);
+            reclamation.setDescription(filteredDescription);
+
+            ps.setString(1, filteredSujet);
+            ps.setString(2, filteredDescription);
             ps.setString(3, reclamation.getStatut());
             ps.setString(4, reclamation.getPieceJointe());
             ps.setInt(5, reclamation.getId());
             ps.executeUpdate();
-            System.out.println("Reclamation modifiée avec succès.");
+            System.out.println("Reclamation modifiee avec succes.");
+        } catch (RuntimeException e) {
+            System.err.println("Erreur filtrage reclamation : " + e.getMessage());
+            throw new SQLDataException("Filtrage impossible: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erreur modification reclamation : " + e.getMessage());
             throw new SQLDataException(e.getMessage());
@@ -108,7 +272,8 @@ public class ReclamationService implements Iservice<Reclamation> {
         return reclamations;
     }
 
-    public List<Reclamation> getAllReclamationsWithUsername(String usernameSearch, String statusFilter) throws SQLDataException {
+    public List<Reclamation> getAllReclamationsWithUsername(String usernameSearch, String statusFilter)
+            throws SQLDataException {
         List<Reclamation> reclamations = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
@@ -184,7 +349,7 @@ public class ReclamationService implements Iservice<Reclamation> {
             connection.setAutoCommit(false);
 
             try (PreparedStatement psResp = connection.prepareStatement(deleteResponsesSql);
-                 PreparedStatement psRecl = connection.prepareStatement(deleteReclamationSql)) {
+                    PreparedStatement psRecl = connection.prepareStatement(deleteReclamationSql)) {
                 psResp.setInt(1, reclamationId);
                 psResp.executeUpdate();
 

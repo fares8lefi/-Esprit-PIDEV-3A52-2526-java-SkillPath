@@ -1,25 +1,26 @@
 package Services;
 
 import Models.User;
+import Utils.Session;
 import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService implements Iservice<User> {
 
     private Connection connection;
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-    private final String URL = dotenv.get("DB_URL", "jdbc:mysql://localhost:3306/skillpathdb2");
-    private final String USERNAME = dotenv.get("DB_USER", "root");
-    private final String PASSWORD = dotenv.get("DB_PASS", "");
-
+    private static final Map<String, Long> TEMPORARY_DEACTIVATIONS = new ConcurrentHashMap<>();
     public UserService() {
         connection = Utils.Database.getInstance().getConnection();
     }
@@ -323,6 +324,12 @@ public class UserService implements Iservice<User> {
                 }
 
                 if (verifyPassword(password, storedHash)) {
+                    String status = rs.getString("status");
+                    if (!"active".equalsIgnoreCase(status)) {
+                        System.out.println("Compte desactive pour : " + email);
+                        return null;
+                    }
+
                     User user = new User();
                     
                     // Récupérer et convertir l'ID binaire (16 octets) en UUID
@@ -337,7 +344,7 @@ public class UserService implements Iservice<User> {
                     user.setEmail(rs.getString("email"));
                     user.setUsername(rs.getString("username"));
                     user.setRole(rs.getString("role"));
-                    user.setStatus(rs.getString("status"));
+                    user.setStatus(status);
                     System.out.println("Connexion réussie pour : " + user.getUsername());
                     return user;
                 } else {
@@ -350,6 +357,63 @@ public class UserService implements Iservice<User> {
             System.out.println("Erreur login SQL : " + e.getMessage());
         }
         return null;
+    }
+
+    public void deactivateClientTemporarily(byte[] userIdBytes, int seconds) {
+        if (userIdBytes == null || userIdBytes.length == 0 || seconds <= 0) {
+            return;
+        }
+
+        String userKey = Base64.getEncoder().encodeToString(userIdBytes);
+        long deactivateUntil = System.currentTimeMillis() + (seconds * 1000L);
+        TEMPORARY_DEACTIVATIONS.put(userKey, deactivateUntil);
+
+        updateClientStatus(userIdBytes, "inactive");
+        notifyCurrentUserAboutTemporaryBanAndLogout(userIdBytes, seconds);
+        System.out.println("Compte client desactive temporairement pendant " + seconds + " secondes.");
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(seconds * 1000L);
+                Long latestUntil = TEMPORARY_DEACTIVATIONS.get(userKey);
+                if (latestUntil != null && latestUntil <= deactivateUntil) {
+                    updateClientStatus(userIdBytes, "active");
+                    TEMPORARY_DEACTIVATIONS.remove(userKey);
+                    System.out.println("Compte client reactive apres suspension temporaire.");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+    }
+
+    private void updateClientStatus(byte[] userIdBytes, String status) {
+        String sql = "UPDATE users SET status = ? WHERE id = ? AND LOWER(role) <> 'admin'";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setBytes(2, userIdBytes);
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                System.err.println("Aucun compte trouve pour appliquer le statut: " + status);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur updateClientStatus : " + e.getMessage());
+        }
+    }
+
+    private void notifyCurrentUserAboutTemporaryBanAndLogout(byte[] userIdBytes, int seconds) {
+        if (Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
+            return;
+        }
+
+        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+        bb.putLong(Session.getCurrentUser().getId().getMostSignificantBits());
+        bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
+        if (java.util.Arrays.equals(bb.array(), userIdBytes)) {
+            Session.setTemporaryBanMessage("Votre compte a ete desactive pendant " + seconds
+                    + " secondes car votre message contient des mots inappropries.");
+            Session.logoutKeepTemporaryBanMessage();
+        }
     }
 
     @Override

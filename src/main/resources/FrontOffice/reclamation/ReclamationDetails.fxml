@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
@@ -67,8 +68,10 @@
                            </content>
                         </ScrollPane>
       
-                        <HBox alignment="CENTER" spacing="15.0">
+                        <HBox alignment="CENTER" spacing="10.0">
                            <children>
+                              <ComboBox fx:id="comboVoiceLang" prefWidth="120.0" promptText="Langue" />
+                              <Button mnemonicParsing="false" onAction="#startVoiceRecognition" styleClass="btn-secondary" text="🎤" />
                               <TextField fx:id="txtReponse" promptText="Écrivez votre message..." styleClass="text-field-modern" HBox.hgrow="ALWAYS" />
                               <Button mnemonicParsing="false" onAction="#sendReponse" styleClass="btn-primary" text="Envoyer ✈" />
                            </children>

@@ -2,171 +2,305 @@ package Controllers.reclamation;
 
 import Models.Reclamation;
 import Models.Reponse;
-import Models.User;
-import Services.ReponseService;
 import Services.ReclamationService;
+import Services.ReponseService;
+import Utils.OllamaReclamationAssistant;
 import Utils.Session;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.collections.FXCollections;
+import Utils.VoiceRecognitionService;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.sql.SQLDataException;
-import java.util.Arrays;
 import java.util.List;
 
 public class ReclamationDetailsController {
 
-    @FXML private Label lblSujet;
-    @FXML private Label lblDescription;
-    @FXML private Label lblStatut;
-    @FXML private Label lblPieceJointe;
-    @FXML private Button btnOpenPieceJointe;
-    @FXML private VBox chatContainer;
-    @FXML private ScrollPane chatScrollPane;
-    @FXML private TextField txtReponse;
+    @FXML
+    private Label lblSujet;
+    @FXML
+    private Label lblDescription;
+    @FXML
+    private Label lblStatut;
+    @FXML
+    private Label lblPieceJointe;
+    @FXML
+    private Button btnOpenPieceJointe;
+    @FXML
+    private VBox chatContainer;
+    @FXML
+    private TextField txtReponse;
+    @FXML
+    private ComboBox<String> comboVoiceLang;
+    @FXML
+    private ScrollPane chatScrollPane;
 
-    private final ReponseService reponseService = new ReponseService();
-    private Reclamation reclamation;
+    private Reclamation currentReclamation;
+    private ReponseService reponseService;
+    private ReclamationService reclamationService;
 
-    public void setReclamation(Reclamation r) {
-        this.reclamation = r;
-        lblSujet.setText(r.getSujet());
-        lblDescription.setText(r.getDescription());
-        lblStatut.setText(r.getStatut());
-        
-        // Style du statut
-        if (r.getStatut().equalsIgnoreCase("Traitee")) {
-            lblStatut.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-padding: 5 12; -fx-background-radius: 20;");
-        } else {
-            lblStatut.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-padding: 5 12; -fx-background-radius: 20;");
+    public void initialize() {
+        reponseService = new ReponseService();
+        reclamationService = new ReclamationService();
+        if (comboVoiceLang != null) {
+            comboVoiceLang.setItems(FXCollections.observableArrayList("Français", "English", "Tounsi"));
+            comboVoiceLang.getSelectionModel().select("Français");
         }
-
-        if (r.getPieceJointe() != null && !r.getPieceJointe().isEmpty()) {
-            lblPieceJointe.setText(new File(r.getPieceJointe()).getName());
-            btnOpenPieceJointe.setVisible(true);
-            btnOpenPieceJointe.setManaged(true);
-        }
-
-        loadReponses();
     }
 
-    private void loadReponses() {
-        if (reclamation == null) return;
+    public void initData(Reclamation reclamation) {
+        this.currentReclamation = reclamation;
+        lblSujet.setText(reclamation.getSujet());
+        lblDescription.setText(reclamation.getDescription());
+        lblStatut.setText(reclamation.getStatut());
+        configurePieceJointe(reclamation.getPieceJointe());
         
+        loadResponses();
+    }
+
+    private void loadResponses() {
+        chatContainer.getChildren().clear();
         try {
-            List<Reponse> list = reponseService.getReponsesByReclamation(reclamation.getId());
-            chatContainer.getChildren().clear();
-            
-            for (Reponse resp : list) {
-                chatContainer.getChildren().add(createResponseBubble(resp));
+            List<Reponse> reponses = reponseService.getReponsesByReclamation(currentReclamation.getId());
+            for (Reponse rep : reponses) {
+                addResponseToChat(rep);
             }
-            
-            // Scroll to bottom
-            Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
-            
+            scrollToBottom();
         } catch (SQLDataException e) {
-            e.printStackTrace();
+            System.err.println("Erreur chargement reponses : " + e.getMessage());
         }
     }
 
-    private VBox createResponseBubble(Reponse resp) {
+    private void addResponseToChat(Reponse rep) {
+        HBox messageBox = new HBox();
+        messageBox.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        
+        Label messageLabel = new Label(rep.getMessage());
+        messageLabel.setWrapText(true);
+        messageLabel.setMaxWidth(400); // Prevent bubble from being too wide
+
+        // Determine if this response is from the current user or someone else (e.g. Admin)
         boolean isMine = false;
-        User currentUser = Session.getInstance().getCurrentUser();
-        if (currentUser != null && resp.getUserIdBytes() != null) {
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(currentUser.getId().getMostSignificantBits());
-            bb.putLong(currentUser.getId().getLeastSignificantBits());
-            isMine = Arrays.equals(bb.array(), resp.getUserIdBytes());
-        }
-
-        VBox bubble = new VBox(5);
-        bubble.setMaxWidth(400);
-        bubble.setPadding(new Insets(10, 15, 10, 15));
-        
-        Label author = new Label(isMine ? "Moi" : "Support SkillPath");
-        author.setStyle("-fx-font-weight: bold; -fx-font-size: 10; -fx-text-fill: #94a3b8;");
-
-        Label msg = new Label(resp.getMessage());
-        msg.setWrapText(true);
-        msg.setStyle("-fx-text-fill: white;");
-
-        bubble.getChildren().addAll(author, msg);
-        
-        if (isMine) {
-            bubble.setStyle("-fx-background-color: #8b5cf6; -fx-background-radius: 15 15 0 15;");
-            VBox.setMargin(bubble, new Insets(0, 0, 0, 150));
-            bubble.setAlignment(Pos.CENTER_RIGHT);
-        } else {
-            bubble.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 15 15 15 0;");
-            VBox.setMargin(bubble, new Insets(0, 150, 0, 0));
-            bubble.setAlignment(Pos.CENTER_LEFT);
-        }
-        
-        return bubble;
-    }
-
-    @FXML
-    private void sendReponse(ActionEvent event) {
-        String message = txtReponse.getText().trim();
-        if (message.isEmpty() || reclamation == null) return;
-
-        User currentUser = Session.getInstance().getCurrentUser();
-        if (currentUser == null) return;
-
-        try {
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(currentUser.getId().getMostSignificantBits());
-            bb.putLong(currentUser.getId().getLeastSignificantBits());
-
-            Reponse reponse = new Reponse(message, reclamation.getId(), bb.array());
-            reponseService.ajouter(reponse);
-            
-            txtReponse.clear();
-            loadReponses();
-            
-        } catch (SQLDataException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void openPieceJointe(ActionEvent event) {
-        if (reclamation != null && reclamation.getPieceJointe() != null) {
-            try {
-                Desktop.getDesktop().open(new File(reclamation.getPieceJointe()));
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (Session.isLoggedIn() && rep.getUserIdBytes() != null) {
+            java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(rep.getUserIdBytes());
+            long high = bb.getLong();
+            long low = bb.getLong();
+            java.util.UUID responderUIID = new java.util.UUID(high, low);
+            if (responderUIID.equals(Session.getCurrentUser().getId())) {
+                isMine = true;
             }
         }
+
+        if (isMine) {
+            messageLabel.getStyleClass().add("chat-bubble-me");
+            messageBox.setAlignment(Pos.CENTER_RIGHT);
+        } else {
+            messageLabel.getStyleClass().add("chat-bubble-other");
+            messageBox.setAlignment(Pos.CENTER_LEFT);
+            // Prefix admin labels if needed
+            Label senderLabel = new Label("Support");
+            senderLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px;");
+            VBox msgWrapper = new VBox(2, senderLabel, messageLabel);
+            messageBox.getChildren().add(msgWrapper);
+            chatContainer.getChildren().add(messageBox);
+            return;
+        }
+
+        messageBox.getChildren().add(messageLabel);
+        chatContainer.getChildren().add(messageBox);
     }
 
     @FXML
-    private void goBack(ActionEvent event) {
+    void startVoiceRecognition(ActionEvent event) {
+        String selected = comboVoiceLang.getValue();
+        String langCode = "fr-FR";
+        if ("English".equals(selected)) {
+            langCode = "en-US";
+        } else if ("Tounsi".equals(selected)) {
+            langCode = "ar-TN"; 
+        }
+
+        VoiceRecognitionService.startRecognition(langCode, text -> {
+            if (text != null && !text.isBlank()) {
+                String currentText = txtReponse.getText();
+                txtReponse.setText(currentText.isEmpty() ? text : currentText + " " + text);
+            }
+        });
+    }
+
+    @FXML
+    void sendReponse(ActionEvent event) {
+        String msg = txtReponse.getText().trim();
+        if (msg.isEmpty()) return;
+
+        if (!Session.isLoggedIn() || Session.getCurrentUser().getId() == null) {
+            System.err.println("User not logged in!");
+            return;
+        }
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/reclamation/UserReclamations.fxml"));
-            Parent root = loader.load();
+            java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(new byte[16]);
+            bb.putLong(Session.getCurrentUser().getId().getMostSignificantBits());
+            bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
+            byte[] userIdBytes = bb.array();
+
+            Reponse reponse = new Reponse(msg, currentReclamation.getId(), userIdBytes);
+            reponseService.ajouter(reponse);
+
+            // Change status to "En attente" since user replied
+            if (!"En attente".equalsIgnoreCase(currentReclamation.getStatut())) {
+                reclamationService.updateStatut(currentReclamation.getId(), "En attente");
+                currentReclamation.setStatut("En attente");
+                Platform.runLater(() -> lblStatut.setText("En attente"));
+            }
+
+            txtReponse.clear();
+            addResponseToChat(reponse);
+            scrollToBottom();
+            if (showTemporaryBanMessageIfNeeded(event)) {
+                return;
+            }
+            generateAssistantReply(msg);
+
+        } catch (SQLDataException e) {
+            if (showTemporaryBanMessageIfNeeded(event)) {
+                return;
+            }
+            System.err.println("Erreur envoi reponse : " + e.getMessage());
+        }
+    }
+
+    private void generateAssistantReply(String userMessage) {
+        if (currentReclamation == null || userMessage == null || userMessage.isBlank()) {
+            return;
+        }
+
+        final int reclamationId = currentReclamation.getId();
+        final String context = "Sujet: " + currentReclamation.getSujet()
+                + "\nDescription: " + currentReclamation.getDescription()
+                + "\nStatut: " + currentReclamation.getStatut();
+
+        new Thread(() -> {
+            String assistantMessage = OllamaReclamationAssistant.generateAssistantResponse(userMessage, context);
+            if (assistantMessage == null || assistantMessage.isBlank()) {
+                return;
+            }
+
+            reclamationService.saveAssistantResponse(reclamationId, assistantMessage);
+            Platform.runLater(this::loadResponses);
+        }).start();
+    }
+
+    private boolean showTemporaryBanMessageIfNeeded(ActionEvent event) {
+        String banMessage = Session.consumeTemporaryBanMessage();
+        if (banMessage != null && !banMessage.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Compte temporairement desactive", banMessage);
+            navigateToLogin(event);
+            return true;
+        }
+        return false;
+    }
+
+    private void navigateToLogin(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setTitle("Mes Réclamations");
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/reclamation/UserReclamations.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void openPieceJointe(ActionEvent event) {
+        if (currentReclamation == null || currentReclamation.getPieceJointe() == null || currentReclamation.getPieceJointe().isBlank()) {
+            showAlert(Alert.AlertType.INFORMATION, "Piece jointe", "Aucune piece jointe disponible.");
+            return;
+        }
+
+        try {
+            Path attachmentPath = Path.of(currentReclamation.getPieceJointe());
+            File file = attachmentPath.toFile();
+            if (!file.exists()) {
+                showAlert(Alert.AlertType.ERROR, "Piece jointe", "Le fichier n'existe plus: " + attachmentPath);
+                return;
+            }
+
+            if (!Desktop.isDesktopSupported()) {
+                showAlert(Alert.AlertType.ERROR, "Piece jointe", "Ouverture de fichier non supportee sur cette machine.");
+                return;
+            }
+
+            Desktop.getDesktop().open(file);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Piece jointe", "Impossible d'ouvrir la piece jointe: " + e.getMessage());
+        }
+    }
+
+    private void scrollToBottom() {
+        Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
+    }
+
+    private void configurePieceJointe(String pieceJointePath) {
+        if (pieceJointePath == null || pieceJointePath.isBlank()) {
+            lblPieceJointe.setText("Aucune piece jointe");
+            btnOpenPieceJointe.setDisable(true);
+            btnOpenPieceJointe.setVisible(false);
+            btnOpenPieceJointe.setManaged(false);
+            return;
+        }
+
+        String fileName;
+        try {
+            fileName = Path.of(pieceJointePath).getFileName().toString();
+        } catch (Exception e) {
+            fileName = pieceJointePath;
+        }
+
+        lblPieceJointe.setText(fileName);
+        btnOpenPieceJointe.setDisable(false);
+        btnOpenPieceJointe.setVisible(true);
+        btnOpenPieceJointe.setManaged(true);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
