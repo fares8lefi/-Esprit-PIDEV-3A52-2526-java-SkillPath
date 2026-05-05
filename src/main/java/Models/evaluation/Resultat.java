@@ -1,6 +1,7 @@
 package Models.evaluation;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 public class Resultat {
     private int id_resultat;
@@ -8,26 +9,26 @@ public class Resultat {
     private int note_max;
     private Timestamp date_passage;
     private int id_quiz;
-    private int id_etudiant;
+    private UUID id_user;
 
     public Resultat() {
     }
 
-    public Resultat(int id_resultat, int score, int note_max, Timestamp date_passage, int id_quiz, int id_etudiant) {
+    public Resultat(int id_resultat, int score, int note_max, Timestamp date_passage, int id_quiz, UUID id_user) {
         this.id_resultat = id_resultat;
         this.score = score;
         this.note_max = note_max;
         this.date_passage = date_passage;
         this.id_quiz = id_quiz;
-        this.id_etudiant = id_etudiant;
+        this.id_user = id_user;
     }
 
-    public Resultat(int score, int note_max, Timestamp date_passage, int id_quiz, int id_etudiant) {
+    public Resultat(int score, int note_max, Timestamp date_passage, int id_quiz, UUID id_user) {
         this.score = score;
         this.note_max = note_max;
         this.date_passage = date_passage;
         this.id_quiz = id_quiz;
-        this.id_etudiant = id_etudiant;
+        this.id_user = id_user;
     }
 
     public int getId_resultat() {
@@ -70,12 +71,12 @@ public class Resultat {
         this.id_quiz = id_quiz;
     }
 
-    public int getId_etudiant() {
-        return id_etudiant;
+    public UUID getId_user() {
+        return id_user;
     }
 
-    public void setId_etudiant(int id_etudiant) {
-        this.id_etudiant = id_etudiant;
+    public void setId_user(UUID id_user) {
+        this.id_user = id_user;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class Resultat {
                 ", note_max=" + note_max +
                 ", date_passage=" + date_passage +
                 ", id_quiz=" + id_quiz +
-                ", id_etudiant=" + id_etudiant +
+                ", id_user=" + id_user +
                 '}';
     }
 }

@@ -78,37 +78,45 @@ public class LoginController {
                 // Configurer le WebView
                 captchaWebView.setPageFill(javafx.scene.paint.Color.TRANSPARENT);
                 
-                InputStream is = getClass().getResourceAsStream("/recaptcha.html");
-                if (is != null) {
-                    Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
-                    String rawHtml = scanner.hasNext() ? scanner.next() : "";
-                    final String html = rawHtml.replace("__SITE_KEY__", siteKey);
-                    
-                    // Démarrer un mini-serveur HTTP local
-                    try {
-                        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-                        server.createContext("/", exchange -> {
-                            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
-                            byte[] bytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                            exchange.sendResponseHeaders(200, bytes.length);
-                            OutputStream os = exchange.getResponseBody();
-                            os.write(bytes);
-                            os.close();
-                        });
-                        server.setExecutor(null);
-                        server.start();
-                        
-                        int port = server.getAddress().getPort();
-                        captchaWebView.getEngine().load("http://127.0.0.1:" + port + "/");
-                    } catch (Exception ex) {
-                        System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
-                        // Fallback : chargement direct du contenu
-                        captchaWebView.getEngine().loadContent(html);
+                // ── Lecture et fermeture immédiate du fichier ──────────────
+                String rawHtml = "";
+                try (InputStream is = getClass().getResourceAsStream("/recaptcha.html")) {
+                    if (is != null) {
+                        try (Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A")) {
+                            rawHtml = scanner.hasNext() ? scanner.next() : "";
+                        }
+                    } else {
+                        System.err.println("recaptcha.html introuvable dans les ressources !");
+                        captchaWebView.getEngine().loadContent("<div style='color:red;'>Fichier recaptcha.html introuvable.</div>");
+                        return;
                     }
-                } else {
-                    System.err.println("recaptcha.html introuvable dans les ressources !");
-                    captchaWebView.getEngine().loadContent("<div style='color:red;'>Fichier recaptcha.html introuvable.</div>");
                 }
+                // ──────────────────────────────────────────────────────────
+
+                final String html = rawHtml.replace("__SITE_KEY__", siteKey);
+                    
+                // Démarrer un mini-serveur HTTP local
+                try {
+                    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+                    server.createContext("/", exchange -> {
+                        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+                        byte[] bytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                        exchange.sendResponseHeaders(200, bytes.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(bytes);
+                        os.close();
+                    });
+                    server.setExecutor(null);
+                    server.start();
+                    
+                    int port = server.getAddress().getPort();
+                    captchaWebView.getEngine().load("http://127.0.0.1:" + port + "/");
+                } catch (Exception ex) {
+                    System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
+                    // Fallback : chargement direct du contenu
+                    captchaWebView.getEngine().loadContent(html);
+                }
+
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'initialisation du WebView reCAPTCHA: " + e.getMessage());
                 e.printStackTrace();
@@ -194,8 +202,8 @@ public class LoginController {
                 if ("admin".equalsIgnoreCase(user.getRole())) {
                     navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
                 } else {
-                    // Update: Non-admin users are redirected to QuizFrontOffice from evaluation branch
-                    navigateTo(event, "/FrontOffice/evaluation/QuizFrontOffice.fxml", "Quiz Disponibles - SkillPath");
+                    
+                    navigateTo(event, "/FrontOffice/home/homeUser.fxml", "Quiz Disponibles - SkillPath");
                 }
             } else {
                 showError(result.getMessage());
@@ -336,7 +344,7 @@ public class LoginController {
                     if (user != null) {
                         Utils.Session.getInstance().login(user);
                         System.out.println("✓ Connexion Google réussie : " + user.getUsername());
-                        navigateTo(event, "/FrontOffice/evaluation/QuizFrontOffice.fxml", "Quiz Disponibles - SkillPath");
+                        navigateTo(event, "/FrontOffice/home/home.fxml", "Quiz Disponibles - SkillPath");
                     } else {
                         showError("Impossible de finaliser la connexion Google.");
                     }

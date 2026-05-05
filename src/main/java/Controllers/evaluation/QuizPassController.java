@@ -213,11 +213,13 @@ public class QuizPassController {
 
         lblScore.setText(currentScore + " / " + totalPoints);
 
-        // Save Resultat in DB (assuming user id = 1 for mock)
+        // Save Resultat in DB
         ResultatService rs = new ResultatService();
+        User currentUser = Session.getCurrentUser();
         try {
             rs.ajouter(new Models.evaluation.Resultat(currentScore, totalPoints,
-                    new java.sql.Timestamp(System.currentTimeMillis()), quiz.getId_quiz(), 1));
+                    new java.sql.Timestamp(System.currentTimeMillis()), quiz.getId_quiz(), 
+                    currentUser != null ? currentUser.getId() : java.util.UUID.randomUUID()));
         } catch (Exception e) {
             System.err.println("Failed to save result: " + e.getMessage());
         }
@@ -243,7 +245,6 @@ public class QuizPassController {
         }
 
         // Send Email
-        User currentUser = Session.getCurrentUser();
         if (currentUser != null && currentUser.getEmail() != null) {
             String studentEmail = currentUser.getEmail();
             String studentName = currentUser.getUsername() != null ? currentUser.getUsername() : "Étudiant";

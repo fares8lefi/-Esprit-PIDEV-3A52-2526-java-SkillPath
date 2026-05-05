@@ -75,6 +75,16 @@ public class SideBarController implements Initializable {
     }
 
     @FXML
+    private void handleEvents(ActionEvent event) {
+        navigateTo(event, "/BackOffice/event/EventCrud.fxml", "Gestion Événements - SkillPath");
+    }
+
+    @FXML
+    private void handleLocations(ActionEvent event) {
+        navigateTo(event, "/BackOffice/event/LocationCrud.fxml", "Gestion des Lieux - SkillPath");
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         Session.getInstance().logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
