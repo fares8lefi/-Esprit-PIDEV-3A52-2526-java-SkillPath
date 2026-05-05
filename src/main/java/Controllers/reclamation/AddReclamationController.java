@@ -129,15 +129,15 @@ public class AddReclamationController {
             return;
         }
 
-        if (!Session.isLoggedIn() || Session.getCurrentUser() == null || Session.getCurrentUser().getId() == null) {
+        if (!Utils.Session.isLoggedIn() || Utils.Session.getCurrentUser() == null || Utils.Session.getCurrentUser().getId() == null) {
             showAlert(Alert.AlertType.ERROR, "Erreur session", "Vous devez etre connecte pour soumettre une reclamation.");
             return;
         }
 
         try {
             java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(new byte[16]);
-            bb.putLong(Session.getCurrentUser().getId().getMostSignificantBits());
-            bb.putLong(Session.getCurrentUser().getId().getLeastSignificantBits());
+            bb.putLong(Utils.Session.getCurrentUser().getId().getMostSignificantBits());
+            bb.putLong(Utils.Session.getCurrentUser().getId().getLeastSignificantBits());
             byte[] userIdBytes = bb.array();
 
             String pieceJointePath = currentPieceJointePath;
