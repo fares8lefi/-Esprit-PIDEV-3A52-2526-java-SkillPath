@@ -310,39 +310,36 @@ public class LoginController {
 
             if (email != null) {
                 Platform.runLater(() -> {
-                    User user = userService.login(email, ""); // On essaie un login (si mdp vide autorisé pour OAuth)
+                    // Tenter de récupérer l'utilisateur existant en base par son email
+                    User user = userService.getUserByEmail(email);
                     
                     if (user == null) {
-                        // Si l'utilisateur n'existe pas, on le crée
-                        if (!userService.emailExists(email)) {
-                            User newUser = new User();
-                            newUser.setEmail(email);
-                            newUser.setUsername(name != null ? name : email.split("@")[0]);
-                            newUser.setPassword(UUID.randomUUID().toString()); // Mdp aléatoire
-                            newUser.setRole("client");
-                            newUser.setStatus("active");
-                            newUser.setVerified(true);
-                            try {
-                                userService.ajouter(newUser);
-                                user = userService.login(email, ""); // Ne marchera pas car verifyPassword échouera
-                                // Solution: Ajouter une méthode loginOAuth dans UserService ou autoriser ici
-                                user = newUser; // Fallback temporaire pour la démo
-                            } catch (Exception ex) {
-                                showError("Erreur lors de la création du compte Google.");
-                                return;
-                            }
-                        } else {
-                            // L'utilisateur existe mais n'est pas "vérifié" ou autre ?
-                            // On le récupère quand même s'il vient de Google
-                            user = new User();
-                            user.setEmail(email);
-                            user.setUsername(name);
-                            user.setRole("client");
+                        // Si l'utilisateur n'existe pas encore, on le crée
+                        User newUser = new User();
+                        newUser.setEmail(email);
+                        newUser.setUsername(name != null ? name : email.split("@")[0]);
+                        newUser.setPassword(UUID.randomUUID().toString()); // Mdp aléatoire non utilisé
+                        newUser.setRole("client");
+                        newUser.setStatus("active");
+                        newUser.setVerified(true);
+                        
+                        try {
+                            userService.ajouter(newUser);
+                            // Après l'ajout, on le récupère pour avoir son ID généré en base
+                            user = userService.getUserByEmail(email);
+                        } catch (Exception ex) {
+                            showError("Erreur lors de la création du compte Google.");
+                            return;
                         }
                     }
 
-                    Session.getInstance().login(user);
-                    navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                    if (user != null) {
+                        Utils.Session.getInstance().login(user);
+                        System.out.println("✓ Connexion Google réussie : " + user.getUsername());
+                        navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                    } else {
+                        showError("Impossible de finaliser la connexion Google.");
+                    }
                 });
             }
         } catch (Exception e) {
