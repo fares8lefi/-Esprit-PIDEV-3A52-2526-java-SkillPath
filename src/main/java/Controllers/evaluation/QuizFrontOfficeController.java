@@ -3,6 +3,7 @@ package Controllers.evaluation;
 import Models.evaluation.Quiz;
 import Services.evaluation.QuestionService;
 import Services.evaluation.QuizService;
+import Services.evaluation.AIGeneratorService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,16 +33,28 @@ public class QuizFrontOfficeController {
     private ComboBox<String> comboSort;
     @FXML
     private FlowPane quizGrid;
+    @FXML
+    private Label lblMotivational;
 
     private QuizService quizService;
     private QuestionService questionService;
+    private AIGeneratorService aiGeneratorService;
     private ObservableList<Quiz> allQuizzes;
 
     @FXML
     public void initialize() {
         quizService = new QuizService();
         questionService = new QuestionService();
+        aiGeneratorService = new AIGeneratorService();
         allQuizzes = FXCollections.observableArrayList();
+
+        // Fetch motivational quote asynchronously to avoid freezing the UI
+        java.util.concurrent.CompletableFuture.supplyAsync(() -> aiGeneratorService.generateMotivationalQuote())
+                .thenAccept(quote -> javafx.application.Platform.runLater(() -> {
+                    if (lblMotivational != null) {
+                        lblMotivational.setText(quote);
+                    }
+                }));
 
         // Init Sorting Options
         comboSort.setItems(FXCollections.observableArrayList(
@@ -194,6 +207,17 @@ public class QuizFrontOfficeController {
     void goToHistory(javafx.scene.input.MouseEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizHistory.fxml"));
+            Stage stage = (Stage) txtSearch.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void switchToBack(javafx.scene.input.MouseEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/BackOffice/evaluation/QuizManagement.fxml"));
             Stage stage = (Stage) txtSearch.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

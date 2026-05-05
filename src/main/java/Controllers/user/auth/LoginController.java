@@ -26,7 +26,6 @@ import java.util.Scanner;
 import io.github.cdimascio.dotenv.Dotenv;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
-import java.io.OutputStream;
 import javafx.scene.web.WebView;
 import javafx.application.Platform;
 import java.awt.Desktop;
@@ -195,7 +194,8 @@ public class LoginController {
                 if ("admin".equalsIgnoreCase(user.getRole())) {
                     navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
                 } else {
-                    navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                    // Update: Non-admin users are redirected to QuizFrontOffice from evaluation branch
+                    navigateTo(event, "/FrontOffice/evaluation/QuizFrontOffice.fxml", "Quiz Disponibles - SkillPath");
                 }
             } else {
                 showError(result.getMessage());
@@ -336,7 +336,7 @@ public class LoginController {
                     if (user != null) {
                         Utils.Session.getInstance().login(user);
                         System.out.println("✓ Connexion Google réussie : " + user.getUsername());
-                        navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil - SkillPath");
+                        navigateTo(event, "/FrontOffice/evaluation/QuizFrontOffice.fxml", "Quiz Disponibles - SkillPath");
                     } else {
                         showError("Impossible de finaliser la connexion Google.");
                     }

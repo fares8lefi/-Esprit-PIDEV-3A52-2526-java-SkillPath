@@ -23,6 +23,8 @@
                <Label style="-fx-text-fill: #3b82f6;" styleClass="font-bold" text="Quiz" />
                <Label text="|" styleClass="text-slate-500" />
                <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToHistory" text="Mes Résultats" />
+               <Label text="|" styleClass="text-slate-500" />
+               <Label onMouseClicked="#switchToBack" style="-fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-font-size: 11px; -fx-underline: true;" text="Interface Admin" />
             </HBox>
          </HBox>
 
@@ -38,7 +40,7 @@
                    <Label styleClass="text-4xl" text="Quiz " />
                    <Label styleClass="text-4xl, gradient-text" text="Disponibles" />
                </HBox>
-               <Label styleClass="text-slate-400, text-lg" text="Testez vos connaissances et évaluez votre progression" />
+               <Label fx:id="lblMotivational" styleClass="text-slate-400, text-lg" text="Testez vos connaissances et évaluez votre progression" />
             </VBox>
 
             <!-- Search & Sort Box -->

@@ -106,6 +106,7 @@ public class UserService implements Iservice<User> {
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.ssl.trust", host);
 
         try {
             jakarta.mail.Session session = jakarta.mail.Session.getInstance(props,
@@ -173,7 +174,6 @@ public class UserService implements Iservice<User> {
     }
 
     /**
-     * Étape 1 : Demander une réinitialisation de mot de passe.
      * Étape 1 : Demander une réinitialisation de mot de passe.
      * Génère un code, le stocke en base et l'envoie par email.
      */
@@ -263,7 +263,7 @@ public class UserService implements Iservice<User> {
             ps.setString(4, hashedPassword);
             ps.setString(5, user.getStatus());
             ps.setString(6, user.getRole());
-            ps.setBoolean(7, false);
+            ps.setBoolean(7, user.isVerified());
             ps.setString(8, user.getVerificationCode());
             ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             
@@ -276,6 +276,10 @@ public class UserService implements Iservice<User> {
     }
     
     public void ajouterUserParAdmin(User user) throws SQLDataException {
+        if (connection == null) {
+            System.err.println("Database connection is null in ajouterUserParAdmin!");
+            return;
+        }
         String sql = "INSERT INTO users (id, email, username, password, status, role, is_verified, verification_code, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -309,6 +313,10 @@ public class UserService implements Iservice<User> {
 
     // ─── Vérification du code ───
     public boolean verifyCode(String email, String code) {
+        if (connection == null) {
+            System.err.println("Database connection is null in verifyCode!");
+            return false;
+        }
         String sql = "SELECT verification_code FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -333,7 +341,11 @@ public class UserService implements Iservice<User> {
 
     // ─── Connexion ───
     public User login(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND is_verified = true";
+        if (connection == null) {
+            System.err.println("Database connection is null in login!");
+            return null;
+        }
+        String sql = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -377,7 +389,7 @@ public class UserService implements Iservice<User> {
                     System.out.println("Mot de passe incorrect pour : " + email);
                 }
             } else {
-                System.out.println("Aucun compte vérifié trouvé pour : " + email);
+                System.out.println("Aucun compte trouvé pour : " + email);
             }
         } catch (SQLException e) {
             System.out.println("Erreur login SQL : " + e.getMessage());
@@ -444,6 +456,10 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void supprimer(User user) throws SQLDataException {
+        if (connection == null) {
+            System.err.println("Database connection is null in supprimer!");
+            return;
+        }
         String sql = "DELETE FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -455,6 +471,10 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void modifier(User user) throws SQLDataException {
+        if (connection == null) {
+            System.err.println("Database connection is null in modifier!");
+            return;
+        }
         String sql = "UPDATE users SET username = ?, status = ?, role = ?, domaine = ?, niveau = ?, style_dapprentissage = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
@@ -678,4 +698,3 @@ public List<User> getClientList() throws SQLDataException {
         return map;
     }
 }
-

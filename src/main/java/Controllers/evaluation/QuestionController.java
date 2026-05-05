@@ -3,6 +3,7 @@ package Controllers.evaluation;
 import Models.evaluation.Question;
 import Models.evaluation.Quiz;
 import Services.evaluation.QuestionService;
+import Services.evaluation.AIGeneratorService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -47,6 +48,7 @@ public class QuestionController {
     private Label lblError;
 
     private QuestionService questionService;
+    private AIGeneratorService aiService;
     private ObservableList<Question> questionList;
     private Quiz currentQuiz;
 
@@ -58,6 +60,7 @@ public class QuestionController {
     @FXML
     public void initialize() {
         questionService = new QuestionService();
+        aiService = new AIGeneratorService();
         questionList = FXCollections.observableArrayList();
 
         // Init Options for correct answer selection
@@ -216,6 +219,41 @@ public class QuestionController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void handleGenerateAI(ActionEvent event) {
+        if (currentQuiz == null) {
+            showAlert(Alert.AlertType.WARNING, "Action impossible", "Veuillez d'abord sélectionner un quiz !");
+            return;
+        }
+
+        showAlert(Alert.AlertType.INFORMATION, "Génération en cours", "Veuillez patienter pendant la génération...");
+
+        new Thread(() -> {
+            try {
+                String subject = currentQuiz.getTitre();
+                java.util.List<Question> generated = aiService.generateQuestions(subject, currentQuiz.getId_quiz());
+                
+                javafx.application.Platform.runLater(() -> {
+                    if (generated.isEmpty()) {
+                        showAlert(Alert.AlertType.ERROR, "Erreur", "Génération échouée. Veuillez vérifier votre clé API dans le .env.");
+                    } else {
+                        for (Question q : generated) {
+                            try {
+                                questionService.ajouter(q);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        loadQuestions();
+                        showAlert(Alert.AlertType.INFORMATION, "Succès", generated.size() + " questions générées avec l'IA !");
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage()));
+            }
+        }).start();
     }
 
     private void clearFields() {

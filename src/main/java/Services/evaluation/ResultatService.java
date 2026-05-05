@@ -15,7 +15,12 @@ public class ResultatService {
     }
 
     public void ajouter(Resultat resultat) throws SQLDataException {
-        String query = "INSERT INTO resultat (score, note_max, date_passage, quiz_id, id_etudiant) VALUES (?, ?, ?, ?, ?)";
+        if (cnx == null) {
+            System.err.println("Database connection is null in ResultatService.ajouter!");
+            return;
+        }
+        // Consistent with QuizService and evaluation branch schema
+        String query = "INSERT INTO resultat (score, note_max, date_passage, id_quiz, id_etudiant) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, resultat.getScore());
             ps.setInt(2, resultat.getNote_max());
@@ -37,6 +42,7 @@ public class ResultatService {
 
     public List<Resultat> recupererParEtudiant(int idEtudiant) throws SQLDataException {
         List<Resultat> list = new ArrayList<>();
+        // Consistent with QuizService and evaluation branch schema
         String query = "SELECT * FROM resultat WHERE id_etudiant = ? ORDER BY date_passage DESC";
         try (PreparedStatement ps = cnx.prepareStatement(query)) {
             ps.setInt(1, idEtudiant);
@@ -47,7 +53,7 @@ public class ResultatService {
                         rs.getInt("score"),
                         rs.getInt("note_max"),
                         rs.getTimestamp("date_passage"),
-                        rs.getInt("quiz_id"),
+                        rs.getInt("id_quiz"),
                         rs.getInt("id_etudiant")));
             }
         } catch (SQLException e) {

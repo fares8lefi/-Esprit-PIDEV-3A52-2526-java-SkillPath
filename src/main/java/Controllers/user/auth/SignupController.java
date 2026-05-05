@@ -36,93 +36,95 @@ public class SignupController {
         try {
             hideAlert();
 
-        String username = usernameField.getText().trim();
-        String email    = emailField.getText().trim();
-        String password = passwordField.getText();
+            String username = usernameField.getText().trim();
+            String email    = emailField.getText().trim();
+            String password = passwordField.getText();
 
-        // controller de saisie
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            showError("Veuillez remplir tous les champs.");
-            return;
-        }
-        if (!email.matches("^[\\w.+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")) {
-            showError("L'adresse email n'est pas valide.");
-            return;
-        }
-        if (password.length() < 8) {
-            showError("Le mot de passe doit comporter au moins 8 caractères.");
-            return;
-        }
-        if (!termsCheckbox.isSelected()) {
-            showError("Veuillez accepter les conditions d'utilisation.");
-            return;
-        }
-        if (userService.emailExists(email)) {
-            showError("Un compte existe déjà avec cet email.");
-            return;
-        }
-
-        // Création de l'utilisateur 
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setStatus("pending");
-        user.setRole("student");
-
-        String verificationCode = userService.generateVerificationCode();
-        user.setVerificationCode(verificationCode);
-
-        try {
-            userService.ajouter(user);
-        } catch (SQLDataException e) {
-            showError("Erreur lors de l'inscription : " + e.getMessage());
-            return;
-        }
-
-        // Envoi de l'email de vérification et redirection
-        submitButton.setDisable(true); // Désactiver le bouton pendant le traitement
-
-        new Thread(() -> {
-            try {
-                boolean emailSent = userService.sendVerificationEmail(email, username, verificationCode);
-                
-                javafx.application.Platform.runLater(() -> {
-                    submitButton.setDisable(false);
-                    if (!emailSent) {
-                        showError("Compte créé, mais l'email de vérification n'a pas pu être envoyé.");
-                    }
-
-                    // Rediriger vers la page de vérification
-                    try {
-                        FXMLLoader loader = new FXMLLoader(
-                            getClass().getResource("/FrontOffice/user/auth/verify.fxml")
-                        );
-                        Parent root = loader.load();
-
-                        VerifyController verifyController = loader.getController();
-                        verifyController.setEmail(email);
-
-                        Stage stage = (Stage) submitButton.getScene().getWindow();
-                        stage.setScene(new Scene(root));
-                        stage.show();
-                    } catch (IOException e) {
-                        showSuccess("Compte créé ! Code envoyé à " + email);
-                        System.err.println("Redirection verify.fxml : " + e.getMessage());
-                    }
-                });
-            } catch (Exception e) {
-                javafx.application.Platform.runLater(() -> {
-                    submitButton.setDisable(false);
-                    showError("Erreur lors de la finalisation : " + e.getMessage());
-                });
+            // controller de saisie
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                showError("Veuillez remplir tous les champs.");
+                return;
             }
-        }).start();
-    } catch (Exception e) {
-        showError("Une erreur inattendue est survenue : " + e.getMessage());
-        e.printStackTrace();
+            if (!email.matches("^[\\w.+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")) {
+                showError("L'adresse email n'est pas valide.");
+                return;
+            }
+            if (password.length() < 8) {
+                showError("Le mot de passe doit comporter au moins 8 caractères.");
+                return;
+            }
+            if (!termsCheckbox.isSelected()) {
+                showError("Veuillez accepter les conditions d'utilisation.");
+                return;
+            }
+            if (userService.emailExists(email)) {
+                showError("Un compte existe déjà avec cet email.");
+                return;
+            }
+
+            // Générer un code de vérification
+            String verificationCode = userService.generateVerificationCode();
+
+            // Création de l'utilisateur
+            User user = new User();
+            user.setUsername(username);
+            user.setEmail(email);
+            user.setPassword(password);
+            user.setStatus("inactive");
+            user.setRole("student");
+            user.setVerified(false);
+            user.setVerificationCode(verificationCode);
+
+            try {
+                userService.ajouter(user);
+            } catch (SQLDataException e) {
+                showError("Erreur lors de l'inscription : " + e.getMessage());
+                return;
+            }
+
+            // Envoi de l'email de vérification et redirection
+            submitButton.setDisable(true); // Désactiver le bouton pendant le traitement
+
+            new Thread(() -> {
+                try {
+                    boolean emailSent = userService.sendVerificationEmail(email, username, verificationCode);
+                    
+                    javafx.application.Platform.runLater(() -> {
+                        submitButton.setDisable(false);
+                        if (!emailSent) {
+                            showError("Compte créé, mais l'email de vérification n'a pas pu être envoyé.");
+                        }
+
+                        // Rediriger vers la page de vérification
+                        try {
+                            FXMLLoader loader = new FXMLLoader(
+                                getClass().getResource("/FrontOffice/user/auth/verify.fxml")
+                            );
+                            Parent root = loader.load();
+
+                            VerifyController verifyController = loader.getController();
+                            verifyController.setEmail(email);
+
+                            Stage stage = (Stage) submitButton.getScene().getWindow();
+                            stage.setScene(new Scene(root));
+                            stage.show();
+                        } catch (IOException e) {
+                            showSuccess("Compte créé ! Code envoyé à " + email);
+                            System.err.println("Redirection verify.fxml : " + e.getMessage());
+                        }
+                    });
+                } catch (Exception e) {
+                    javafx.application.Platform.runLater(() -> {
+                        submitButton.setDisable(false);
+                        showError("Erreur lors de la finalisation : " + e.getMessage());
+                    });
+                }
+            }).start();
+        } catch (Exception e) {
+            showError("Une erreur inattendue est survenue : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-}
 
     @FXML
     public void goToLogin() {
