@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="Controllers.course.FrontCourseCardController"
@@ -67,15 +68,37 @@
                             </children>
                         </HBox>
                         
-                        <!-- AI Probability Badge -->
-                        <HBox fx:id="aiBadge" spacing="10" alignment="CENTER" styleClass="ai-pulse"
-                               style="-fx-background-color: rgba(59,130,246,0.1); -fx-padding: 8 16; -fx-background-radius: 12; -fx-border-color: rgba(59,130,246,0.2); -fx-border-radius: 12;">
+                        <!-- AI Probability Section (Circular + Labels) -->
+                        <VBox alignment="CENTER" spacing="5">
                             <children>
-                                <Label text="🪄" style="-fx-font-size: 14;" />
-                                <Label fx:id="lblAiProb" text="85% Succès" 
-                                       style="-fx-text-fill: #60a5fa; -fx-font-weight: 900; -fx-font-size: 10; -fx-letter-spacing: 1;" />
+                                <Label text="IA SUCCÈS" textFill="#94a3b8" style="-fx-font-size: 7; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                                <StackPane fx:id="predictionCircleContainer" prefHeight="45" prefWidth="45" style="-fx-cursor: hand;">
+                                    <children>
+                                        <Circle radius="18" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                                        <Label fx:id="lblAiProb" text="--%" 
+                                               style="-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 9;">
+                                            <tooltip><Tooltip text="Probabilité de réussite estimée par l'IA SkillPath" /></tooltip>
+                                        </Label>
+                                    </children>
+                                </StackPane>
+                                <Label fx:id="lblAiStatus" text="..." textFill="#64748b" style="-fx-font-size: 8; -fx-font-weight: bold;" />
                             </children>
-                        </HBox>
+                        </VBox>
+
+                        <!-- Agenda Section -->
+                        <VBox alignment="CENTER" spacing="5">
+                            <children>
+                                <Label text="AGENDA" textFill="#94a3b8" style="-fx-font-size: 7; -fx-font-weight: 900; -fx-letter-spacing: 0.5;" />
+                                <StackPane fx:id="agendaContainer" prefHeight="45" prefWidth="45" style="-fx-cursor: hand; -fx-background-color: rgba(139, 92, 246, 0.1); -fx-background-radius: 25; -fx-border-color: rgba(139, 92, 246, 0.2); -fx-border-radius: 25;">
+                                    <children>
+                                        <Label text="📅" style="-fx-font-size: 18;">
+                                            <tooltip><Tooltip fx:id="agendaTooltip" style="-fx-show-delay: 100ms; -fx-font-size: 12;" /></tooltip>
+                                        </Label>
+                                    </children>
+                                </StackPane>
+                                <Label fx:id="lblScheduleCount" text="0 module" textFill="#64748b" style="-fx-font-size: 8; -fx-font-weight: bold;" />
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
 

@@ -62,7 +62,8 @@ public class AssetLoader {
      * Standard robust way to get the uploads/modules directory.
      */
     public static File getModulesUploadsDir() {
-        File modulesDir = new File("C:\\pi\\images");
+        File root = findProjectRoot();
+        File modulesDir = new File(root, "uploads/modules/");
         if (!modulesDir.exists()) modulesDir.mkdirs();
         return modulesDir;
     }
@@ -85,8 +86,11 @@ public class AssetLoader {
 
         // Potential paths to check
         File[] candidates = {
-            new File("C:\\pi\\images\\" + finalImageName),
-            new File("C:\\pi\\images\\" + imageName) // Try original anyway
+            new File(root, "uploads/modules/" + imageName), // Try original first (most likely)
+            new File(root, "uploads/modules/" + finalImageName),
+            new File(root, "uploads/" + imageName),
+            new File(root, "uploads/" + finalImageName),
+            new File(root, "src/main/resources/uploads/modules/" + imageName)
         };
 
         for (File file : candidates) {

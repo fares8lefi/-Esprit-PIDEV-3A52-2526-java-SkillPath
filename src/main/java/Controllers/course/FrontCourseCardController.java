@@ -3,6 +3,7 @@ package Controllers.course;
 import Models.Course;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -14,10 +15,23 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Random;
 
 public class FrontCourseCardController {
@@ -29,22 +43,28 @@ public class FrontCourseCardController {
     @FXML private Label lblDescription;
     @FXML private Label lblLevel;
     @FXML private Label lblAiProb;
-    @FXML private HBox aiBadge;
+    @FXML private Label lblAiStatus;
+    @FXML private StackPane predictionCircleContainer;
+    @FXML private StackPane agendaContainer;
+    @FXML private Tooltip agendaTooltip;
+    @FXML private Label lblScheduleCount;
     @FXML private StackPane imageContainer;
     @FXML private javafx.scene.control.Button btnFavorite;
     
     private Course course;
     private boolean isLiked = false;
 
-    // Simple static storage to remember likes during the application run
-    private static final java.util.Set<Integer> likedCourses = new java.util.HashSet<>();
+    private final Services.FavoriteService favoriteService = new Services.FavoriteService();
 
     public void setData(Course course) {
         this.course = course;
         
-        // Initialize favorite state from memory
-        isLiked = likedCourses.contains(course.getId());
-        updateFavoriteUI();
+        // Initialize favorite state from DB
+        Utils.Session session = Utils.Session.getInstance();
+        if (session.isLoggedIn()) {
+            isLiked = favoriteService.isFavorite(session.getCurrentUser().getId().toString(), course.getId());
+            updateFavoriteUI();
+        }
         
         lblTitle.setText(course.getTitle());
         lblDescription.setText(course.getDescription());
@@ -81,15 +101,134 @@ public class FrontCourseCardController {
             if (loadedImage != null) {
                 imgCourse.setImage(loadedImage);
             } else {
-                // Last resort Classpath fallback
-                URL res = getClass().getResource("/FrontOffice/images/default-course.png");
-                if (res != null) imgCourse.setImage(new Image(res.toExternalForm()));
+                // Professional placeholder if file not found or wrong format
+                URL placeholderRes = getClass().getResource("/FrontOffice/images/default-course.png");
+                if (placeholderRes != null) imgCourse.setImage(new Image(placeholderRes.toExternalForm()));
             }
+        } else {
+            // Default placeholder if no image path exists at all
+            URL placeholderRes = getClass().getResource("/FrontOffice/images/default-course.png");
+            if (placeholderRes != null) imgCourse.setImage(new Image(placeholderRes.toExternalForm()));
         }
 
-        // Simulate AI Probability if not exists
-        int prob = 70 + new Random().nextInt(25);
-        lblAiProb.setText(prob + "% SUCCÈS");
+        // Real AI Prediction from Flask
+        Services.PredictionService predictionService = new Services.PredictionService();
+        Services.ModuleService moduleService = new Services.ModuleService();
+        
+        try {
+            int totalModules = moduleService.getByCourse(course.getId()).size();
+            if (session.isLoggedIn()) {
+                predictionService.predictSuccess(session.getCurrentUser(), course, totalModules)
+                    .thenAccept(prob -> {
+                        Platform.runLater(() -> {
+                            if (prob >= 0) {
+                                animatePredictionCircle(prob);
+                            } else {
+                                lblAiProb.setText("--%");
+                            }
+                        });
+                    });
+            } else {
+                lblAiProb.setText("?");
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Erreur chargement modules pour IA : " + e.getMessage());
+            lblAiProb.setText("!");
+        }
+
+        // --- AGENDA LOGIC ---
+        try {
+            List<Models.Module> allModules = moduleService.getByCourse(course.getId());
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            List<Models.Module> scheduledModules = allModules.stream()
+                .filter(m -> m.getScheduledAt() != null && m.getScheduledAt().isAfter(now))
+                .sorted((m1, m2) -> m1.getScheduledAt().compareTo(m2.getScheduledAt()))
+                .collect(java.util.stream.Collectors.toList());
+
+            if (scheduledModules.isEmpty()) {
+                agendaTooltip.setText("Aucun module planifié");
+                lblScheduleCount.setText("Aucun module");
+                agendaContainer.setOpacity(0.5);
+            } else {
+                StringBuilder sb = new StringBuilder("📅 Modules Planifiés :\n\n");
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM à HH:mm");
+                
+                for (Models.Module m : scheduledModules) {
+                    sb.append("• ").append(m.getTitle())
+                      .append("\n  └─ ")
+                      .append(m.getScheduledAt().format(formatter))
+                      .append("\n\n");
+                }
+                agendaTooltip.setText(sb.toString().trim());
+                lblScheduleCount.setText(scheduledModules.size() + (scheduledModules.size() > 1 ? " modules" : " module"));
+                agendaContainer.setOpacity(1.0);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement Agenda : " + e.getMessage());
+            lblScheduleCount.setText("Erreur");
+        }
+    }
+
+    private void animatePredictionCircle(double targetScore) {
+        // Nettoyer les anciens arcs
+        predictionCircleContainer.getChildren().removeIf(node -> node instanceof Arc);
+
+        // Créer l'arc de progression (plus petit pour la carte)
+        Arc arc = new Arc(0, 0, 18, 18, 90, 0);
+        arc.setType(ArcType.OPEN);
+        arc.setFill(Color.TRANSPARENT);
+        arc.setStrokeWidth(4);
+        arc.setStrokeLineCap(StrokeLineCap.ROUND);
+
+        // Détermination des couleurs
+        Color startColor;
+        Color endColor;
+        String status;
+
+        if (targetScore < 40) {
+            startColor = Color.web("#f87171");
+            endColor = Color.web("#ef4444");
+            status = "Faible";
+        } else if (targetScore < 70) {
+            startColor = Color.web("#fbbf24");
+            endColor = Color.web("#f59e0b");
+            status = "Moyen";
+        } else {
+            startColor = Color.web("#34d399");
+            endColor = Color.web("#10b981");
+            status = "Élevé";
+        }
+
+        lblAiStatus.setText(status);
+        lblAiStatus.setTextFill(endColor);
+
+        arc.setStroke(new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, startColor),
+                new Stop(1, endColor)));
+
+        // Ajouter l'arc au conteneur
+        predictionCircleContainer.getChildren().add(0, arc);
+
+        // Animation de l'arc
+        Timeline timeline = new Timeline();
+        KeyFrame kf = new KeyFrame(Duration.millis(1200), 
+            new KeyValue(arc.lengthProperty(), -targetScore * 3.6)
+        );
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
+
+        // Animation du compteur textuel
+        Timeline counter = new Timeline();
+        int steps = (int) targetScore;
+        if (steps > 0) {
+            for (int i = 0; i <= steps; i++) {
+                final int val = i;
+                counter.getKeyFrames().add(new KeyFrame(Duration.millis(i * (1200.0/steps)), e -> {
+                    lblAiProb.setText(val + "%");
+                }));
+            }
+            counter.play();
+        }
     }
 
     @FXML
@@ -104,28 +243,74 @@ public class FrontCourseCardController {
     @FXML
     private void handleViewDetails(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/courseDetails.fxml"));
-            Parent root = loader.load();
+            // Track click for recommendations (Session + Persistence)
+            Utils.Session session = Utils.Session.getInstance();
+            session.trackClick(course);
             
-            FrontCourseDetailsController controller = loader.getController();
-            controller.setCourse(course);
+            try {
+                if (session.isLoggedIn()) {
+                    Services.UserInteractionService interactionService = new Services.UserInteractionService();
+                    interactionService.recordInteraction(
+                        session.getCurrentUser().getId(), 
+                        course.getId(), 
+                        course.getCategory(), 
+                        course.getLevel()
+                    );
+                }
+            } catch (Exception ex) {
+                System.err.println("Erreur tracking IA (non bloquante) : " + ex.getMessage());
+            }
             
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Erreur navigation vers détails : " + e.getMessage());
+            // Check if there are modules for this course
+            Services.ModuleService moduleService = new Services.ModuleService();
+            java.util.List<Models.Module> modules = moduleService.getByCourse(course.getId());
+            
+            if (modules != null && !modules.isEmpty()) {
+                // Navigate to the first module using the new premium template
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/moduleShow.fxml"));
+                Parent root = loader.load();
+                
+                FrontModuleShowController controller = loader.getController();
+                controller.setData(modules.get(0));
+                
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setTitle(course.getTitle() + " - " + modules.get(0).getTitle());
+                stage.setScene(new Scene(root));
+                stage.show();
+            } else {
+                // If no modules, go to the generic course details
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/courseDetails.fxml"));
+                Parent root = loader.load();
+                
+                FrontCourseDetailsController controller = loader.getController();
+                controller.setCourse(course);
+                
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur navigation vers cours/module : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+
+
     @FXML
     private void handleFavoriteToggle() {
+        Utils.Session session = Utils.Session.getInstance();
+        if (!session.isLoggedIn()) return;
+
+        String userId = session.getCurrentUser().getId().toString();
         isLiked = !isLiked;
+        
         if (isLiked) {
-            likedCourses.add(course.getId());
+            favoriteService.addFavorite(userId, course.getId());
         } else {
-            likedCourses.remove(course.getId());
+            favoriteService.removeFavorite(userId, course.getId());
         }
+        
         updateFavoriteUI();
         
         // Simple scale effect for feedback

@@ -66,16 +66,18 @@ public class CourseDetailsController implements Initializable {
             lblCreatedAt.setText(course.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
         }
 
-        // Image loading
+        // Image loading (Elite Robust Logic)
         if (course.getImage() != null && !course.getImage().isEmpty()) {
-            try {
-                // Assuming images are in a specific public URL or local path
-                // For now, placeholder logic
+            Image loadedImage = Utils.AssetLoader.loadCourseImage(course.getImage());
+            if (loadedImage != null) {
+                imgCourse.setImage(loadedImage);
                 lblNoImage.setVisible(false);
-            } catch (Exception e) {
+            } else {
+                imgCourse.setImage(null);
                 lblNoImage.setVisible(true);
             }
         } else {
+            imgCourse.setImage(null);
             lblNoImage.setVisible(true);
         }
 

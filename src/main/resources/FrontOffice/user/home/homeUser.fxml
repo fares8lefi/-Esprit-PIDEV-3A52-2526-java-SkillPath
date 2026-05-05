@@ -48,11 +48,11 @@
                   <HBox alignment="CENTER" spacing="30.0">
                      <children>
                         <Label styleClass="nav-link" text="Événements" textFill="#94a3b8" />
-                        <Label fx:id="navCatalogue" onMouseClicked="#handleCatalogue" styleClass="nav-link" text="Catalogue" textFill="#94a3b8" />
-                        <Label styleClass="nav-link" text="Mes Cours" textFill="#8b5cf6">
+                        <Label fx:id="navCatalogue" styleClass="nav-link" text="Catalogue" textFill="#94a3b8" />
+                        <Label onMouseClicked="#handleCatalogue" styleClass="nav-link" text="Cours" textFill="#8b5cf6" style="-fx-cursor: hand;">
                            <font><Font name="System Bold" size="13.0" /></font>
                         </Label>
-                        <Label styleClass="nav-link" text="Recommandations" textFill="#94a3b8" />
+                        <Hyperlink onAction="#handleRecommendations" text="Recommandations" style="-fx-text-fill: #94a3b8; -fx-font-size: 13; -fx-underline: false; -fx-padding: 5 10;" />
                      </children>
                   </HBox>
                   <Region HBox.hgrow="ALWAYS" />
@@ -60,8 +60,20 @@
                   <!-- User Actions -->
                   <HBox alignment="CENTER" spacing="15.0">
                      <children>
-                        <!-- Notification Button -->
-                        <Button mnemonicParsing="false" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12;" text="🔔" textFill="#94a3b8" />
+                         <!-- Notification Button with Badge -->
+                         <StackPane>
+                            <children>
+                               <Button onAction="#showNotifications" mnemonicParsing="false" style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12;" text="🔔" textFill="#94a3b8" />
+                               <StackPane fx:id="notifBadge" mouseTransparent="true" maxHeight="15.0" maxWidth="15.0" minHeight="15.0" minWidth="15.0" style="-fx-background-color: #ef4444; -fx-background-radius: 10;" visible="false" StackPane.alignment="TOP_RIGHT">
+                                  <children>
+                                     <Label fx:id="lblNotifCount" text="0" textFill="WHITE" style="-fx-font-size: 8; -fx-font-weight: bold;" />
+                                  </children>
+                                  <StackPane.margin>
+                                     <Insets right="2.0" top="2.0" />
+                                  </StackPane.margin>
+                               </StackPane>
+                            </children>
+                         </StackPane>
                         
                         <!-- User Profile Info Wrapper (Clickable) -->
                         <HBox fx:id="profileBox" alignment="CENTER" spacing="15.0" onMouseClicked="#handleProfile" style="-fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 12; -fx-background-color: rgba(255,255,255,0.02); -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12;">
@@ -129,7 +141,7 @@
                                     <HBox spacing="15.0">
                                        <children>
                                           <Button alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-primary" text="🚀 Start Adventure" />
-                                          <Button alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-secondary" text="Browse Courses" />
+                                          <Button alignment="CENTER" onAction="#handleCatalogue" prefHeight="50.0" prefWidth="200.0" styleClass="btn-secondary" text="Browse Courses" />
                                        </children>
                                     </HBox>
                                  </children>
@@ -227,6 +239,57 @@
                </content>
             </ScrollPane>
          </children>
+      </VBox>
+      
+      <!-- Layer 2: Floating Overlays (Absolute Positioning) -->
+      <VBox fx:id="chatContainer" AnchorPane.bottomAnchor="40" AnchorPane.rightAnchor="40" spacing="20" alignment="BOTTOM_RIGHT" pickOnBounds="false">
+          <children>
+              <!-- Chat Window -->
+              <VBox fx:id="chatWindow" visible="false" prefHeight="600" prefWidth="420" 
+                    style="-fx-background-color: #0f172a; -fx-background-radius: 32; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 60, 0, 0, 30); -fx-border-color: rgba(255,255,255,0.12); -fx-border-radius: 32;">
+                  <children>
+                      <HBox alignment="CENTER_LEFT" spacing="18" prefHeight="100" style="-fx-background-color: linear-gradient(to right, #4f46e5, #9333ea); -fx-background-radius: 32 32 0 0;">
+                          <padding><Insets left="35" right="35"/></padding>
+                          <children>
+                              <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                  <children>
+                                      <Label text="SkillPath Intelligence" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 17;" />
+                                      <Label text="Online Advisor • Llama 3.2" textFill="rgba(255,255,255,0.7)" style="-fx-font-size: 11; -fx-font-weight: 800;" />
+                                  </children>
+                              </VBox>
+                              <Button onAction="#toggleChat" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28; -fx-cursor: hand; -fx-padding: 0;" text="×" />
+                          </children>
+                      </HBox>
+                      
+                      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                          <content>
+                              <VBox fx:id="chatMessages" spacing="28" style="-fx-padding: 35; -fx-background-color: #0f172a;" />
+                          </content>
+                      </ScrollPane>
+
+                      <VBox spacing="20" style="-fx-background-color: #1a2234; -fx-padding: 30; -fx-border-color: rgba(255,255,255,0.06); -fx-border-width: 1 0 0 0; -fx-background-radius: 0 0 32 32;">
+                          <children>
+                              <HBox spacing="15" alignment="CENTER">
+                                  <children>
+                                      <TextField fx:id="txtChatInput" promptText="Comment puis-je vous aider ?" HBox.hgrow="ALWAYS" onAction="#sendChatMessage"
+                                                 style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 16 30; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 30;" />
+                                      <Button onAction="#sendChatMessage" prefHeight="60" prefWidth="60" 
+                                              style="-fx-background-color: #6366f1; -fx-background-radius: 30; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.5), 25, 0, 0, 10);">
+                                          <graphic><Label text="➜" textFill="WHITE" style="-fx-font-size: 22; -fx-font-weight: bold;" /></graphic>
+                                      </Button>
+                                  </children>
+                              </HBox>
+                          </children>
+                      </VBox>
+                  </children>
+              </VBox>
+
+              <!-- Toggle Button -->
+              <Button onAction="#toggleChat" prefHeight="85" prefWidth="85" 
+                      style="-fx-background-color: linear-gradient(to bottom right, #6366f1, #9333ea); -fx-background-radius: 45; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.6), 40, 0, 0, 20); -fx-cursor: hand;">
+                  <graphic><Label text="💬" textFill="WHITE" style="-fx-font-size: 38;" /></graphic>
+              </Button>
+          </children>
       </VBox>
    </children>
 </AnchorPane>

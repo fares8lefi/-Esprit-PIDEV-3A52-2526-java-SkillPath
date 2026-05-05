@@ -2,6 +2,8 @@ package Controllers.course;
 
 import Models.Course;
 import Services.CourseService;
+import Utils.Session;
+import javafx.event.ActionEvent;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -9,9 +11,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -35,8 +41,13 @@ public class FrontCourseListController implements Initializable {
     @FXML private VBox chatWindow;
     @FXML private VBox chatMessages;
     @FXML private TextField txtChatInput;
+    @FXML private StackPane notifBadge;
+    @FXML private Label lblNotifCount;
 
     private final CourseService courseService = new CourseService();
+    private final Services.NotificationService notificationService = new Services.NotificationService();
+    private final Services.ChatbotService chatbotService = new Services.ChatbotService();
+    
     private List<Course> masterList = new ArrayList<>();
     private String selectedCategory = "";
     private String selectedLevel = "";
@@ -48,6 +59,17 @@ public class FrontCourseListController implements Initializable {
         Platform.runLater(() -> {
             loadData();
             setupFilters();
+            
+            // Initialize notifications
+            Utils.Session session = Utils.Session.getInstance();
+            if (session.isLoggedIn()) {
+                Services.NotificationService notificationService = new Services.NotificationService();
+                int count = notificationService.getUnreadCount(session.getCurrentUser().getId().toString());
+                if (count > 0) {
+                    lblNotifCount.setText(String.valueOf(count));
+                    notifBadge.setVisible(true);
+                }
+            }
         });
         
         // Listeners for real-time search
@@ -151,6 +173,19 @@ public class FrontCourseListController implements Initializable {
         displayCourses(filtered);
     }
 
+    @FXML
+    private void handleRecommendations(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/course/recommendations.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML private void handleSortAZ() { setSort("AZ"); }
     @FXML private void handleSortZA() { setSort("ZA"); }
     @FXML private void handleSortNewest() { setSort("NEWEST"); }
@@ -239,69 +274,6 @@ public class FrontCourseListController implements Initializable {
     }
 
     @FXML
-    private void toggleChat() {
-        boolean isVisible = chatWindow.isVisible();
-        chatWindow.setVisible(!isVisible);
-        
-        if (!isVisible) {
-            FadeTransition ft = new FadeTransition(Duration.millis(300), chatWindow);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.play();
-            
-            if (chatMessages.getChildren().isEmpty()) {
-                addChatMessage("Bonjour ! Je suis votre assistant SkillPath. Comment puis-je vous aider aujourd'hui ?", false);
-            }
-        }
-    }
-
-    @FXML
-    private void sendChatMessage() {
-        String text = txtChatInput.getText().trim();
-        if (text.isEmpty()) return;
-
-        addChatMessage(text, true);
-        txtChatInput.clear();
-
-        // Simulate AI Response
-        Platform.runLater(() -> {
-            new Thread(() -> {
-                try { Thread.sleep(1000); } catch (InterruptedException e) {}
-                Platform.runLater(() -> {
-                    String response = getAIResponse(text);
-                    addChatMessage(response, false);
-                });
-            }).start();
-        });
-    }
-
-    private void addChatMessage(String text, boolean isUser) {
-        Label label = new Label(text);
-        label.setWrapText(true);
-        label.setMaxWidth(280);
-        label.getStyleClass().add(isUser ? "chat-bubble-user" : "chat-bubble-ai");
-        
-        HBox box = new HBox(label);
-        box.setAlignment(isUser ? javafx.geometry.Pos.CENTER_RIGHT : javafx.geometry.Pos.CENTER_LEFT);
-        
-        chatMessages.getChildren().add(box);
-        
-        // Simple entrance animation for bubble
-        label.setOpacity(0);
-        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(Duration.millis(300), label);
-        ft.setToValue(1);
-        ft.play();
-    }
-
-    private String getAIResponse(String input) {
-        input = input.toLowerCase();
-        if (input.contains("java")) return "Le cours Java Expert est excellent pour maîtriser les Streams et le Multi-threading.";
-        if (input.contains("prix") || input.contains("gratuit")) return "Certains de nos cours sont gratuits, d'autres sont à prix premium pour garantir la qualité.";
-        if (input.contains("merci")) return "Je vous en prie ! N'hésitez pas si vous avez d'autres questions.";
-        return "Je suis là pour vous aider à trouver la meilleure formation sur SkillPath !";
-    }
-
-    @FXML
     private void goToHome() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
@@ -330,5 +302,102 @@ public class FrontCourseListController implements Initializable {
         } catch (IOException e) {
             System.err.println("Erreur redirection events : " + e.getMessage());
         }
+    }
+    @FXML
+    private void handleLogout(ActionEvent event) {
+        System.out.println("Clic sur Déconnexion...");
+        Session.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setTitle("Connexion - SkillPath");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erreur redirection login : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showNotifications(javafx.scene.input.MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/notifPopUp.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.setTitle("Mes Notifications");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            
+            // Refresh badge
+            Services.NotificationService notificationService = new Services.NotificationService();
+            int count = notificationService.getUnreadCount(Session.getInstance().getCurrentUser().getId().toString());
+            if (count <= 0) {
+                notifBadge.setVisible(false);
+            } else {
+                lblNotifCount.setText(String.valueOf(count));
+                notifBadge.setVisible(true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void toggleChat(ActionEvent event) {
+        chatWindow.setVisible(!chatWindow.isVisible());
+    }
+
+    @FXML
+    private void sendChatMessage() {
+        String message = txtChatInput.getText().trim();
+        if (message.isEmpty()) return;
+
+        addMessageBubble(message, true);
+        txtChatInput.clear();
+
+        Label typingLabel = new Label("L'IA réfléchit...");
+        typingLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-style: italic;");
+        chatMessages.getChildren().add(typingLabel);
+
+        chatbotService.askQuestion(message).thenAccept(response -> {
+            Platform.runLater(() -> {
+                chatMessages.getChildren().remove(typingLabel);
+                addMessageBubble(response, false);
+            });
+        });
+    }
+
+    private void addMessageBubble(String text, boolean isUser) {
+        Label label = new Label(text);
+        label.setWrapText(true);
+        label.setMaxWidth(300);
+        
+        VBox bubble = new VBox(label);
+        bubble.setPadding(new Insets(12, 20, 12, 20));
+        
+        if (isUser) {
+            bubble.setStyle("-fx-background-color: #6366f1; -fx-background-radius: 20 20 0 20;");
+            label.setStyle("-fx-text-fill: white; -fx-font-size: 14;");
+            HBox container = new HBox(bubble);
+            container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+            chatMessages.getChildren().add(container);
+        } else {
+            bubble.setStyle("-fx-background-color: #1e293b; -fx-background-radius: 20 20 20 0; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 20 20 20 0;");
+            label.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 14;");
+            HBox container = new HBox(bubble);
+            container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            chatMessages.getChildren().add(container);
+        }
+        
+        Platform.runLater(() -> {
+            if (chatMessages.getParent().getParent() instanceof ScrollPane) {
+                ((ScrollPane) chatMessages.getParent().getParent()).setVvalue(1.0);
+            }
+        });
     }
 }

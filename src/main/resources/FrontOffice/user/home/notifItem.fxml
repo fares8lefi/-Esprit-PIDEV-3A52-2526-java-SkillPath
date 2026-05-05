@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      style="-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 10;" spacing="5">
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <children>
+                <Label text="✉️" style="-fx-font-size: 16;" />
+                <Label fx:id="lblTitle" text="Titre de la notification" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+            </children>
+        </HBox>
+        <Label fx:id="lblMessage" text="Le message détaillé de la notification s'affiche ici sur plusieurs lignes si nécessaire." 
+               textFill="#94a3b8" wrapText="true" style="-fx-font-size: 12; -fx-line-spacing: 3;" />
+        <Label fx:id="lblDate" text="Il y a 2 heures" textFill="#64748b" style="-fx-font-size: 10; -fx-font-style: italic;" />
+    </children>
+</VBox>

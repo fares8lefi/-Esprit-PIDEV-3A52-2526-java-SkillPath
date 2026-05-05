@@ -139,6 +139,14 @@ public class AddCourseController implements Initializable {
         );
         selectedImageFile = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
         if (selectedImageFile != null) {
+            String fileName = selectedImageFile.getName().toLowerCase();
+            if (fileName.endsWith(".webp")) {
+                showAlert("Format non supporté", "Le format .webp n'est pas supporté par JavaFX. Veuillez choisir une image .jpg ou .png.");
+                selectedImageFile = null;
+                lblImageName.setText("Aucune image sélectionnée");
+                lblImageName.setStyle("-fx-text-fill: #f43f5e;");
+                return;
+            }
             lblImageName.setText(selectedImageFile.getName());
             lblImageName.setStyle("-fx-text-fill: #4ade80;");
         }
