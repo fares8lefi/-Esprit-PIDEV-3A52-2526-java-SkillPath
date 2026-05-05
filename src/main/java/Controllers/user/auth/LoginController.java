@@ -344,7 +344,11 @@ public class LoginController {
                     if (user != null) {
                         Utils.Session.getInstance().login(user);
                         System.out.println("✓ Connexion Google réussie : " + user.getUsername());
-                        navigateTo(event, "/FrontOffice/home/home.fxml", "Quiz Disponibles - SkillPath");
+                        if ("admin".equalsIgnoreCase(user.getRole())) {
+                            navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
+                        } else {
+                            navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "home user - SkillPath");
+                        }
                     } else {
                         showError("Impossible de finaliser la connexion Google.");
                     }

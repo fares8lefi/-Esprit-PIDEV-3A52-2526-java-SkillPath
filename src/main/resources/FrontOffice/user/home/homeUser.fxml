@@ -108,7 +108,7 @@
             </HBox>
 
             <!-- 2. Main Content (Scrollable) -->
-            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
                <content>
                   <VBox spacing="40.0" style="-fx-padding: 60 80 60 80;">
                      <children>
@@ -140,7 +140,7 @@
                                     </Label>
                                     <HBox spacing="15.0">
                                        <children>
-                                          <Button alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-primary" text="🚀 Start Adventure" />
+                                          <Button onAction="#handleStartAdventure" alignment="CENTER" prefHeight="50.0" prefWidth="200.0" styleClass="btn-primary" text="🚀 Start Adventure" />
                                           <Button alignment="CENTER" onAction="#handleCatalogue" prefHeight="50.0" prefWidth="200.0" styleClass="btn-secondary" text="Browse Courses" />
                                        </children>
                                     </HBox>
@@ -214,7 +214,7 @@
                         </VBox>
 
                         <!-- Catalogue Grid (Dynamic part) -->
-                        <VBox spacing="30.0">
+                        <VBox fx:id="coursesSection" spacing="30.0">
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="15.0">
                                  <children>
