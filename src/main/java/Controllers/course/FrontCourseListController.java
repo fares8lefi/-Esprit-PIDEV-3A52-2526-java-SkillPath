@@ -5,19 +5,25 @@ import Services.CourseService;
 import Utils.Session;
 import javafx.event.ActionEvent;
 import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -251,12 +257,12 @@ public class FrontCourseListController implements Initializable {
                 final int staggerDelay = delay;
                 
                 Platform.runLater(() -> {
-                    javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(Duration.millis(800), cardNode);
+                    FadeTransition ft = new FadeTransition(Duration.millis(800), cardNode);
                     ft.setFromValue(0.0);
                     ft.setToValue(1.0);
                     ft.setDelay(Duration.millis(staggerDelay));
                     
-                    javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(Duration.millis(800), cardNode);
+                    TranslateTransition tt = new TranslateTransition(Duration.millis(800), cardNode);
                     tt.setFromY(20);
                     tt.setToY(0);
                     tt.setDelay(Duration.millis(staggerDelay));
@@ -277,9 +283,9 @@ public class FrontCourseListController implements Initializable {
     private void goToHome() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) lblResultCount.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
+            Parent root = loader.load();
+            Stage stage = (Stage) lblResultCount.getScene().getWindow();
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             System.err.println("Erreur redirection accueil : " + e.getMessage());
@@ -295,9 +301,9 @@ public class FrontCourseListController implements Initializable {
     private void goToEvents() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/event/EventList.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) lblResultCount.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
+            Parent root = loader.load();
+            Stage stage = (Stage) lblResultCount.getScene().getWindow();
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             System.err.println("Erreur redirection events : " + e.getMessage());
@@ -309,10 +315,10 @@ public class FrontCourseListController implements Initializable {
         Session.getInstance().logout();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/auth/login.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) ((Node) event.getSource()).getScene().getWindow();
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setTitle("Connexion - SkillPath");
-            stage.setScene(new javafx.scene.Scene(root));
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             System.err.println("Erreur redirection login : " + e.getMessage());
@@ -321,14 +327,14 @@ public class FrontCourseListController implements Initializable {
     }
 
     @FXML
-    private void showNotifications(javafx.scene.input.MouseEvent event) {
+    private void showNotifications(MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/user/home/notifPopUp.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
-            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
             stage.setTitle("Mes Notifications");
             stage.setScene(new Scene(root));
             stage.showAndWait();
@@ -384,13 +390,13 @@ public class FrontCourseListController implements Initializable {
             bubble.setStyle("-fx-background-color: #6366f1; -fx-background-radius: 20 20 0 20;");
             label.setStyle("-fx-text-fill: white; -fx-font-size: 14;");
             HBox container = new HBox(bubble);
-            container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+            container.setAlignment(Pos.CENTER_RIGHT);
             chatMessages.getChildren().add(container);
         } else {
             bubble.setStyle("-fx-background-color: #1e293b; -fx-background-radius: 20 20 20 0; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 20 20 20 0;");
             label.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 14;");
             HBox container = new HBox(bubble);
-            container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            container.setAlignment(Pos.CENTER_LEFT);
             chatMessages.getChildren().add(container);
         }
         

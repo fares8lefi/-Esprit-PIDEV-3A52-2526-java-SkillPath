@@ -6,6 +6,7 @@ import Services.ModuleService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -13,8 +14,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +112,7 @@ public class FrontCourseDetailsController {
         if (!text.isEmpty()) {
             addChatMessage(text, true);
             txtChatInput.clear();
-            javafx.application.Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 try { Thread.sleep(800); } catch (Exception ignored) {}
                 addChatMessage("C'est une excellente question sur " + currentCourse.getTitle() + ". Nos mentors reviendront vers vous avec plus de détails, mais sachez que ce cours est l'un des plus complets sur SkillPath.", false);
             });
@@ -120,8 +124,8 @@ public class FrontCourseDetailsController {
         label.setWrapText(true);
         label.setMaxWidth(300);
         label.getStyleClass().add(isUser ? "chat-bubble-user" : "chat-bubble-ai");
-        javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(label);
-        box.setAlignment(isUser ? javafx.geometry.Pos.CENTER_RIGHT : javafx.geometry.Pos.CENTER_LEFT);
+        HBox box = new HBox(label);
+        box.setAlignment(isUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         chatMessages.getChildren().add(box);
     }
 
@@ -139,7 +143,7 @@ public class FrontCourseDetailsController {
     }
 
     @FXML
-    private void handleBackClick(javafx.scene.input.MouseEvent event) {
+    private void handleBackClick(MouseEvent event) {
         handleBack(new ActionEvent(event.getSource(), null));
     }
 

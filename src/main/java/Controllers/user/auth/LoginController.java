@@ -203,7 +203,7 @@ public class LoginController {
                     navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
                 } else {
                     
-                    navigateTo(event, "/FrontOffice/home/homeUser.fxml", "Quiz Disponibles - SkillPath");
+                    navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "home user - SkillPath");
                 }
             } else {
                 showError(result.getMessage());
