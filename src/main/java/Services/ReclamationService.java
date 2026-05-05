@@ -78,15 +78,15 @@ public class ReclamationService implements Iservice<Reclamation> {
                         if (aiResponseText != null && !aiResponseText.isBlank()) {
                             saveAssistantResponse(finalId, aiResponseText);
                         } else {
-                            System.err.println("[AI] Aucune réponse générée par Ollama.");
+                            System.err.println("[AI] generateAutoResponse a renvoyé null ou vide.");
                         }
                     } catch (Exception e) {
-                        System.err.println("[AI] Erreur dans le thread de réponse: " + e.getMessage());
+                        System.err.println("[AI] Erreur fatale dans le thread AI: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }).start();
             } else {
-                System.err.println("[AI] Impossible de récupérer l'ID de la réclamation, l'IA ne peut pas répondre.");
+                System.err.println("[AI] reclamationId invalide (" + reclamationId + "), abandon de la réponse automatique.");
             }
 
         } catch (RuntimeException e) {
@@ -170,19 +170,26 @@ public class ReclamationService implements Iservice<Reclamation> {
     }
 
     private byte[] getAIUserId() {
-        // On cherche le premier admin pour lui attribuer la réponse IA (ou un ID par
-        // défaut si non trouvé)
-        String sql = "SELECT id FROM user WHERE role = 'admin' LIMIT 1";
+        // 1. On cherche d'abord un administrateur
+        String sqlAdmin = "SELECT id FROM users WHERE role = 'admin' LIMIT 1";
         try (Statement st = connection.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
-            if (rs.next()) {
-                return rs.getBytes("id");
-            }
+                ResultSet rs = st.executeQuery(sqlAdmin)) {
+            if (rs.next()) return rs.getBytes("id");
         } catch (SQLException e) {
-            System.err.println("[AI] Impossible de trouver un ID admin: " + e.getMessage());
+            System.err.println("[AI] Erreur recherche admin: " + e.getMessage());
         }
 
-        // Fallback: 16 octets à zéro (si la DB ne contraint pas la clé étrangère)
+        // 2. Fallback: On cherche n'importe quel utilisateur existant
+        String sqlAny = "SELECT id FROM users LIMIT 1";
+        try (Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sqlAny)) {
+            if (rs.next()) return rs.getBytes("id");
+        } catch (SQLException e) {
+            System.err.println("[AI] Erreur recherche user fallback: " + e.getMessage());
+        }
+
+        // 3. Dernier recours: 16 octets à zéro (risque de crash si FK active)
+        System.err.println("[AI] ATTENTION: Aucun utilisateur trouvé en base pour porter la réponse IA !");
         return new byte[16];
     }
 
