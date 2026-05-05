@@ -125,6 +125,13 @@
                                                         <VBox fx:id="modulesContainer" spacing="20" />
                                                     </children>
                                                 </VBox>
+
+                                                <VBox fx:id="quizzesSection" spacing="35" managed="false" visible="false">
+                                                    <children>
+                                                        <Label text="Évaluations &amp; Quiz" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: white; -fx-letter-spacing: -1;" />
+                                                        <VBox fx:id="quizzesContainer" spacing="20" />
+                                                    </children>
+                                                </VBox>
                                             </children>
                                         </VBox>
 

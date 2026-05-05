@@ -181,13 +181,18 @@
 
 /* reCAPTCHA Panel */
 .captcha-panel {
-    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-background-color: rgba(15, 23, 42, 0.5);
     -fx-background-radius: 16px;
     -fx-border-color: rgba(139, 92, 246, 0.2);
     -fx-border-radius: 16px;
     -fx-border-width: 1px;
-    -fx-padding: 15px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5);
+    -fx-padding: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
+}
+
+.captcha-panel:hover {
+    -fx-border-color: rgba(139, 92, 246, 0.4);
+    -fx-background-color: rgba(15, 23, 42, 0.7);
 }
 
 .alert-success {
@@ -327,10 +332,20 @@
 }
 .scroll-pane .scroll-bar:vertical {
     -fx-background-color: transparent;
+    -fx-pref-width: 6px;
 }
 .scroll-pane .scroll-bar:vertical .thumb {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: rgba(255, 255, 255, 0.15);
     -fx-background-radius: 10px;
+}
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(139, 92, 246, 0.4);
+}
+.scroll-pane .scroll-bar:vertical .track,
+.scroll-pane .scroll-bar:vertical .decrement-button,
+.scroll-pane .scroll-bar:vertical .increment-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 #sideBar {
     -fx-min-width: 280px;

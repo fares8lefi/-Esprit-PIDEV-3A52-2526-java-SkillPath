@@ -27,6 +27,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import javafx.scene.web.WebView;
+import netscape.javascript.JSObject;
 import javafx.application.Platform;
 import java.awt.Desktop;
 import java.net.URI;
@@ -44,9 +45,13 @@ public class LoginController {
     @FXML private Label errorLabel;
     @FXML private Button loginBtn;
     @FXML private Button googleBtn;
-    @FXML private WebView captchaWebView;
+    @FXML private Button verifyCaptchaBtn;
     @FXML private StackPane loadingContainer;
     @FXML private ProgressIndicator loadingIndicator;
+
+    private Stage captchaStage;
+    private boolean isCaptchaVerified = false;
+    private String captchaToken = null;
 
     private final UserService userService = new UserService();
     private String siteKey;
@@ -67,62 +72,88 @@ public class LoginController {
 
         if (siteKey == null || siteKey.isEmpty()) {
             System.err.println("reCAPTCHA siteKey est NULL ou vide ! Vérifiez le fichier .env");
-            if (captchaWebView != null) {
-                captchaWebView.getEngine().loadContent("<div style='color:red;font-family:sans-serif;padding:10px;'>Erreur: Clé reCAPTCHA manquante (.env)</div>");
-            }
+        }
+    }
+
+    @FXML
+    private void handleVerifyCaptcha(ActionEvent event) {
+        if (siteKey == null || siteKey.isEmpty()) {
+            showError("Erreur: Clé reCAPTCHA manquante (.env)");
             return;
         }
 
-        if (captchaWebView != null) {
-            try {
-                // Configurer le WebView
-                captchaWebView.setPageFill(javafx.scene.paint.Color.TRANSPARENT);
-                
-                // ── Lecture et fermeture immédiate du fichier ──────────────
-                String rawHtml = "";
-                try (InputStream is = getClass().getResourceAsStream("/recaptcha.html")) {
-                    if (is != null) {
-                        try (Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A")) {
-                            rawHtml = scanner.hasNext() ? scanner.next() : "";
-                        }
-                    } else {
-                        System.err.println("recaptcha.html introuvable dans les ressources !");
-                        captchaWebView.getEngine().loadContent("<div style='color:red;'>Fichier recaptcha.html introuvable.</div>");
-                        return;
+        WebView webView = new WebView();
+        webView.setContextMenuEnabled(false);
+        webView.setPageFill(javafx.scene.paint.Color.web("#0f172a")); // Dark background for the dialog
+
+        try {
+            String rawHtml = "";
+            try (InputStream is = getClass().getResourceAsStream("/recaptcha.html")) {
+                if (is != null) {
+                    try (Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A")) {
+                        rawHtml = scanner.hasNext() ? scanner.next() : "";
                     }
+                } else {
+                    showError("Fichier recaptcha.html introuvable.");
+                    return;
                 }
-                // ──────────────────────────────────────────────────────────
-
-                final String html = rawHtml.replace("__SITE_KEY__", siteKey);
-                    
-                // Démarrer un mini-serveur HTTP local
-                try {
-                    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-                    server.createContext("/", exchange -> {
-                        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
-                        byte[] bytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                        exchange.sendResponseHeaders(200, bytes.length);
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(bytes);
-                        os.close();
-                    });
-                    server.setExecutor(null);
-                    server.start();
-                    
-                    int port = server.getAddress().getPort();
-                    captchaWebView.getEngine().load("http://127.0.0.1:" + port + "/");
-                } catch (Exception ex) {
-                    System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
-                    // Fallback : chargement direct du contenu
-                    captchaWebView.getEngine().loadContent(html);
-                }
-
-            } catch (Exception e) {
-                System.err.println("Erreur lors de l'initialisation du WebView reCAPTCHA: " + e.getMessage());
-                e.printStackTrace();
             }
-        } else {
-            System.err.println("captchaWebView est NULL ! Vérifiez l'injection @FXML dans login.fxml");
+
+            final String html = rawHtml.replace("__SITE_KEY__", siteKey);
+
+            webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                    netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine().executeScript("window");
+                    window.setMember("javaApp", this);
+                }
+            });
+
+            // Start a local HTTP server for the WebView
+            try {
+                HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+                server.createContext("/", exchange -> {
+                    exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+                    byte[] bytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(200, bytes.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(bytes);
+                    os.close();
+                });
+                server.setExecutor(null);
+                server.start();
+
+                int port = server.getAddress().getPort();
+                webView.getEngine().load("http://127.0.0.1:" + port + "/");
+                
+                // Stop the server when the stage closes
+                webView.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                    if (newScene != null) {
+                        newScene.windowProperty().addListener((obsWindow, oldWindow, newWindow) -> {
+                            if (newWindow != null) {
+                                newWindow.setOnHidden(e -> server.stop(0));
+                            }
+                        });
+                    }
+                });
+
+            } catch (Exception ex) {
+                System.err.println("Erreur serveur HTTP local: " + ex.getMessage());
+                webView.getEngine().loadContent(html);
+            }
+
+            captchaStage = new Stage();
+            captchaStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            captchaStage.setTitle("Vérification de sécurité");
+            captchaStage.setResizable(false);
+            
+            // Setting a reasonable size for the challenge
+            Scene scene = new Scene(webView, 420, 600);
+            captchaStage.setScene(scene);
+            captchaStage.showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur lors de l'initialisation du reCAPTCHA");
         }
     }
 
@@ -137,22 +168,19 @@ public class LoginController {
         }
 
         // ── Vérification reCAPTCHA ──────────────────────────────────────────
-        if (captchaWebView != null) {
-            // Lire les valeurs JS depuis le WebView (FX thread)
-            Object verified = captchaWebView.getEngine()
-                    .executeScript("isCaptchaVerified()");
-            if (!Boolean.TRUE.equals(verified)) {
-                showError(" Veuillez compléter le reCAPTCHA avant de vous connecter.");
-                return;
-            }
-            String captchaToken = (String) captchaWebView.getEngine()
-                    .executeScript("getCaptchaResponse()");
-            if (!verifierCaptcha(captchaToken)) {
-                showError(" La vérification reCAPTCHA a échoué. Veuillez réessayer.");
-                // Réinitialiser le widget pour forcer une nouvelle tentative
-                captchaWebView.getEngine().executeScript("grecaptcha.reset()");
-                return;
-            }
+        if (!isCaptchaVerified || captchaToken == null) {
+            showError(" Veuillez compléter le reCAPTCHA avant de vous connecter.");
+            return;
+        }
+        
+        if (!verifierCaptcha(captchaToken)) {
+            showError(" La vérification reCAPTCHA a échoué. Veuillez réessayer.");
+            isCaptchaVerified = false;
+            captchaToken = null;
+            verifyCaptchaBtn.setText("Effectuer la vérification");
+            verifyCaptchaBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05);");
+            verifyCaptchaBtn.setDisable(false);
+            return;
         }
         // ────────────────────────────────────────────────────────────────────
 
@@ -219,9 +247,11 @@ public class LoginController {
             emailField.setDisable(false);
             passwordField.setDisable(false);
             // Réinitialiser le captcha après un échec
-            if (captchaWebView != null) {
-                captchaWebView.getEngine().executeScript("grecaptcha.reset()");
-            }
+            isCaptchaVerified = false;
+            captchaToken = null;
+            verifyCaptchaBtn.setText("Effectuer la vérification");
+            verifyCaptchaBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05);");
+            verifyCaptchaBtn.setDisable(false);
             showError("Erreur de connexion au service de sécurité.");
             loginTask.getException().printStackTrace();
         });
@@ -454,5 +484,34 @@ public class LoginController {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Méthodes appelées par le JavaScript
+    public void onVerified(boolean verified) {
+        Platform.runLater(() -> {
+            System.out.println("reCAPTCHA vérifié via bridge");
+        });
+    }
+    
+    public void onTokenReceived(String token) {
+        Platform.runLater(() -> {
+            this.isCaptchaVerified = true;
+            this.captchaToken = token;
+            
+            // Update button UI
+            verifyCaptchaBtn.setText("Vérification réussie ✓");
+            verifyCaptchaBtn.setStyle("-fx-background-color: rgba(16, 185, 129, 0.2); -fx-text-fill: #10b981; -fx-border-color: #10b981;");
+            verifyCaptchaBtn.setDisable(true);
+            errorLabel.setVisible(false);
+
+            if (captchaStage != null && captchaStage.isShowing()) {
+                captchaStage.close();
+            }
+        });
+    }
+
+    public void onChallengeStateChanged(boolean isChallengeVisible) {
+        // Not really needed anymore since it's in a modal dialog of fixed size,
+        // but we can leave it or just ignore it.
     }
 }

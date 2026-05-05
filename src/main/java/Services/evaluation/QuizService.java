@@ -160,4 +160,28 @@ public class QuizService implements Iservice<Quiz> {
         }
         return null;
     }
+
+    public List<Quiz> getByCourse(int courseId) {
+        List<Quiz> list = new ArrayList<>();
+        String sql = "SELECT * FROM quiz WHERE course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Quiz q = new Quiz();
+                    q.setId_quiz(rs.getInt("id_quiz"));
+                    q.setTitre(rs.getString("titre"));
+                    q.setDescription(rs.getString("description"));
+                    q.setDuree(rs.getInt("duree"));
+                    q.setNote_max(rs.getInt("note_max"));
+                    q.setDate_creation(rs.getTimestamp("date_creation"));
+                    q.setCourse_id(rs.getInt("course_id"));
+                    list.add(q);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur getByCourse : " + e.getMessage());
+        }
+        return list;
+    }
 }

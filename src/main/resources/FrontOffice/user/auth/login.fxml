@@ -56,7 +56,7 @@
             </VBox>
 
             <!-- Right: Login Card -->
-            <VBox styleClass="glass-card" spacing="18" maxWidth="380" minWidth="360">
+            <VBox styleClass="glass-card" spacing="18" maxWidth="420" minWidth="360">
                 <VBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 0 0 5 0;">
                     <Label text="Bon retour !" styleClass="card-title"/>
                     <Label text="Content de vous revoir parmi nous." styleClass="card-subtitle"/>
@@ -100,14 +100,21 @@
                 </HBox>
 
                 <!-- reCAPTCHA Container -->
-                <javafx.scene.web.WebView fx:id="captchaWebView" 
-                                          prefHeight="130" minHeight="130" 
-                                          prefWidth="300" maxWidth="340"
-                                          style="-fx-padding: 0; -fx-background-color: transparent;">
+                <VBox fx:id="captchaContainer" spacing="5" alignment="CENTER" styleClass="captcha-panel">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-padding: 0 0 5 0;">
+                            <Label text="🛡️ SECURITY VERIFICATION" style="-fx-text-fill: #94a3b8; -fx-font-size: 9px; -fx-font-weight: 900; -fx-letter-spacing: 1.5px;"/>
+                        </HBox>
+                        <Button fx:id="verifyCaptchaBtn" onAction="#handleVerifyCaptcha" text="Effectuer la vérification" styleClass="btn-secondary" maxWidth="Infinity">
+                            <graphic>
+                                <Label text="🛡️" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 0 8 0 0;"/>
+                            </graphic>
+                        </Button>
+                    </children>
                     <VBox.margin>
-                        <Insets top="2" bottom="2"/>
+                        <Insets top="5" bottom="5"/>
                     </VBox.margin>
-                </javafx.scene.web.WebView>
+                </VBox>
 
                 <!-- Loading Indicator (Hidden by default) -->
                 <StackPane fx:id="loadingContainer" visible="false" managed="false" 
