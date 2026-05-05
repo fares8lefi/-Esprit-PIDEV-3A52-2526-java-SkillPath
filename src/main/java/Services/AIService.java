@@ -27,7 +27,7 @@ public class AIService {
         features.add(niveau);
         features.add(progression);
         features.add(catMatch);
-        
+
         payload.add("features", features);
 
         HttpRequest request = HttpRequest.newBuilder()
