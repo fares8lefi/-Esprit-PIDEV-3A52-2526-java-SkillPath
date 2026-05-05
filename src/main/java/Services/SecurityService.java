@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Service de sécurité interceptant les tentatives de connexion et communiquant avec le serveur ML Flask.
+ * Service de sécurité interceptant les tentatives de connexion et communiquant
+ * avec le serveur ML Flask.
  */
 public class SecurityService {
 
@@ -50,7 +51,7 @@ public class SecurityService {
             payload.put("ip", clientIp);
             payload.put("username", email);
             payload.put("status", status);
-            
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             payload.put("timestamp", sdf.format(new Date()));
 
@@ -108,8 +109,9 @@ public class SecurityService {
                 String storedHash = rs.getString("password");
                 // Adaptation pour les hashs Symfony ($2y$ -> $2a$)
                 String hash = storedHash;
-                if (hash.startsWith("$2y$")) hash = "$2a$" + hash.substring(4);
-                
+                if (hash.startsWith("$2y$"))
+                    hash = "$2a$" + hash.substring(4);
+
                 if (BCrypt.checkpw(password, hash)) {
                     User user = new User();
                     user.setId(DatabaseConnection.bytesToUuid(rs.getBytes("id")));
@@ -124,7 +126,8 @@ public class SecurityService {
         return null;
     }
 
-    private void saveLoginLog(byte[] userId, String ip, String username, String status, Connection conn) throws SQLException {
+    private void saveLoginLog(byte[] userId, String ip, String username, String status, Connection conn)
+            throws SQLException {
         String sql = "INSERT INTO login_logs (user_id, ip, username, status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, userId);
@@ -137,7 +140,7 @@ public class SecurityService {
 
     private Map<String, Object> calculateMetrics(String ip, Connection conn) throws SQLException {
         Map<String, Object> metrics = new HashMap<>();
-        
+
         // Attempts last 60s
         String sqlAttempts = "SELECT COUNT(*) FROM login_logs WHERE ip = ? AND created_at > (NOW() - INTERVAL 1 MINUTE)";
         try (PreparedStatement ps = conn.prepareStatement(sqlAttempts)) {
@@ -167,7 +170,7 @@ public class SecurityService {
                 metrics.put("time_between_attempts", 0);
             }
         }
-        
+
         return metrics;
     }
 
@@ -203,8 +206,9 @@ public class SecurityService {
                 return new LoginResult(false, null, true, "HIGH", "Trop de tentatives. Accès bloqué 5min.");
             }
         }
-        
-        if (user != null) return new LoginResult(true, user, false, "LOW", "Connexion réussie");
+
+        if (user != null)
+            return new LoginResult(true, user, false, "LOW", "Connexion réussie");
         return new LoginResult(false, null, false, "LOW", "Email ou mot de passe incorrect");
     }
 
@@ -219,7 +223,8 @@ public class SecurityService {
         }
     }
 
-    private void blockIpWithExpiry(String ip, String reason, double score, String risk, Timestamp expires, Connection conn) throws SQLException {
+    private void blockIpWithExpiry(String ip, String reason, double score, String risk, Timestamp expires,
+            Connection conn) throws SQLException {
         String sql = "INSERT INTO blocked_ips (ip, reason, score, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE is_active = TRUE, expires_at = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ip);
@@ -231,7 +236,8 @@ public class SecurityService {
         }
     }
 
-    private void saveSecurityEvent(String ip, String username, double score, String action, String risk, Connection conn) throws SQLException {
+    private void saveSecurityEvent(String ip, String username, double score, String action, String risk,
+            Connection conn) throws SQLException {
         String sql = "INSERT INTO security_events (ip, username, score, action, risk_level) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ip);
