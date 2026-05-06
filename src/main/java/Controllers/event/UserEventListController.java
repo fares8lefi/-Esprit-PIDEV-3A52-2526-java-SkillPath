@@ -11,9 +11,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.Priority;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -84,6 +87,23 @@ public class UserEventListController {
         card.setStyle("-fx-padding: 20; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12;");
         card.setPrefWidth(220);
 
+        ImageView imgView = new ImageView();
+        imgView.setFitWidth(180);
+        imgView.setFitHeight(120);
+        imgView.setPreserveRatio(false); // Stretch to fill
+        Rectangle clip = new Rectangle(180, 120);
+        clip.setArcWidth(12);
+        clip.setArcHeight(12);
+        imgView.setClip(clip);
+        
+        if (event.getImage() != null && !event.getImage().trim().isEmpty()) {
+            try {
+                imgView.setImage(new Image(event.getImage(), true));
+            } catch (Exception e) {
+                System.err.println("Could not load image: " + event.getImage());
+            }
+        }
+
         Label title = new Label(event.getTitle());
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: white;");
         title.setWrapText(true);
@@ -103,7 +123,7 @@ public class UserEventListController {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        card.getChildren().addAll(rating, title, date, spacer, btnDetails);
+        card.getChildren().addAll(imgView, rating, title, date, spacer, btnDetails);
         return card;
     }
 
@@ -136,6 +156,22 @@ public class UserEventListController {
 
             Stage stage = new Stage();
             stage.setTitle("My Favourite Events");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void handleShowJoined() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/event/JoinedEvents.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("My Tickets");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.show();

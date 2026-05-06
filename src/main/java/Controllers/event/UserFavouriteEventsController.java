@@ -11,9 +11,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.Priority;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -81,6 +84,21 @@ public class UserFavouriteEventsController {
         card.setStyle("-fx-padding: 20; -fx-background-radius: 12; -fx-border-color: rgba(239, 68, 68, 0.3); -fx-border-radius: 12; -fx-background-color: rgba(239, 68, 68, 0.05);");
         card.setPrefWidth(220);
 
+        ImageView imgView = new ImageView();
+        imgView.setFitWidth(180);
+        imgView.setFitHeight(120);
+        imgView.setPreserveRatio(false);
+        Rectangle clip = new Rectangle(180, 120);
+        clip.setArcWidth(12);
+        clip.setArcHeight(12);
+        imgView.setClip(clip);
+        
+        if (event.getImage() != null && !event.getImage().trim().isEmpty()) {
+            try {
+                imgView.setImage(new Image(event.getImage(), true));
+            } catch (Exception e) {}
+        }
+
         Label title = new Label(event.getTitle());
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: white;");
         title.setWrapText(true);
@@ -97,7 +115,7 @@ public class UserFavouriteEventsController {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        card.getChildren().addAll(title, date, spacer, btnDetails);
+        card.getChildren().addAll(imgView, title, date, spacer, btnDetails);
         return card;
     }
 
