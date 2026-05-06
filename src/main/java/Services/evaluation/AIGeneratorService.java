@@ -83,26 +83,23 @@ public class AIGeneratorService {
                 throw new RuntimeException("Erreur : GROQ_API_KEY introuvable ou vide dans le fichier .env !");
             }
 
-            // Construction du prompt avec une composante aléatoire pour garantir des questions différentes
-            long randomSeed = System.currentTimeMillis();
-            String prompt = "Tu es un expert technique et professeur. Génère 5 questions QCM de niveau avancé pour le domaine : " + courseName + ". " +
-                    "Génère des questions TOTALEMENT NOUVELLES et différentes de tes réponses précédentes. " +
-                    "Voici une graine aléatoire : " + randomSeed + ". " +
-                    "Renvoie UNIQUEMENT un objet JSON valide avec une clé 'questions' contenant un tableau d'objets. " +
-                    "Chaque objet doit avoir ces clés exactes : " +
-                    "'enonce', 'choix_a', 'choix_b', 'choix_c', 'choix_d', " +
-                    "'bonne_reponse' (lettre majuscule 'A', 'B', 'C' ou 'D'), " +
-                    "'points' (entier entre 1 et 5).";
+            // Utilisation d'un message système pour cadrer l'IA
+            String systemInstructions = "Tu es un générateur de quiz professionnel. " +
+                    "Tu dois générer 5 questions QCM en français sur un sujet donné. " +
+                    "Chaque question doit avoir un énoncé clair (la question), 4 choix (A, B, C, D), une bonne réponse (la lettre) et des points. " +
+                    "Réponds UNIQUEMENT au format JSON.";
 
-            // Création du corps de la requête JSON
+            String userPrompt = "Sujet du quiz : " + courseName + ". " +
+                    "Graine aléatoire : " + System.currentTimeMillis() + ". " +
+                    "Format attendu : { \"questions\": [ { \"enonce\": \"...\", \"choix_a\": \"...\", \"choix_b\": \"...\", \"choix_c\": \"...\", \"choix_d\": \"...\", \"bonne_reponse\": \"A\", \"points\": 2 } ] }";
+
+            // Création du corps de la requête JSON avec messages System et User
             JSONObject requestBody = new JSONObject()
                     .put("model", GROQ_MODEL)
                     .put("response_format", new JSONObject().put("type", "json_object"))
                     .put("messages", new JSONArray()
-                            .put(new JSONObject()
-                                    .put("role", "user")
-                                    .put("content", prompt)
-                            )
+                            .put(new JSONObject().put("role", "system").put("content", systemInstructions))
+                            .put(new JSONObject().put("role", "user").put("content", userPrompt))
                     );
 
             // Création du client HTTP
