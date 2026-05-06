@@ -102,7 +102,7 @@ public class QuestionController {
         Label enonce = new Label(q.getEnonce());
         enonce.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14px;");
         enonce.setWrapText(true);
-        enonce.setMaxHeight(40);
+        enonce.setMinHeight(40);
 
         HBox badges = new HBox(8);
         Label resp = new Label("Réponse: " + q.getBonne_reponse());
