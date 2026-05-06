@@ -25,7 +25,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Region;
 import javafx.scene.text.TextFlow;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
@@ -46,6 +48,10 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import Models.evaluation.Quiz;
+import Services.evaluation.QuizService;
 
 public class FrontModuleShowController implements Initializable {
 
@@ -53,6 +59,8 @@ public class FrontModuleShowController implements Initializable {
     @FXML private Label progressPercent;
     @FXML private ProgressBar courseProgressBar;
     @FXML private VBox modulesContainer;
+    @FXML private VBox quizSection;
+    @FXML private FlowPane quizContainer;
     
     @FXML private Label breadcrumbCourse;
     @FXML private Label breadcrumbModule;
@@ -96,6 +104,7 @@ public class FrontModuleShowController implements Initializable {
     private final Services.PredictionService predictionService = new Services.PredictionService();
     private final Services.ProgressService progressService = new Services.ProgressService();
     private final Services.CertificateService certificateService = new Services.CertificateService();
+    private final QuizService quizService = new QuizService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -130,9 +139,97 @@ public class FrontModuleShowController implements Initializable {
             lockOverlay.setVisible(false);
             updateUI();
             loadSidebar();
+            loadCourseQuizzes();
             updateNavigationButtons();
             loadAIPrediction();
         }
+    }
+
+    private void loadCourseQuizzes() {
+        try {
+            if (currentCourse == null) {
+                quizSection.setVisible(false);
+                quizSection.setManaged(false);
+                return;
+            }
+
+            java.util.List<Quiz> quizzes = quizService.getByCourse(currentCourse.getId());
+            quizContainer.getChildren().clear();
+
+            if (quizzes == null || quizzes.isEmpty()) {
+                quizSection.setVisible(false);
+                quizSection.setManaged(false);
+                return;
+            }
+
+            for (Quiz q : quizzes) {
+                quizContainer.getChildren().add(createQuizCard(q));
+            }
+
+            quizSection.setVisible(true);
+            quizSection.setManaged(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            quizSection.setVisible(false);
+            quizSection.setManaged(false);
+        }
+    }
+
+    private VBox createQuizCard(Quiz quiz) {
+        VBox cardContainer = new VBox();
+        cardContainer.setPrefWidth(350);
+        cardContainer.setMaxWidth(350);
+
+        HBox topColorLine = new HBox();
+        topColorLine.setPrefHeight(8);
+        topColorLine.getStyleClass().add("card-header-line");
+
+        VBox cardBody = new VBox();
+        cardBody.getStyleClass().add("quiz-card");
+        cardBody.setSpacing(12);
+
+        Label title = new Label(quiz.getTitre());
+        title.setStyle("-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: white;");
+        title.setWrapText(true);
+
+        Label desc = new Label(quiz.getDescription() != null ? quiz.getDescription() : "");
+        desc.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
+        desc.setWrapText(true);
+        desc.setMaxHeight(48);
+
+        HBox footer = new HBox();
+        footer.setSpacing(10);
+        Label duration = new Label("⏳ " + quiz.getDuree() + " min");
+        duration.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold;");
+        Label pts = new Label("⭐ " + quiz.getNote_max() + " pts");
+        pts.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold;");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+        Button openBtn = new Button("Démarrer");
+        openBtn.setStyle("-fx-cursor: hand; -fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8;");
+        openBtn.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/FrontOffice/evaluation/QuizPass.fxml"));
+                Parent root = loader.load();
+                Controllers.evaluation.QuizPassController passController = loader.getController();
+                passController.setQuiz(quiz);
+                Stage stage = (Stage) modulesContainer.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        footer.getChildren().addAll(duration, pts, spacer, openBtn);
+
+        cardBody.getChildren().addAll(title, desc, footer);
+        cardContainer.getChildren().addAll(topColorLine, cardBody);
+
+        cardContainer.setOnMouseEntered(e -> cardBody.setStyle("-fx-background-color: rgba(255,255,255,0.04);"));
+        cardContainer.setOnMouseExited(e -> cardBody.setStyle("-fx-background-color: transparent;"));
+
+        return cardContainer;
     }
 
     private void loadAIPrediction() {
