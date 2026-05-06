@@ -49,10 +49,13 @@ public final class OllamaContentFilterService {
 
     private static List<String> detectBadTerms(String inputText) throws Exception {
         String responseText = callOllama(buildDetectionPrompt(inputText));
+        System.out.println("[AI Filter Debug] Raw Ollama Response: " + responseText);
         if (responseText == null || responseText.isBlank()) {
             return List.of();
         }
-        return parseBadTermsFromModelResponse(responseText, inputText);
+        List<String> terms = parseBadTermsFromModelResponse(responseText, inputText);
+        System.out.println("[AI Filter Debug] Detected bad terms: " + terms);
+        return terms;
     }
 
     private static String buildDetectionPrompt(String text) {
@@ -143,6 +146,7 @@ public final class OllamaContentFilterService {
         String requestBody = "{"
                 + "\"model\":\"" + escapeJson(ollamaModel) + "\","
                 + "\"prompt\":\"" + escapeJson(prompt) + "\","
+                + "\"format\":\"json\","
                 + "\"stream\":false,"
                 + "\"options\":{\"temperature\":0}"
                 + "}";
