@@ -1,9 +1,11 @@
 package Controllers.evaluation;
 
 import Models.evaluation.Quiz;
+import Models.Course;
 import Services.evaluation.QuestionService;
 import Services.evaluation.QuizService;
 import Services.evaluation.AIGeneratorService;
+import Services.CourseService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,6 +41,7 @@ public class QuizFrontOfficeController {
     private QuizService quizService;
     private QuestionService questionService;
     private AIGeneratorService aiGeneratorService;
+    private CourseService courseService;
     private ObservableList<Quiz> allQuizzes;
 
     @FXML
@@ -46,6 +49,7 @@ public class QuizFrontOfficeController {
         quizService = new QuizService();
         questionService = new QuestionService();
         aiGeneratorService = new AIGeneratorService();
+        courseService = new CourseService();
         allQuizzes = FXCollections.observableArrayList();
 
         // Fetch motivational quote asynchronously to avoid freezing the UI
@@ -167,6 +171,19 @@ public class QuizFrontOfficeController {
         descLabel.setWrapText(true);
         descLabel.setMaxHeight(60); // Imitate line-clamp
 
+        // Course Association
+        Label courseLabel = null;
+        if (quiz.getCourse_id() != null) {
+            try {
+                Course course = courseService.recupererParId(quiz.getCourse_id());
+                if (course != null) {
+                    courseLabel = new Label("📚 " + course.getTitle());
+                    courseLabel.setStyle("-fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-font-size: 12px;");
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
         // Stats (Duration & Points)
         HBox statsBox = new HBox();
         statsBox.setSpacing(20);
@@ -176,7 +193,11 @@ public class QuizFrontOfficeController {
         pointsLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold;");
         statsBox.getChildren().addAll(durationLabel, pointsLabel);
 
-        cardBody.getChildren().addAll(headerBox, descLabel, statsBox);
+        cardBody.getChildren().addAll(headerBox, descLabel);
+        if (courseLabel != null) {
+            cardBody.getChildren().add(courseLabel);
+        }
+        cardBody.getChildren().add(statsBox);
         cardContainer.getChildren().addAll(topColorLine, cardBody);
 
         // Hover Effect
