@@ -4,6 +4,7 @@ import Models.evaluation.Quiz;
 import Models.evaluation.Resultat;
 import Services.evaluation.QuizService;
 import Services.evaluation.ResultatService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +31,17 @@ public class QuizHistoryController {
 
     @FXML
     public void initialize() {
+        loadHistory();
+        
+        // Set up listener to refresh when window is shown
+        Platform.runLater(() -> {
+            if (resultsGrid.getScene() != null && resultsGrid.getScene().getWindow() != null) {
+                resultsGrid.getScene().getWindow().setOnShown(event -> refreshHistory());
+            }
+        });
+    }
+
+    public void refreshHistory() {
         loadHistory();
     }
 
