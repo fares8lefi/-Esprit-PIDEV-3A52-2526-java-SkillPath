@@ -334,7 +334,7 @@ public class QuizPassController {
             timeline.stop();
         }
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizHistory.fxml"));
             Stage stage = (Stage) viewIntro.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {
