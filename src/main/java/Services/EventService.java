@@ -124,4 +124,84 @@ public class EventService implements Iservice<Event> {
             e.printStackTrace();
         }
     }
+
+    // ─── Analytics Methods ───────────────────────────────────────────────────
+
+    /** Total number of events in the database. */
+    public int getTotalEvents() {
+        String sql = "SELECT COUNT(*) FROM event";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /** Events with event_date >= today. */
+    public int getUpcomingEventsCount() {
+        String sql = "SELECT COUNT(*) FROM event WHERE event_date >= CURDATE()";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /** Events with event_date < today. */
+    public int getPastEventsCount() {
+        String sql = "SELECT COUNT(*) FROM event WHERE event_date < CURDATE()";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /** Overall average rating across all rated events. */
+    public double getAverageRatingOverall() {
+        String sql = "SELECT AVG(score) FROM event_rating";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                double val = rs.getDouble(1);
+                return rs.wasNull() ? 0.0 : val;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0.0;
+    }
+
+    /**
+     * Number of events created per month (last 12 months).
+     * Key: "YYYY-MM", Value: count.
+     */
+    public java.util.Map<String, Integer> getEventsByMonth() {
+        java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
+        String sql = "SELECT DATE_FORMAT(event_date, '%Y-%m') AS month, COUNT(*) AS cnt " +
+                     "FROM event WHERE event_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) " +
+                     "GROUP BY month ORDER BY month ASC";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getString("month"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return map;
+    }
+
+    /**
+     * Rating distribution: how many users gave each score 1-5.
+     * Key: score (1-5), Value: count.
+     */
+    public java.util.Map<Integer, Integer> getRatingDistribution() {
+        java.util.Map<Integer, Integer> map = new java.util.LinkedHashMap<>();
+        for (int i = 1; i <= 5; i++) map.put(i, 0);
+        String sql = "SELECT score, COUNT(*) AS cnt FROM event_rating GROUP BY score ORDER BY score";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getInt("score"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return map;
+    }
 }

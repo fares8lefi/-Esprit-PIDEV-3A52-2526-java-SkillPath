@@ -24,6 +24,7 @@ public class SideBarController implements Initializable {
     @FXML private Button btnEvaluation;
     @FXML private Button btnUsers;
     @FXML private Button btnEvents;
+    @FXML private Button btnEventAnalytics;
     @FXML private Button btnLocations;
     @FXML private Button btnLogout;
 
@@ -76,6 +77,12 @@ public class SideBarController implements Initializable {
     }
 
     @FXML
+    private void handleEventAnalytics(ActionEvent event) {
+        setActive(btnEventAnalytics);
+        navigateTo(event, "/BackOffice/event/EventAnalytics.fxml", "Analytiques Événements");
+    }
+
+    @FXML
     private void handleLocations(ActionEvent event) {
         setActive(btnLocations);
         navigateTo(event, "/BackOffice/event/LocationCrud.fxml", "Lieux des Événements");
@@ -100,9 +107,10 @@ public class SideBarController implements Initializable {
             case "courses"      -> setActive(btnCourses);
             case "modules"      -> setActive(btnModules);
             case "reclamations" -> setActive(btnReclamations);
-            case "evaluation"  -> setActive(btnEvaluation);
+            case "evaluation"   -> setActive(btnEvaluation);
             case "users"        -> setActive(btnUsers);
             case "events"       -> setActive(btnEvents);
+            case "analytics"    -> setActive(btnEventAnalytics);
             case "locations"    -> setActive(btnLocations);
         }
     }
@@ -112,7 +120,7 @@ public class SideBarController implements Initializable {
     // ─────────────────────────────────────────────────────────────
 
     private void setActive(Button active) {
-        Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnEvaluation, btnUsers, btnEvents, btnLocations};
+        Button[] all = {btnDashboard, btnCourses, btnModules, btnReclamations, btnEvaluation, btnUsers, btnEvents, btnEventAnalytics, btnLocations};
         for (Button btn : all) {
             if (btn == null) {
                 continue;

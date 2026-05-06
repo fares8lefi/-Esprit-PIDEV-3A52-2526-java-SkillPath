@@ -5,9 +5,8 @@ import Utils.Database;
 
 import java.nio.ByteBuffer;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.LinkedHashMap;
 
 public class UserJoinedEventService {
     private Connection connection;
@@ -119,5 +118,92 @@ public class UserJoinedEventService {
             e.printStackTrace();
         }
         return eventIds;
+    }
+
+    /** Returns the seat number for a user+event registration, or null if none. */
+    public Integer getSeatNumber(UUID userId, int eventId) {
+        String sql = "SELECT seat_number FROM user_joined_events WHERE user_id = ? AND event_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBytes(1, uuidToBytes(userId));
+            ps.setInt(2, eventId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int seat = rs.getInt("seat_number");
+                return rs.wasNull() ? null : seat;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // ─── Analytics Methods ───────────────────────────────────────────────────
+
+    /** Total number of registrations across all events. */
+    public int getTotalParticipants() {
+        String sql = "SELECT COUNT(*) FROM user_joined_events";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /** Map of eventId → participant count for every event that has registrations. */
+    public Map<Integer, Integer> getParticipantCountPerEvent() {
+        Map<Integer, Integer> map = new HashMap<>();
+        String sql = "SELECT event_id, COUNT(*) AS cnt FROM user_joined_events GROUP BY event_id";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getInt("event_id"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    /**
+     * Returns the top-N most popular events as a list of int[]{eventId, participantCount},
+     * ordered by count descending.
+     */
+    public List<int[]> getTopEvents(int limit) {
+        List<int[]> result = new ArrayList<>();
+        String sql = "SELECT event_id, COUNT(*) AS cnt FROM user_joined_events " +
+                     "GROUP BY event_id ORDER BY cnt DESC LIMIT ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(new int[]{rs.getInt("event_id"), rs.getInt("cnt")});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * Returns registrations grouped by month (last 12 months).
+     * Key: "YYYY-MM", Value: registration count.
+     */
+    public Map<String, Integer> getRegistrationsByMonth() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        String sql = "SELECT DATE_FORMAT(e.event_date, '%Y-%m') AS month, COUNT(uje.event_id) AS cnt " +
+                     "FROM event e LEFT JOIN user_joined_events uje ON e.id = uje.event_id " +
+                     "WHERE e.event_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) " +
+                     "GROUP BY month ORDER BY month ASC";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getString("month"), rs.getInt("cnt"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.event.AdminEventAnalyticsController"
+      prefHeight="900.0" prefWidth="1440.0"
+      style="-fx-background-color: #0f172a;"
+      stylesheets="@../../FrontOffice/user/auth/style.css">
+
+    <children>
+        <!-- Sidebar -->
+        <fx:include fx:id="sideBar" source="../Admin/SideBar.fxml" />
+
+        <!-- Main Content: Scrollable Analytics Dashboard -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" HBox.hgrow="ALWAYS"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+            <content>
+                <!-- dashboardContainer is populated entirely by the controller -->
+                <VBox fx:id="dashboardContainer" />
+            </content>
+        </ScrollPane>
+    </children>
+</HBox>
