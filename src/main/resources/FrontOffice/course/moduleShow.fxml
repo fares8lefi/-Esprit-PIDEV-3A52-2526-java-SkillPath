@@ -202,6 +202,21 @@
                                  </children>
                               </VBox>
                               
+                              <!-- Quiz Section -->
+                              <VBox fx:id="quizSection" spacing="20.0" style="-fx-padding: 40 0 0 0;" managed="false" visible="false">
+                                 <children>
+                                    <HBox alignment="CENTER" spacing="15.0">
+                                       <children>
+                                          <Separator HBox.hgrow="ALWAYS" opacity="0.1" />
+                                          <Label text="ÉVALUATIONS DU COURS" textFill="#3b82f6" style="-fx-font-size: 10; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
+                                          <Separator HBox.hgrow="ALWAYS" opacity="0.1" />
+                                       </children>
+                                    </HBox>
+                                    
+                                    <FlowPane fx:id="quizContainer" hgap="25.0" vgap="25.0" alignment="TOP_LEFT" />
+                                 </children>
+                              </VBox>
+                              
                               <!-- Footer Navigation -->
                               <HBox alignment="CENTER" prefHeight="100.0" style="-fx-padding: 50 0 0 0; -fx-border-color: rgba(255,255,255,0.05); -fx-border-width: 1 0 0 0;">
                                  <children>
