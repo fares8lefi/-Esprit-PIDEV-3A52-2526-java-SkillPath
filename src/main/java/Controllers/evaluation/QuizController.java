@@ -130,6 +130,18 @@ public class QuizController {
         desc.setWrapText(true);
         desc.setMaxHeight(40);
 
+        // Course Association Label
+        Label courseLabel = null;
+        if (quiz.getCourse_id() != null) {
+            for (CourseDTO c : comboCourse.getItems()) {
+                if (c.getId() == quiz.getCourse_id()) {
+                    courseLabel = new Label("📚 " + c.getTitle());
+                    courseLabel.setStyle("-fx-text-fill: #60a5fa; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    break;
+                }
+            }
+        }
+
         HBox badges = new HBox(8);
         Label pts = new Label(quiz.getNote_max() + " PTS");
         pts.getStyleClass().addAll("badge", "badge-amber");
@@ -137,7 +149,11 @@ public class QuizController {
         dur.getStyleClass().addAll("badge", "badge-blue");
         badges.getChildren().addAll(pts, dur);
 
-        card.getChildren().addAll(title, desc, badges);
+        card.getChildren().addAll(title, desc);
+        if (courseLabel != null) {
+            card.getChildren().add(courseLabel);
+        }
+        card.getChildren().add(badges);
 
         card.setStyle("-fx-cursor: hand;");
         card.setOnMouseClicked(e -> {
