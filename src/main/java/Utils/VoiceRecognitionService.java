@@ -3,6 +3,7 @@ package Utils;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import io.github.cdimascio.dotenv.Dotenv;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -40,14 +41,15 @@ import java.util.regex.Pattern;
 
 public class VoiceRecognitionService {
 
-    private static final int PYTHON_SERVER_PORT = 5001;
+    private static final int PYTHON_SERVER_PORT = 5005;
     private static final String PYTHON_SERVER_URL = "http://localhost:" + PYTHON_SERVER_PORT + "/";
-    private static final int SERVER_READY_RETRIES = 48; // 48 * 5s = 4 minutes
+    private static final int SERVER_READY_RETRIES = 720; // 720 * 5s = 60 minutes
     private static final int SERVER_READY_SLEEP_MS = 5000;
     private static final Pattern STATUS_PATTERN = Pattern.compile("\"status\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern TEXT_PATTERN = Pattern.compile("\"text\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"");
     private static final Pattern MESSAGE_PATTERN = Pattern.compile("\"message\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"");
 
+    private static final Dotenv DOTENV = Dotenv.configure().ignoreIfMissing().load();
     private static HttpServer server;
     private static Process pythonServerProcess;
     private static boolean shutdownHookRegistered = false;
@@ -62,12 +64,25 @@ public class VoiceRecognitionService {
 
     private static void startPythonLocalRecording(Consumer<String> onResult) {
         try {
-            AudioFormat format = new AudioFormat(16000.0f, 16, 1, true, false);
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+            // Try different sample rates. Python server will automatically resample back to 16kHz
+            float[] sampleRates = {16000.0f, 44100.0f, 48000.0f, 8000.0f, 22050.0f};
+            AudioFormat format = null;
+            DataLine.Info info = null;
 
-            if (!AudioSystem.isLineSupported(info)) {
+            for (float rate : sampleRates) {
+                AudioFormat testFormat = new AudioFormat(rate, 16, 1, true, false);
+                DataLine.Info testInfo = new DataLine.Info(TargetDataLine.class, testFormat);
+                if (AudioSystem.isLineSupported(testInfo)) {
+                    format = testFormat;
+                    info = testInfo;
+                    System.out.println("Using microphone format: " + rate + " Hz");
+                    break;
+                }
+            }
+
+            if (format == null || info == null) {
                 Platform.runLater(() -> {
-                    Alert a = new Alert(Alert.AlertType.ERROR, "Microphone is not supported by this system.");
+                    Alert a = new Alert(Alert.AlertType.ERROR, "No supported microphone format found on this system.");
                     a.show();
                 });
                 return;
@@ -90,6 +105,8 @@ public class VoiceRecognitionService {
             recordingThread.setDaemon(true);
             recordingThread.start();
 
+            final AudioFormat finalFormat = format;
+
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Tunisian Dictation (Local GPU)");
@@ -109,7 +126,7 @@ public class VoiceRecognitionService {
                 try {
                     byte[] audioData = out.toByteArray();
                     ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
-                    AudioInputStream ais = new AudioInputStream(bais, format, audioData.length / format.getFrameSize());
+                    AudioInputStream ais = new AudioInputStream(bais, finalFormat, audioData.length / finalFormat.getFrameSize());
 
                     Path tempWav = createTempWavPath();
                     AudioSystem.write(ais, AudioFileFormat.Type.WAVE, tempWav.toFile());
@@ -291,15 +308,24 @@ public class VoiceRecognitionService {
 
     private static String[] resolvePythonCommand() throws Exception {
         String envPython = System.getenv("VOICE_PYTHON_EXE");
+        if (envPython == null || envPython.isBlank()) {
+            envPython = DOTENV.get("VOICE_PYTHON_EXE");
+        }
+
         if (envPython != null && !envPython.isBlank()) {
             String[] forced = new String[]{envPython};
             if (canRunCommand(forced)) {
                 return forced;
             }
-            throw new Exception("VOICE_PYTHON_EXE is set but not executable: " + envPython);
+            System.err.println("VOICE_PYTHON_EXE is set but not executable: " + envPython);
         }
 
         List<String[]> candidates = new ArrayList<>();
+        // 1. Try local venv
+        String projectDir = System.getProperty("user.dir");
+        candidates.add(new String[]{projectDir + File.separator + ".venv" + File.separator + "Scripts" + File.separator + "python.exe"});
+        
+        // 2. Global candidates
         candidates.add(new String[]{"python"});
         candidates.add(new String[]{"py", "-3"});
         candidates.add(new String[]{"py"});
