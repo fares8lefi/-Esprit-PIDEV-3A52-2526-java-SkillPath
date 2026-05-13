@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 public class SecurityService {
 
-    private static final String FLASK_URL = "http://localhost:5000/predict";
+    private static final String FLASK_URL = "http://localhost:5050/predict";
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(2))
             .build();
@@ -107,10 +107,13 @@ public class SecurityService {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String storedHash = rs.getString("password");
-                // Adaptation pour les hashs Symfony ($2y$ -> $2a$)
-                String hash = storedHash;
-                if (hash.startsWith("$2y$"))
+                if (storedHash == null) return null;
+                
+                String hash = storedHash.trim();
+                // PHP/Symfony uses $2y$ prefix, jBCrypt uses $2a$
+                if (hash.startsWith("$2y$")) {
                     hash = "$2a$" + hash.substring(4);
+                }
 
                 if (BCrypt.checkpw(password, hash)) {
                     User user = new User();

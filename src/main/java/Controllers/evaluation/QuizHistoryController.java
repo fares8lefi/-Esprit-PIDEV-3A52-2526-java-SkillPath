@@ -66,6 +66,9 @@ public class QuizHistoryController {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Label errorLabel = new Label("Erreur: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 16px;");
+            resultsGrid.getChildren().add(errorLabel);
         }
     }
 
@@ -97,7 +100,12 @@ public class QuizHistoryController {
             scoreLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 20px; -fx-font-weight: bold;");
         }
 
-        String dateStr = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(r.getDate_passage());
+        String dateStr = "";
+        if (r.getDate_passage() != null) {
+            dateStr = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(r.getDate_passage());
+        } else {
+            dateStr = "Date inconnue";
+        }
         Label dateLabel = new Label("🗓 " + dateStr);
         dateLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
 
@@ -232,6 +240,16 @@ public class QuizHistoryController {
     public void goToFrontOffice(MouseEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/evaluation/QuizFrontOffice.fxml"));
+            Stage stage = (Stage) resultsGrid.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    public void goToHome(MouseEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
             Stage stage = (Stage) resultsGrid.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

@@ -18,7 +18,7 @@
                <Label style="-fx-font-size: 20px; -fx-font-weight: 900;" styleClass="gradient-text" text="Path" />
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="20.0">
-               <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToFrontOffice" text="Accueil" />
+               <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToHome" text="Accueil" />
                <Label text="|" styleClass="text-slate-500" />
                <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToFrontOffice" text="Quiz" />
                <Label text="|" styleClass="text-slate-500" />

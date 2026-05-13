@@ -234,11 +234,10 @@ public class QuizFrontOfficeController {
             e.printStackTrace();
         }
     }
-
     @FXML
-    void switchToBack(javafx.scene.input.MouseEvent event) {
+    void goToHome(javafx.scene.input.MouseEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/BackOffice/evaluation/QuizManagement.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/FrontOffice/user/home/homeUser.fxml"));
             Stage stage = (Stage) txtSearch.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {

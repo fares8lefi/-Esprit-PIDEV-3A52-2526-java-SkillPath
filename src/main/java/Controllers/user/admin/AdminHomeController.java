@@ -104,15 +104,25 @@ public class AdminHomeController implements Initializable {
             if (activationProgressBar != null)
                 activationProgressBar.setProgress(rate);
 
+            // ── Fetch dynamic counts for courses, modules, reclamations ──
+            Services.CourseService courseService = new Services.CourseService();
+            Services.ModuleService moduleService = new Services.ModuleService();
+            Services.ReclamationService reclamationService = new Services.ReclamationService();
+
+            int courseCount = courseService.recuperer().size();
+            int moduleCount = moduleService.recuperer().size();
+            int reclamationCount = reclamationService.recuperer().size();
+
+            if (courseCountLabel != null) courseCountLabel.setText(String.valueOf(courseCount));
+            if (moduleCountLabel != null) moduleCountLabel.setText(String.valueOf(moduleCount));
+            if (reclamationCountLabel != null) reclamationCountLabel.setText(String.valueOf(reclamationCount));
+
         } catch (SQLDataException e) {
             System.out.println("Erreur chargement stats : " + e.getMessage());
         }
 
         // Valeurs par défaut pour les stats non encore branchées
         if (urgentCountLabel != null) urgentCountLabel.setText("0");
-        if (courseCountLabel != null) courseCountLabel.setText("—");
-        if (moduleCountLabel != null) moduleCountLabel.setText("—");
-        if (reclamationCountLabel != null) reclamationCountLabel.setText("0");
         if (resultatCountLabel != null) resultatCountLabel.setText("—");
     }
 

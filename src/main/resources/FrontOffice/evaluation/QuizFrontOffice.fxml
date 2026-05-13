@@ -18,13 +18,11 @@
                <Label style="-fx-font-size: 20px; -fx-font-weight: 900;" styleClass="gradient-text" text="Path" />
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="20.0">
-               <Label styleClass="text-slate-400, font-bold" text="Accueil" />
+               <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToHome" text="Accueil" />
                <Label text="|" styleClass="text-slate-500" />
                <Label style="-fx-text-fill: #3b82f6;" styleClass="font-bold" text="Quiz" />
                <Label text="|" styleClass="text-slate-500" />
                <Label style="-fx-cursor: hand;" styleClass="text-slate-400, font-bold" onMouseClicked="#goToHistory" text="Mes Résultats" />
-               <Label text="|" styleClass="text-slate-500" />
-               <Label onMouseClicked="#switchToBack" style="-fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-font-size: 11px; -fx-underline: true;" text="Interface Admin" />
             </HBox>
          </HBox>
 

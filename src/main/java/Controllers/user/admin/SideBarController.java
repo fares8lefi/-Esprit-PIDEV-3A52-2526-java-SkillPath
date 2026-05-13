@@ -27,6 +27,7 @@ public class SideBarController implements Initializable {
     @FXML private Button btnEvents;
     @FXML private Button btnEventAnalytics;
     @FXML private Button btnLocations;
+    @FXML private Button btnClientPage;
     @FXML private Button btnLogout;
 
     @Override
@@ -97,6 +98,12 @@ public class SideBarController implements Initializable {
     private void handleLogout(ActionEvent event) {
         Session.getInstance().logout();
         navigateTo(event, "/FrontOffice/user/auth/login.fxml", "Connexion - SkillPath");
+    }
+
+    @FXML
+    private void handleSwitchToClient(ActionEvent event) {
+        setActive(btnClientPage);
+        navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Accueil Client - SkillPath");
     }
 
     // ─────────────────────────────────────────────────────────────

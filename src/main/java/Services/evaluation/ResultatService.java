@@ -21,7 +21,7 @@ public class ResultatService {
             System.err.println("Database connection is null in ResultatService.ajouter!");
             return;
         }
-        String query = "INSERT INTO resultat (score, note_max, date_passage, id_quiz, id_user) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO resultat (score, note_max, date_passage, quiz_id, etudiant_id) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, resultat.getScore());
             ps.setInt(2, resultat.getNote_max());
@@ -43,15 +43,27 @@ public class ResultatService {
 
     public List<Resultat> recupererParEtudiant(int idEtudiant) throws SQLDataException {
         List<Resultat> list = new ArrayList<>();
-        // Ignore parameter and use current user from session
-        if (Session.getInstance().getCurrentUser() == null) {
-            System.err.println("No user logged in!");
+        UUID userId = null;
+        if (Session.getInstance().getCurrentUser() != null) {
+            userId = Session.getInstance().getCurrentUser().getId();
+        }
+
+        String query;
+        if (userId != null) {
+            query = "SELECT * FROM resultat WHERE etudiant_id = ? ORDER BY date_passage DESC";
+        } else {
+            query = "SELECT * FROM resultat ORDER BY date_passage DESC";
+        }
+
+        if (cnx == null) {
+            System.err.println("Database connection is null in ResultatService.recupererParEtudiant!");
             return list;
         }
-        UUID userId = Session.getInstance().getCurrentUser().getId();
-        String query = "SELECT * FROM resultat WHERE id_user = ? ORDER BY date_passage DESC";
+
         try (PreparedStatement ps = cnx.prepareStatement(query)) {
-            ps.setBytes(1, uuidToBytes(userId));
+            if (userId != null) {
+                ps.setBytes(1, uuidToBytes(userId));
+            }
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new Resultat(
@@ -59,8 +71,8 @@ public class ResultatService {
                         rs.getInt("score"),
                         rs.getInt("note_max"),
                         rs.getTimestamp("date_passage"),
-                        rs.getInt("id_quiz"),
-                        bytesToUUID(rs.getBytes("id_user"))));
+                        rs.getInt("quiz_id"),
+                        bytesToUUID(rs.getBytes("etudiant_id"))));
             }
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());

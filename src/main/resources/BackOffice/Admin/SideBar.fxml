@@ -137,6 +137,19 @@
                 </HBox>
             </graphic>
         </Button>
+
+        <Region prefHeight="1" style="-fx-background-color: rgba(255,255,255,0.06);">
+            <VBox.margin><Insets top="10" bottom="10"/></VBox.margin>
+        </Region>
+
+        <Button fx:id="btnClientPage" mnemonicParsing="false" maxWidth="Infinity" onAction="#handleSwitchToClient" styleClass="nav-item">
+            <graphic>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="🌐" style="-fx-font-size: 18;"/>
+                    <Label text="Page Client"/>
+                </HBox>
+            </graphic>
+        </Button>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS"/>

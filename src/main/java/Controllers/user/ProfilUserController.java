@@ -116,7 +116,12 @@ public class ProfilUserController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Tableau de Bord - SkillPath");
+        String role = currentUser.getRole();
+        if ("admin".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role)) {
+            navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin - SkillPath");
+        } else {
+            navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "Tableau de Bord - SkillPath");
+        }
     }
 
     private void navigateTo(ActionEvent event, String fxmlPath, String title) {

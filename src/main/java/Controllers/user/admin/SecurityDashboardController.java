@@ -51,7 +51,7 @@ public class SecurityDashboardController {
     @FXML private ProgressIndicator loadingIndicator;
     @FXML private Button refreshButton;
 
-    private static final String FLASK_URL = "http://localhost:5000";
+    private static final String FLASK_URL = "http://localhost:5050";
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(java.time.Duration.ofSeconds(2))
             .build();

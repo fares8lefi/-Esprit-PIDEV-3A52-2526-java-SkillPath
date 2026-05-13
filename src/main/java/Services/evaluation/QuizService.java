@@ -48,7 +48,7 @@ public class QuizService implements Iservice<Quiz> {
         // First delete questions and results associated with this quiz to satisfy
         // foreign key constraints
         String sqlQuestions = "DELETE FROM question WHERE quiz_id = ?";
-        String sqlResults = "DELETE FROM resultat WHERE id_quiz = ?";
+        String sqlResults = "DELETE FROM resultat WHERE quiz_id = ?";
         String sqlQuiz = "DELETE FROM quiz WHERE id_quiz = ?";
 
         try {

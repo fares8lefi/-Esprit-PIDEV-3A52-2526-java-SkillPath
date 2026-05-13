@@ -227,7 +227,8 @@ public class LoginController {
                 Utils.Session.getInstance().login(user);
                 System.out.println("✓ Connexion réussie : " + user.getUsername());
                 
-                if ("admin".equalsIgnoreCase(user.getRole())) {
+                String role = user.getRole();
+                if ("admin".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role)) {
                     navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
                 } else {
                     
@@ -374,7 +375,8 @@ public class LoginController {
                     if (user != null) {
                         Utils.Session.getInstance().login(user);
                         System.out.println("✓ Connexion Google réussie : " + user.getUsername());
-                        if ("admin".equalsIgnoreCase(user.getRole())) {
+                        String role = user.getRole();
+                        if ("admin".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role)) {
                             navigateTo(event, "/BackOffice/Admin/user/homeAdmin.fxml", "Tableau de Bord Admin");
                         } else {
                             navigateTo(event, "/FrontOffice/user/home/homeUser.fxml", "home user - SkillPath");
