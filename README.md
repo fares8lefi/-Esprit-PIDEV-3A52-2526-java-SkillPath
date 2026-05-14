@@ -30,7 +30,6 @@ SkillPath est une plateforme d'apprentissage innovante combinant une application
 | :--- | :--- |
 | **Java 17+** | Application Desktop & Services de Sécurité |
 | **JavaFX 21** | Interface graphique BackOffice |
-| **Symfony 7.x** | Framework Web FrontOffice |
 | **MySQL 8.x** | Base de données relationnelle |
 | **jBCrypt** | Hachage sécurisé des mots de passe |
 | **Flask (Python)** | Bridge IA pour la détection d'intrusion |
